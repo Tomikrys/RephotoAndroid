@@ -1,3 +1,52 @@
 <resources>
-    <string name="app_name">AndroidOpenCVDemo</string>
+    <string name="app_name">Rephoto</string>
+
+    <string name="hello_world">Hello world!</string>
+    <string name="action_settings">Settings</string>
+
+    <string name="camera_button">&#xf030; Snap Picture</string>
+    <string name="frame">frame</string>
+    <string name="re_fotografie">Re-fotografie</string>
+    <string name="spustit_aplikaci">Spustit aplikaci</string>
+    <string name="ukon_it">Ukončit</string>
+    <string name="spustit">Spustit</string>
+    <string name="ukoncit">Ukončit</string>
+    <string name="end">Ukončit</string>
+    <string name="play">Spustit</string>
+    <string name="enter_optical_center">Zadejte optický střed</string>
+    <string name="enter_focal_lenght">Zadejte ohniskovou vzdálenost</string>
+    <string name="calibration_camera">Kalibrace kamery</string>
+    <string name="insert_calibration_data">Vložit</string>
+    <string name="error_message">Zadejte číselnou hodnotu</string>
+    <string name="select_correct_points">Označte odpovídající body</string>
+    <string name="ref_frame">ref_frame</string>
+    <string name="change_view">Změnit fotografii</string>
+    <string name="selected_all">Označeno vše</string>
+    <string name="exit">Ukončit</string>
+    <string name="zadejte_kalibra_n_parametry_pro_fotoapar_t">Zadejte kalibrační parametry pro fotoaparát</string>
+    <string name="zadejte_kalibracni_parametry_pro_kameru">Zadejte kalibracni parametry pro kameru</string>
+    <string name="cx">cx</string>
+    <string name="cy">cy</string>
+    <string name="fx">fx</string>
+    <string name="fy">fy</string>
+    <string name="calibration">Kalibrace</string>
+    <string name="zadejte_refere_n_sn_mek">Zadejte refereční snímek</string>
+    <string name="vyber">Vyber</string>
+    <string name="value_fy">548</string>
+    <string name="value_fx">585</string>
+    <string name="value_cy">273</string>
+    <string name="value_cx">339</string>
+    <string name="empty">0</string>
+    <string name="checkbox">CheckBox</string>
+    <string name="tf_path_to_second_frame">Zadejte adresu druheho snímku</string>
+    <string name="zadejte_adresu_prvn_ho_sn_mku">tf_path_to_first_frame</string>
+    <string name="ok">OK</string>
+    <string name="continues">Pokračovat</string>
+    <string name="tf_path_to_first_frame">Zadejte adresu prvního snímku</string>
+    <string name="enablePath">Přejete si zadat fotografie ze souboru</string>
+    <string name="_341">341</string>
+    <string name="_172">172</string>
+    <string name="_2040">2040</string>
+    <string name="_1548">1548</string>
+    <string name="nextPoint">Další bod</string>
 </resources>

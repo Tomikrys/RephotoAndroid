@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="vertical"
+    android:layout_width="fill_parent"
+    android:layout_height="fill_parent">
+
+    <FrameLayout
+        android:id="@+id/mySurfaceView"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content">
+
+        <com.cam.CapturePreview
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content">
+        </com.cam.CapturePreview>
+
+    </FrameLayout>
+
+    <LinearLayout
+        android:layout_below="@id/mySurfaceView"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:layout_centerInParent="true"
+        android:gravity="center">
+
+        <ImageView android:id="@+id/myImageView"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:src="@drawable/ref_biskupsky_palac"/>
+    </LinearLayout>
+
+</RelativeLayout>
