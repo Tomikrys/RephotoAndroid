@@ -65,26 +65,26 @@ public class SettingActivity extends AppCompatActivity {
             case REQUEST_CHOOSER:
                 if (resultCode == RESULT_OK) {
                     final Uri uri = data.getData();
-//                    String path = FileUtils.getPath(this, uri);
+                    String path = uri.toString();
 
-//                    if (path != null && FileUtils.isLocal(path))                     {
-//                        if(Integer.compare(id_entered_button,id_ref_button) == 0){
-//                            path_ref_image =  new File(path).getAbsolutePath();
-//                            TextView textView = (TextView) findViewById(R.id.ref_frame_label);
-//                            textView.setText(path_ref_image);
-//                        }else if(Integer.compare(id_entered_button,id_first_button) == 0){
-//                            path_first_image =  new File(path).getAbsolutePath();
-//                            TextView textView = (TextView) findViewById(R.id.fist_frame_label);
-//                            textView.setText(path_first_image);
-//                        }else if(Integer.compare(id_entered_button,id_second_button) == 0){
-//                            path_second_image =  new File(path).getAbsolutePath();
-//                            TextView textView = (TextView) findViewById(R.id.second_frame_label);
-//                            textView.setText(path_second_image);
-//
-//                        }
-//                        Log.d(TAG, path_ref_image);
-//                        Log.d(TAG, String.valueOf(id_entered_button));
-//                    }
+                    if (path != null) {
+                        if (Integer.compare(id_entered_button, id_ref_button) == 0) {
+                            path_ref_image = new File(path).getAbsolutePath();
+                            TextView textView = (TextView) findViewById(R.id.ref_frame_label);
+                            textView.setText(path_ref_image);
+                        } else if (Integer.compare(id_entered_button, id_first_button) == 0) {
+                            path_first_image = new File(path).getAbsolutePath();
+                            TextView textView = (TextView) findViewById(R.id.fist_frame_label);
+                            textView.setText(path_first_image);
+                        } else if (Integer.compare(id_entered_button, id_second_button) == 0) {
+                            path_second_image = new File(path).getAbsolutePath();
+                            TextView textView = (TextView) findViewById(R.id.second_frame_label);
+                            textView.setText(path_second_image);
+
+                        }
+                        Log.d(TAG, path_ref_image);
+                        Log.d(TAG, String.valueOf(id_entered_button));
+                    }
                 }
                 break;
         }
@@ -92,11 +92,14 @@ public class SettingActivity extends AppCompatActivity {
 
     public void showFileDialog(View view) {
         id_entered_button = view.getId();
+        Intent intent = new Intent(Intent.ACTION_OPEN_DOCUMENT);
+        intent.setType("image/*");
+        intent = Intent.createChooser(intent, "Choose file");
 
 //        Intent getContentIntent = FileUtils.createGetContentIntent();
-
 //        Intent intent = Intent.createChooser(getContentIntent, "Select a file");
-//        startActivityForResult(intent, REQUEST_CHOOSER);
+
+        startActivityForResult(intent, REQUEST_CHOOSER);
     }
 
     public void setEnableButton(View view) {

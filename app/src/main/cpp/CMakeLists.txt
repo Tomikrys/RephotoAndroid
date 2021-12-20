@@ -22,8 +22,16 @@ add_library( # Sets the name of the library.
         SHARED
 
         # Provides a relative path to your source file(s).
-        opencv-utils.cpp
-        native-lib.cpp)
+        CameraCalibrator.cpp
+        errorNIETO.cpp
+        Line.cpp
+        Main.cpp
+        ModelRegistration.cpp
+        MSAC.cpp
+        lmmin.cpp
+        PnPProblem.cpp
+        RobustMatcher.cpp
+        Utils.cpp)
 
 # Searches for a specified prebuilt library and stores the path as a
 # variable. Because CMake includes system libraries in the search path by

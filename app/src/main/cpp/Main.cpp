@@ -4,6 +4,7 @@
  *
  */
 
+#include <opencv2/imgproc/types_c.h>
 #include "Main.h"
 
 void *fast_robust_matcher(void *arg) {

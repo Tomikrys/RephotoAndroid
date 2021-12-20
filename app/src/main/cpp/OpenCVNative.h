@@ -6,24 +6,24 @@
 
 extern "C" {
 
-JNIEXPORT void JNICALL Java_com_delaroystudios_camera_OpenCVNative_initReconstruction
+JNIEXPORT void JNICALL Java_com_vyw_rephotoandroid_OpenCVNative_initReconstruction
   (JNIEnv *, jclass, jlong, jlong, jlong, jfloatArray);
 
 JNIEXPORT jfloatArray
-JNICALL Java_com_delaroystudios_camera_OpenCVNative_processReconstruction
+JNICALL Java_com_vyw_rephotoandroid_OpenCVNative_processReconstruction
         (JNIEnv * , jclass);
 
-JNIEXPORT jfloatArray JNICALL Java_com_delaroystudios_camera_OpenCVNative_nextPoint
+JNIEXPORT jfloatArray JNICALL Java_com_vyw_rephotoandroid_OpenCVNative_nextPoint
   (JNIEnv *, jclass);
 
-JNIEXPORT jfloatArray JNICALL Java_com_delaroystudios_camera_OpenCVNative_registrationPoints
+JNIEXPORT jfloatArray JNICALL Java_com_vyw_rephotoandroid_OpenCVNative_registrationPoints
   (JNIEnv *, jclass, jdouble, jdouble);
 
-JNIEXPORT void JNICALL Java_com_delaroystudios_camera_OpenCVNative_initNavigation
+JNIEXPORT void JNICALL Java_com_vyw_rephotoandroid_OpenCVNative_initNavigation
   (JNIEnv *, jclass);
 
 
-JNIEXPORT jint JNICALL Java_com_delaroystudios_camera_OpenCVNative_processNavigation
+JNIEXPORT jint JNICALL Java_com_vyw_rephotoandroid_OpenCVNative_processNavigation
   (JNIEnv *, jclass, jlong, jint);
 
 }

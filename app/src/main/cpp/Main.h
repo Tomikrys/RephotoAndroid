@@ -15,7 +15,7 @@
 #include <opencv2/calib3d/calib3d.hpp>
 #include <opencv2/video/tracking.hpp>
 #include <iomanip>
-#include "opencv2/xfeatures2d.hpp"
+#include "opencv2/features2d.hpp"
 
 #include "PnPProblem.h"
 #include "CameraCalibrator.h"

@@ -4,7 +4,8 @@
  *
  */
 
-#include <opencv/cv.hpp>
+#include <opencv2/opencv.hpp>
+#include <opencv2/calib3d/calib3d_c.h>
 #include "RobustMatcher.h"
 
 RobustMatcher::RobustMatcher() {
