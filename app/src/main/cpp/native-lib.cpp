@@ -95,7 +95,7 @@ void matToBitmap(JNIEnv* env, Mat src, jobject bitmap, jboolean needPremultiplyA
 }
 
 extern "C" JNIEXPORT jstring JNICALL
-Java_com_vyw_androidopencvdemo_MainActivity_stringFromJNI(
+Java_com_vyw_androidopencvdemo_MainActivityDemo_stringFromJNI(
         JNIEnv *env,
         jobject /* this */) {
     std::string hello = "Hello from C++";
@@ -103,7 +103,7 @@ Java_com_vyw_androidopencvdemo_MainActivity_stringFromJNI(
 }
 
 extern "C" JNIEXPORT void JNICALL
-Java_com_vyw_androidopencvdemo_MainActivity_flip(JNIEnv *env, jobject p_this, jobject bitmapIn, jobject bitmapOut) {
+Java_com_vyw_androidopencvdemo_MainActivityDemo_flip(JNIEnv *env, jobject p_this, jobject bitmapIn, jobject bitmapOut) {
     Mat src;
     bitmapToMat(env, bitmapIn, src, false);
     // NOTE bitmapToMat returns Mat in RGBA format, if needed convert to BGRA using cvtColor
@@ -115,7 +115,7 @@ Java_com_vyw_androidopencvdemo_MainActivity_flip(JNIEnv *env, jobject p_this, jo
 }
 
 extern "C" JNIEXPORT void JNICALL
-Java_com_vyw_androidopencvdemo_MainActivity_blur(JNIEnv *env, jobject p_this, jobject bitmapIn, jobject bitmapOut, jfloat sigma) {
+Java_com_vyw_androidopencvdemo_MainActivityDemo_blur(JNIEnv *env, jobject p_this, jobject bitmapIn, jobject bitmapOut, jfloat sigma) {
     Mat src;
     bitmapToMat(env, bitmapIn, src, false);
     myBlur(src, sigma);
