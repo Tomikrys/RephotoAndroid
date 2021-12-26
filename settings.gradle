@@ -1,3 +1,4 @@
 include ':app'
-rootProject.name='AndroidOpenCVDemo'
-include ':openCVLibrary310'
+include ':opencv453'
+project(':opencv453').projectDir = new File(rootDir, 'OpenCV-android-sdk-4.5.3/sdk/')
+rootProject.name='RephotoAndroid'
