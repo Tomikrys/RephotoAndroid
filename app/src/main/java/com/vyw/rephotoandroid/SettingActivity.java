@@ -61,6 +61,7 @@ public class SettingActivity extends AppCompatActivity {
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
         switch (requestCode) {
             case REQUEST_CHOOSER:
                 if (resultCode == RESULT_OK) {
@@ -69,20 +70,20 @@ public class SettingActivity extends AppCompatActivity {
 
                     if (path != null) {
                         if (Integer.compare(id_entered_button, id_ref_button) == 0) {
-                            path_ref_image = new File(path).getAbsolutePath();
+                            path_ref_image = path;
                             TextView textView = (TextView) findViewById(R.id.ref_frame_label);
                             textView.setText(path_ref_image);
                         } else if (Integer.compare(id_entered_button, id_first_button) == 0) {
-                            path_first_image = new File(path).getAbsolutePath();
+                            path_first_image = path;
                             TextView textView = (TextView) findViewById(R.id.fist_frame_label);
                             textView.setText(path_first_image);
                         } else if (Integer.compare(id_entered_button, id_second_button) == 0) {
-                            path_second_image = new File(path).getAbsolutePath();
+                            path_second_image = path;
                             TextView textView = (TextView) findViewById(R.id.second_frame_label);
                             textView.setText(path_second_image);
 
                         }
-                        Log.d(TAG, path_ref_image);
+                        Log.d(TAG, path);
                         Log.d(TAG, String.valueOf(id_entered_button));
                     }
                 }
@@ -95,9 +96,6 @@ public class SettingActivity extends AppCompatActivity {
         Intent intent = new Intent(Intent.ACTION_OPEN_DOCUMENT);
         intent.setType("image/*");
         intent = Intent.createChooser(intent, "Choose file");
-
-//        Intent getContentIntent = FileUtils.createGetContentIntent();
-//        Intent intent = Intent.createChooser(getContentIntent, "Select a file");
 
         startActivityForResult(intent, REQUEST_CHOOSER);
     }

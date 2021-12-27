@@ -8,24 +8,14 @@ Main process = Main();
 extern "C"
 jfloatArray JNICALL
 Java_com_vyw_rephotoandroid_OpenCVNative_processReconstruction
-        (JNIEnv
-         *env, jclass) {
+        (JNIEnv *env, jclass) {
     jfloatArray params = (*env).NewFloatArray(2);
-
     cv::Point2f point = process.processReconstruction();
-
     jfloat position[2];
-    position[0] = point.
-            x;
-    position[1] = point.
-            y;
-
-    env->
-            SetFloatArrayRegion(params,
-                                0, 2, position);
-
-    return
-            params;
+    position[0] = point.x;
+    position[1] = point.y;
+    env->SetFloatArrayRegion(params, 0, 2, position);
+    return params;
 }
 
 extern "C"
@@ -33,17 +23,11 @@ jfloatArray JNICALL
 Java_com_vyw_rephotoandroid_OpenCVNative_nextPoint
         (JNIEnv *env, jclass) {
     jfloatArray params = (*env).NewFloatArray(2);
-
     cv::Point2f point = process.nextPoint();
-
     jfloat position[2];
-    position[0] = point.
-            x;
-    position[1] = point.
-            y;
-
+    position[0] = point.x;
+    position[1] = point.y;
     env->SetFloatArrayRegion(params, 0, 2, position);
-
     return params;
 }
 
@@ -52,15 +36,11 @@ jfloatArray JNICALL
 Java_com_vyw_rephotoandroid_OpenCVNative_registrationPoints
         (JNIEnv *env, jclass, jdouble x, jdouble y) {
     jfloatArray params = (*env).NewFloatArray(2);
-
     cv::Point2f point = process.registrationPoints(x, y);
-
     jfloat position[2];
     position[0] = point.x;
     position[1] = point.y;
-
     env->SetFloatArrayRegion(params, 0, 2, position);
-
     return params;
 }
 

@@ -3,17 +3,22 @@ package com.vyw.rephotoandroid;
 import static android.provider.AlarmClock.EXTRA_MESSAGE;
 
 import android.app.Activity;
+import android.content.Context;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Typeface;
+import android.net.Uri;
 import android.os.Bundle;
+import android.os.ParcelFileDescriptor;
+import android.provider.MediaStore;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
 import android.widget.ImageView;
+
 import androidx.core.app.ActivityCompat;
 
 import org.opencv.android.BaseLoaderCallback;
@@ -23,6 +28,8 @@ import org.opencv.android.Utils;
 import org.opencv.core.Mat;
 
 import java.io.File;
+import java.io.FileDescriptor;
+import java.io.IOException;
 import java.util.ArrayList;
 
 /**
@@ -50,12 +57,14 @@ public class CameraActivity extends Activity {
     private float[] calibrate_params;
 
     Intent intent1;
+    private boolean isOCVSetUp = false;
 
     private BaseLoaderCallback mOpenCVCallBack = new BaseLoaderCallback(this) {
         @Override
         public void onManagerConnected(int status) {
             switch (status) {
                 case LoaderCallbackInterface.SUCCESS: {
+                    Log.i(TAG, "OpenCV loaded successfully");
                     refFrame = new Mat();
                     firstFrame = new Mat();
                     secondFrame = new Mat();
@@ -73,11 +82,6 @@ public class CameraActivity extends Activity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-
-        if (!OpenCVLoader.initAsync(OpenCVLoader.OPENCV_VERSION_3_1_0, this, mOpenCVCallBack)) {
-            Log.e("TEST", "Cannot connect to OpenCV Manager");
-        }
-
 
         setContentView(R.layout.activity_main);
 
@@ -115,22 +119,38 @@ public class CameraActivity extends Activity {
         path_first_image = intent.getStringExtra("PATH_FIRST_IMAGE");
         path_second_image = intent.getStringExtra("PATH_SECOND_IMAGE");
 
+        Uri uri_ref_image = Uri.parse(path_ref_image);
+        try {
+            bt_ref_frame = MediaStore.Images.Media.getBitmap(this.getContentResolver(), uri_ref_image);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
 
-        File file0 = new File(path_ref_image);
-        bt_ref_frame = BitmapFactory.decodeFile(file0.getAbsolutePath());
-
+        if (!isOCVSetUp) { // if OCV hasn't been setup yet, init it
+            if (!OpenCVLoader.initDebug()) {
+                OpenCVLoader.initAsync(OpenCVLoader.OPENCV_VERSION, this, mOpenCVCallBack);
+                Log.i(TAG, "Cannot load OpenCV");
+            } else {
+                isOCVSetUp = true;
+                mOpenCVCallBack.onManagerConnected(LoaderCallbackInterface.SUCCESS);
+            }
+        }
     }
 
     private void calc() {
         Utils.bitmapToMat(bt_ref_frame, refFrame);
         if (!"".equals(path_first_image) && !"".equals(path_second_image)) {
 
-            File file1 = new File(path_first_image);
-            File file2 = new File(path_second_image);
-
-
-            Bitmap myBitmap1 = BitmapFactory.decodeFile(file1.getAbsolutePath());
-            Bitmap myBitmap2 = BitmapFactory.decodeFile(file2.getAbsolutePath());
+            Uri uri_first_image = Uri.parse(path_first_image);
+            Uri uri_second_image = Uri.parse(path_second_image);
+            Bitmap myBitmap1 = null;
+            Bitmap myBitmap2 = null;
+            try {
+                myBitmap1 = MediaStore.Images.Media.getBitmap(this.getContentResolver(), uri_first_image);
+                myBitmap2 = MediaStore.Images.Media.getBitmap(this.getContentResolver(), uri_second_image);
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
 
             Utils.bitmapToMat(myBitmap1, firstFrame);
             Utils.bitmapToMat(myBitmap2, secondFrame);
