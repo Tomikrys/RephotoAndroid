@@ -55,7 +55,7 @@ cv::Point2f Main::processReconstruction() {
     cv::Ptr<cv::ORB> featureExtractor = cv::ORB::create();
 
     std::vector<cv::KeyPoint> key_points_first_image, key_points_second_image;
-    std::vector<cv::Point2f> detection_points_first_image, detection_points_second_image;
+    std::vector<cv::Point2f> detection_points_second_image;
     std::vector<cv::DMatch> matches;
 
     robustMatcher.setConfidenceLevel(confidenceLevel);

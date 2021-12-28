@@ -40,6 +40,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
     public void playApplication(View view) {
+        // leaked vindow
         setContentView(R.layout.config_layout);
         dialog = new Dialog(this);
         dialog.setContentView(R.layout.config_layout);

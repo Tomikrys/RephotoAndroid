@@ -5,6 +5,16 @@
     android:layout_width="fill_parent"
     android:layout_height="fill_parent">
 
+    <TextView
+        android:id="@+id/textView5"
+        android:layout_width="112dp"
+        android:layout_height="wrap_content"
+        android:layout_alignParentEnd="true"
+        android:layout_marginStart="88dp"
+        android:layout_marginEnd="49dp"
+        android:layout_toEndOf="@+id/mySurfaceView"
+        android:text="camera_layout" />
+
     <FrameLayout
         android:id="@+id/mySurfaceView"
         android:layout_width="wrap_content"
@@ -12,8 +22,7 @@
 
         <com.cam.CapturePreview
             android:layout_width="fill_parent"
-            android:layout_height="wrap_content">
-        </com.cam.CapturePreview>
+            android:layout_height="wrap_content"></com.cam.CapturePreview>
 
     </FrameLayout>
 

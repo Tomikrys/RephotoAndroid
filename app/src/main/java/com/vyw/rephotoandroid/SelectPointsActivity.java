@@ -70,7 +70,7 @@ public class SelectPointsActivity extends AppCompatActivity {
 
         Paint paint = new Paint();
         paint.setColor(Color.RED);
-        paint.setStrokeWidth(5);
+        paint.setStrokeWidth(15);
         paint.setStyle(Paint.Style.FILL);
         Canvas canvas = new Canvas(bit_first_frame);
         canvas.drawPoint(pos_x, pos_y, paint);
