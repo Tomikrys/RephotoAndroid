@@ -1,31 +1,32 @@
-#include <jni.h>
-#include <opencv2/core/core.hpp>
-
 #ifndef _Included_com_vyw_rephotoandroid_OpenCVNative
 #define _Included_com_vyw_rephotoandroid_OpenCVNative
 
-extern "C"
-JNIEXPORT void JNICALL Java_com_vyw_rephotoandroid_OpenCVNative_initReconstruction
-        (JNIEnv *, jclass, jlong, jlong, jlong, jfloatArray);
+#include <jni.h>
+#include <opencv2/core/core.hpp>
 
-extern "C"
+extern "C" {
 JNIEXPORT jfloatArray
-JNICALL Java_com_vyw_rephotoandroid_OpenCVNative_processReconstruction
+Java_com_vyw_rephotoandroid_OpenCVNative_processReconstruction
+        (JNIEnv *env, jclass);
+
+JNIEXPORT jfloatArray
+Java_com_vyw_rephotoandroid_OpenCVNative_nextPoint
+        (JNIEnv *env, jclass);
+
+JNIEXPORT jfloatArray
+Java_com_vyw_rephotoandroid_OpenCVNative_registrationPoints
+        (JNIEnv *env, jclass, jdouble x, jdouble y);
+
+JNIEXPORT void JNICALL
+Java_com_vyw_rephotoandroid_OpenCVNative_initNavigation
         (JNIEnv *, jclass);
 
-extern "C"
-JNIEXPORT jfloatArray JNICALL Java_com_vyw_rephotoandroid_OpenCVNative_nextPoint
-        (JNIEnv *, jclass);
+JNIEXPORT jint JNICALL
+Java_com_vyw_rephotoandroid_OpenCVNative_processNavigation
+        (JNIEnv *, jclass, jlong currentFrame, jint count_frames);
 
-extern "C"
-JNIEXPORT jfloatArray JNICALL Java_com_vyw_rephotoandroid_OpenCVNative_registrationPoints
-        (JNIEnv *, jclass, jdouble, jdouble);
-
-extern "C"
-JNIEXPORT void JNICALL Java_com_vyw_rephotoandroid_OpenCVNative_initNavigation
-        (JNIEnv *, jclass);
-
-extern "C"
-JNIEXPORT jint JNICALL Java_com_vyw_rephotoandroid_OpenCVNative_processNavigation
-        (JNIEnv *, jclass, jlong, jint);
+JNIEXPORT void JNICALL
+Java_com_vyw_rephotoandroid_OpenCVNative_initReconstruction
+        (JNIEnv *env, jclass, jlong image1, jlong image2, jlong refImage, jfloatArray arr);
+};
 #endif

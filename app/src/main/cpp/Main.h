@@ -41,28 +41,28 @@
 int const number_registration = 8;
 
 // Color
-cv::Scalar red(0, 0, 255);
-cv::Scalar blue(255, 0, 0);
+inline cv::Scalar red(0, 0, 255);
+inline cv::Scalar blue(255, 0, 0);
 
-RobustMatcher robustMatcher;
-PnPProblem pnp_registration;
-PnPProblem pnp_detection;
-cv::KalmanFilter kalmanFilter;
-MSAC msac;
+inline RobustMatcher robustMatcher;
+inline PnPProblem pnp_registration;
+inline PnPProblem pnp_detection;
+inline cv::KalmanFilter kalmanFilter;
+inline MSAC msac;
 
 
 // Robust cv::Matcher parameters
-double confidenceLevel = 0.999;
-float ratioTest = 0.70f;
-double max_distance = 2;
+inline double confidenceLevel = 0.999;
+inline float ratioTest = 0.70f;
+inline double max_distance = 2;
 
 // SIFT parameters
-int numKeyPoints = 1000;
+inline int numKeyPoints = 1000;
 
 // MSAC parameters
-int mode = MODE_NIETO;
-int numVps = 3;
-bool verbose = false;
+inline int mode = MODE_NIETO;
+inline int numVps = 3;
+inline bool verbose = false;
 
 // Grand hotel
 /*const std::string path_to_first_image = "resource/image/grand_hotel (2).jpg";
@@ -135,18 +135,18 @@ const std::string video_read_path = "resource/video/cerveny_kostel_2.3gp";
 const std::string path_rephotography = "resource/results/exp_cerveny_kostel.jpg";*/
 
 // RANSAC parameters
-bool useExtrinsicGuess = false;
-int iterationsCount = 10000;
-float reprojectionError = 3.0;
-double confidence = 0.999;
-int pnp_method = cv::SOLVEPNP_ITERATIVE;
+inline bool useExtrinsicGuess = false;
+inline int iterationsCount = 10000;
+inline float reprojectionError = 3.0;
+inline double confidence = 0.999;
+inline int pnp_method = cv::SOLVEPNP_ITERATIVE;
 
 // Kalman Filter parameters
-int minInliersKalman = 10;
-int nStates = 18;
-int nMeasurements = 6;
-int nInputs = 0;
-double dt = 0.125;
+inline int minInliersKalman = 10;
+inline int nStates = 18;
+inline int nMeasurements = 6;
+inline int nInputs = 0;
+inline double dt = 0.125;
 
 
 struct robust_matcher_struct {
@@ -178,11 +178,11 @@ void updateKalmanFilter(cv::KalmanFilter &KF, cv::Mat &measurements, cv::Mat &tr
 
 void fillMeasurements(cv::Mat &measurements, const cv::Mat &translation_measured, const cv::Mat &rotation_measured);
 
-pthread_t fast_robust_matcher_t, robust_matcher_t;
+inline pthread_t fast_robust_matcher_t, robust_matcher_t;
 
-robust_matcher_struct robust_matcher_arg_struct;
+inline robust_matcher_struct robust_matcher_arg_struct;
 
-fast_robust_matcher_struct fast_robust_matcher_arg_struct;
+inline fast_robust_matcher_struct fast_robust_matcher_arg_struct;
 
 int getDirectory(int x, int y);
 
