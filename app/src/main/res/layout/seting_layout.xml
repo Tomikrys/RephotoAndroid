@@ -4,7 +4,7 @@
     android:orientation="vertical"
     android:layout_width="wrap_content"
     android:layout_height="match_parent"
-    tools:context="com.delaroystudios.camera.SettingActivity"
+    tools:context="com.vyw.rephotoandroid.SettingActivity"
     android:layout_gravity="center_vertical|center_horizontal">
 
     <TextView
