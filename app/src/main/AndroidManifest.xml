@@ -12,14 +12,14 @@
         android:supportsRtl="true"
         android:theme="@style/AppTheme"
         android:requestLegacyExternalStorage="true">
-<!--        <activity-->
-<!--            android:name="com.vyw.rephotoandroid.MainActivity"-->
-<!--            android:exported="true">-->
-<!--            <intent-filter>-->
-<!--                <action android:name="android.intent.action.MAIN" />-->
-<!--                <category android:name="android.intent.category.LAUNCHER" />-->
-<!--            </intent-filter>-->
-<!--        </activity>-->
+        <activity
+            android:name="com.vyw.rephotoandroid.MainActivity"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
 <!--        <activity-->
 <!--            android:name="com.vyw.rephotoandroid.MainActivityDemo"-->
 <!--            android:exported="true">-->
@@ -27,15 +27,15 @@
 <!--                <action android:name="android.intent.action.MAIN" />-->
 <!--                <category android:name="android.intent.category.LAUNCHER" />-->
 <!--            </intent-filter>-->
+<!--&lt;!&ndash;        </activity>&ndash;&gt;-->
+<!--        <activity-->
+<!--            android:name="com.vyw.rephotoandroid.MainActivityDemoJava"-->
+<!--            android:exported="true">-->
+<!--            <intent-filter>-->
+<!--                <action android:name="android.intent.action.MAIN" />-->
+<!--                <category android:name="android.intent.category.LAUNCHER" />-->
+<!--            </intent-filter>-->
 <!--        </activity>-->
-        <activity
-            android:name="com.vyw.rephotoandroid.MainActivityDemoJava"
-            android:exported="true">
-            <intent-filter>
-                <action android:name="android.intent.action.MAIN" />
-                <category android:name="android.intent.category.LAUNCHER" />
-            </intent-filter>
-        </activity>
         <activity android:name="com.vyw.rephotoandroid.CameraActivity" />
         <activity android:name="com.vyw.rephotoandroid.NavigationProcesing" />
         <activity android:name="com.vyw.rephotoandroid.SelectPointsActivity" />

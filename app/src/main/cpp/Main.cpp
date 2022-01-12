@@ -201,7 +201,7 @@ void Main::initNavigation() {
     msac.init(mode, size_ref_image, verbose);
     resize(ref_image, ref_image, size_ref_image);
 
-    if (ref_image.channels() == 3) {
+    if (ref_image.channels() >= 3) {
         cv::cvtColor(ref_image, gray_ref_image, CV_BGR2GRAY);
         ref_image.copyTo(output_ref_image);
     } else {
@@ -248,7 +248,7 @@ void Main::initNavigation() {
     cx = abs((int) cx);
     cy = abs((int) cy);
 
-    cv::waitKey(0);
+//    cv::waitKey(0);
     pnp_registration.setOpticalCenter(cx, cy);
 
     /**

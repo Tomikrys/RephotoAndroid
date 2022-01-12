@@ -81,11 +81,11 @@ public class SelectPointsActivity extends AppCompatActivity {
                 if (isRefImage) {
                     if (event.getAction() == MotionEvent.ACTION_DOWN) {
                         float[] points = OpenCVNative.registrationPoints(event.getX(), event.getY());
-                        Log.d(TAG, "Draw point to : " + String.valueOf(points[0]) + "x" + String.valueOf(points[1]));
+                        Log.d(TAG, "Draw point to : " + String.valueOf(points[0]) + " x " + String.valueOf(points[1]));
                         Utils.matToBitmap(first_frame, bit_first_frame);
                         Paint paint = new Paint();
                         paint.setColor(Color.RED);
-                        paint.setStrokeWidth(5);
+                        paint.setStrokeWidth(15);
                         paint.setStyle(Paint.Style.FILL);
                         Canvas canvas = new Canvas(bit_first_frame);
                         canvas.drawPoint(points[0], points[1], paint);
@@ -105,7 +105,7 @@ public class SelectPointsActivity extends AppCompatActivity {
                         point[1] /= density;*/
 
                         canvas1.drawPoint( point[0], point[1], paint);
-                        Log.d(TAG, "Touch point to : " +point[0] + "x" + point[1]);
+                        Log.d(TAG, "Touch point to : " +point[0] + " x " + point[1]);
                         imageView.setImageBitmap(bit_ref_frame);
                     }
                 }
@@ -137,7 +137,7 @@ public class SelectPointsActivity extends AppCompatActivity {
     }
 
     public void finishRegister(MenuItem item) {
-        //OpenCVNative.initNavigation();
+        OpenCVNative.initNavigation();
         ActivityCompat.finishAffinity(this);
         Intent play = new Intent(this, NavigationProcesing.class);
         startActivity(play);
@@ -150,12 +150,12 @@ public class SelectPointsActivity extends AppCompatActivity {
 
     public void nextPoint(MenuItem item) {
         float[] points = OpenCVNative.nextPoint();
-        Log.d(TAG, "Draw point to : " + String.valueOf(points[0]) + "x" + String.valueOf(points[1]));
+        Log.d(TAG, "Draw point to : " + String.valueOf(points[0]) + " x " + String.valueOf(points[1]));
 
         Utils.matToBitmap(first_frame, bit_first_frame);
         Paint paint = new Paint();
         paint.setColor(Color.RED);
-        paint.setStrokeWidth(5);
+        paint.setStrokeWidth(15);
         paint.setStyle(Paint.Style.FILL);
         Canvas canvas = new Canvas(bit_first_frame);
         canvas.drawPoint(points[0], points[1], paint);
