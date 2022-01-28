@@ -1,8 +1,8 @@
 package com.vyw.rephotoandroid;
 
+import android.app.Activity;
 import android.content.Intent;
 import android.graphics.Bitmap;
-import android.graphics.Camera;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Matrix;
@@ -15,9 +15,6 @@ import android.view.MotionEvent;
 import android.view.View;
 import android.widget.ImageView;
 
-import androidx.appcompat.app.AppCompatActivity;
-import androidx.core.app.ActivityCompat;
-
 import org.opencv.android.Utils;
 import org.opencv.core.Mat;
 
@@ -25,7 +22,7 @@ import org.opencv.core.Mat;
  * Created by acervenka2 on 20.03.2017.
  */
 
-public class SelectPointsActivity extends AppCompatActivity {
+public class SelectPointsActivityOld extends Activity {
 
     public static String TAG = "SelectPointsActivity";
 
@@ -71,7 +68,7 @@ public class SelectPointsActivity extends AppCompatActivity {
 
         Paint paint = new Paint();
         paint.setColor(Color.RED);
-        paint.setStrokeWidth(15);
+        paint.setStrokeWidth(5);
         paint.setStyle(Paint.Style.FILL);
         Canvas canvas = new Canvas(bit_first_frame);
         canvas.drawPoint(pos_x, pos_y, paint);
@@ -81,20 +78,19 @@ public class SelectPointsActivity extends AppCompatActivity {
             public boolean onTouch(View v, MotionEvent event) {
                 if (isRefImage) {
                     if (event.getAction() == MotionEvent.ACTION_DOWN) {
-//                        OPENCVNATIVECALL
                         float[] points = OpenCVNative.registrationPoints(event.getX(), event.getY());
-                        Log.d(TAG, "Draw point to : " + String.valueOf(points[0]) + " x " + String.valueOf(points[1]));
+                        Log.d(TAG, "Draw point to : " + String.valueOf(points[0]) + "x" + String.valueOf(points[1]));
                         Utils.matToBitmap(first_frame, bit_first_frame);
                         Paint paint = new Paint();
                         paint.setColor(Color.RED);
-                        paint.setStrokeWidth(15);
+                        paint.setStrokeWidth(5);
                         paint.setStyle(Paint.Style.FILL);
                         Canvas canvas = new Canvas(bit_first_frame);
                         canvas.drawPoint(points[0], points[1], paint);
 
                         paint.setColor(Color.BLUE);
                         Canvas canvas1 = new Canvas(bit_ref_frame);
-//                        canvas1.drawPoint(event.getX(), event.getY(), paint);
+                        //canvas1.drawPoint(event.getX(), event.getY(), paint);
 
                         float[] point = new float[] {event.getX(), event.getY()};
 
@@ -107,7 +103,7 @@ public class SelectPointsActivity extends AppCompatActivity {
                         point[1] /= density;*/
 
                         canvas1.drawPoint( point[0], point[1], paint);
-                        Log.d(TAG, "Touch point to : " +point[0] + " x " + point[1]);
+                        Log.d(TAG, "Touch point to : " +point[0] + "x" + point[1]);
                         imageView.setImageBitmap(bit_ref_frame);
                     }
                 }
@@ -139,10 +135,9 @@ public class SelectPointsActivity extends AppCompatActivity {
     }
 
     public void finishRegister(MenuItem item) {
-//        OPENCVNATIVECALL
-        OpenCVNative.initNavigation();
-        ActivityCompat.finishAffinity(this);
-        Intent play = new Intent(this, CameraPreview.class);
+        //OpenCVNative.initNavigation();
+//        ActivityCompat.finishAffinity(this);
+        Intent play = new Intent(this, NavigationProcesing.class);
         startActivity(play);
         finish();
     }
@@ -152,16 +147,16 @@ public class SelectPointsActivity extends AppCompatActivity {
     }
 
     public void nextPoint(MenuItem item) {
-//    OPENCVNATIVECALL
         float[] points = OpenCVNative.nextPoint();
-        Log.d(TAG, "Draw point to : " + String.valueOf(points[0]) + " x " + String.valueOf(points[1]));
+        Log.d(TAG, "Draw point to : " + String.valueOf(points[0]) + "x" + String.valueOf(points[1]));
 
         Utils.matToBitmap(first_frame, bit_first_frame);
         Paint paint = new Paint();
         paint.setColor(Color.RED);
-        paint.setStrokeWidth(15);
+        paint.setStrokeWidth(5);
         paint.setStyle(Paint.Style.FILL);
         Canvas canvas = new Canvas(bit_first_frame);
         canvas.drawPoint(points[0], points[1], paint);
+
     }
 }

@@ -79,6 +79,7 @@ public class CameraActivity extends Activity {
         }
     };
 
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -121,7 +122,7 @@ public class CameraActivity extends Activity {
 
         Uri uri_ref_image = Uri.parse(path_ref_image);
         try {
-            bt_ref_frame = MediaStore.Images.Media.getBitmap(this.getContentResolver(), uri_ref_image);
+            bt_ref_frame = getBitmapFromUri(uri_ref_image);
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -137,6 +138,15 @@ public class CameraActivity extends Activity {
         }
     }
 
+    private Bitmap getBitmapFromUri(Uri uri) throws IOException {
+        ParcelFileDescriptor parcelFileDescriptor =
+                getContentResolver().openFileDescriptor(uri, "r");
+        FileDescriptor fileDescriptor = parcelFileDescriptor.getFileDescriptor();
+        Bitmap image = BitmapFactory.decodeFileDescriptor(fileDescriptor);
+        parcelFileDescriptor.close();
+        return image;
+    }
+
     private void calc() {
         Utils.bitmapToMat(bt_ref_frame, refFrame);
         if (!"".equals(path_first_image) && !"".equals(path_second_image)) {
@@ -146,8 +156,10 @@ public class CameraActivity extends Activity {
             Bitmap myBitmap1 = null;
             Bitmap myBitmap2 = null;
             try {
-                myBitmap1 = MediaStore.Images.Media.getBitmap(this.getContentResolver(), uri_first_image);
-                myBitmap2 = MediaStore.Images.Media.getBitmap(this.getContentResolver(), uri_second_image);
+//                myBitmap1 = MediaStore.Images.Media.getBitmap(this.getContentResolver(), uri_first_image);
+//                myBitmap2 = MediaStore.Images.Media.getBitmap(this.getContentResolver(), uri_second_image);
+                myBitmap1 = getBitmapFromUri(uri_first_image);
+                myBitmap2 = getBitmapFromUri(uri_second_image);
             } catch (IOException e) {
                 e.printStackTrace();
             }
@@ -155,8 +167,13 @@ public class CameraActivity extends Activity {
             Utils.bitmapToMat(myBitmap1, firstFrame);
             Utils.bitmapToMat(myBitmap2, secondFrame);
             Utils.bitmapToMat(bt_ref_frame, refFrame);
-
-            OpenCVNative.initReconstruction(firstFrame.getNativeObjAddr(), secondFrame.getNativeObjAddr(), refFrame.getNativeObjAddr(), calibrate_params);
+            // OPENCVNATIVECALL
+            OpenCVNative.initReconstruction(
+                    firstFrame.getNativeObjAddr(),
+                    secondFrame.getNativeObjAddr(),
+                    refFrame.getNativeObjAddr(),
+                    calibrate_params);
+            // OPENCVNATIVECALL
             float[] points = OpenCVNative.processReconstruction();
             //Log.i(TAG, "Desc: " + out.dump());
 

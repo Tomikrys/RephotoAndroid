@@ -115,6 +115,8 @@ public class SettingActivity extends AppCompatActivity {
         intent.putExtra("PATH_REF_IMAGE", path_ref_image);
         intent.putExtra("PATH_FIRST_IMAGE", path_first_image);
         intent.putExtra("PATH_SECOND_IMAGE", path_second_image);
+        intent.addFlags(Intent.FLAG_GRANT_PERSISTABLE_URI_PERMISSION);
+        intent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
         startActivity(intent);
         finish();
     }

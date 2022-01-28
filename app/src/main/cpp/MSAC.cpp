@@ -10,6 +10,9 @@
 #include "MSAC.h"
 #include "lmmin.h"
 
+#include <android/log.h>
+#define printf(...) __android_log_print(ANDROID_LOG_DEBUG, "MSAC", __VA_ARGS__);
+
 //#ifdef DEBUG_MAP	// if defined, a 2D map will be created (which slows down the process)
 
 MSAC::MSAC(void)
@@ -123,6 +126,7 @@ void MSAC::fillDataContainers(std::vector<std::vector<cv::Point> > &lineSegments
 			__Mi.at<float>(i,2) = __c.at<float>(2,0);
 		}
 	}
+//	TODO zero division error
 	__Lengths = __Lengths*((double)1/sum_lengths);
 }
 void MSAC::multipleVPEstimation(std::vector<std::vector<cv::Point> > &lineSegments, std::vector<std::vector<std::vector<cv::Point> > > &lineSegmentsClusters, std::vector<int> &numInliers, std::vector<cv::Mat> &vps, int numVps)

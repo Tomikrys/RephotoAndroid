@@ -2,7 +2,10 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="com.vyw.rephotoandroid">
     <uses-feature android:name="android.hardware.camera.any" />
+    <!--Camera permission-->
     <uses-permission android:name="android.permission.CAMERA" />
+    <!--File read permission-->
+    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
 
     <application
         android:allowBackup="true"
@@ -41,6 +44,8 @@
         <activity android:name="com.vyw.rephotoandroid.SelectPointsActivity" />
         <activity android:name="com.vyw.rephotoandroid.RefotografieActivity" />
         <activity android:name="com.vyw.rephotoandroid.SettingActivity" />
+        <activity android:name="com.vyw.rephotoandroid.CameraPreview" />
+        <activity android:name="com.vyw.rephotoandroid.MainActivityDemoJava" />
     </application>
 
 </manifest>

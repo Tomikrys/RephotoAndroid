@@ -52,6 +52,13 @@ public class MainActivity extends AppCompatActivity {
         System.exit(0);
     }
 
+    public void cameraTest(View view) {
+        ActivityCompat.finishAffinity(this);
+        Intent intent = new Intent(this, MainActivityDemoJava.class);
+        startActivity(intent);
+        finish();
+    }
+
     public void insertCalibrationData(View view) {
         String regexStr = "^[0-9]*$";
         EditText tf[] = new EditText[8];
@@ -81,6 +88,7 @@ public class MainActivity extends AppCompatActivity {
 
         if(isCorrect){
             ActivityCompat.finishAffinity(this);
+            dialog.dismiss();
             Intent intent = new Intent(this, SettingActivity.class);
             intent.putExtra(EXTRA_MESSAGE, message);
             startActivity(intent);

@@ -20,25 +20,34 @@
         android:textSize="50sp" />
 
     <LinearLayout
-        android:layout_height="match_parent"
         android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_centerInParent="true"
         android:gravity="center"
-        android:layout_centerVertical="true"
-        android:layout_centerHorizontal="true"
         android:orientation="vertical">
+
         <Button
             android:id="@+id/button_play"
             android:layout_width="200dp"
             android:layout_height="wrap_content"
-            android:text="@string/play"
-            android:onClick="playApplication"/>
+            android:onClick="playApplication"
+            android:text="@string/play" />
+
+        <Button
+            android:id="@+id/camera_test"
+            android:layout_width="200dp"
+            android:layout_height="wrap_content"
+            android:onClick="cameraTest"
+            android:text="Camera test" />
 
         <Button
             android:id="@+id/button_end"
             android:layout_width="200dp"
             android:layout_height="wrap_content"
-            android:text="@string/end"
-            android:onClick="endApplication"/>
+            android:layout_marginTop="200dp"
+            android:onClick="endApplication"
+            android:text="@string/end" />
+
     </LinearLayout>
 
 

@@ -62,7 +62,7 @@ inline int numKeyPoints = 1000;
 // MSAC parameters
 inline int mode = MODE_NIETO;
 inline int numVps = 3;
-inline bool verbose = false;
+inline bool verbose = true;
 
 // Grand hotel
 /*const std::string path_to_first_image = "resource/image/grand_hotel (2).jpg";
