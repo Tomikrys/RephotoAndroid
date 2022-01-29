@@ -144,7 +144,7 @@ public class SelectPointsActivity extends AppCompatActivity {
         ActivityCompat.finishAffinity(this);
         Intent play = new Intent(this, CameraPreview.class);
         startActivity(play);
-        finish();
+//        finish();
     }
 
     public void exitApplication(MenuItem item) {
