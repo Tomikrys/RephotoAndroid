@@ -7,24 +7,56 @@
     tools:context="com.vyw.rephotoandroid.MainActivityDemoJava">
 
     <FrameLayout
+        android:id="@+id/container"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:id="@+id/container">
+        android:layout_height="match_parent">
+
         <androidx.camera.view.PreviewView
             android:id="@+id/previewView"
             android:layout_width="match_parent"
-            android:layout_height="match_parent"/>
+            android:layout_height="match_parent" />
     </FrameLayout>
+
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent">
-        <TextView
-            android:id="@+id/orientation"
+
+        <ImageView
+            android:id="@+id/cameraPreview"
+            android:layout_width="wrap_content"
+            android:layout_height="484dp"
+            android:visibility="visible"
+            app:srcCompat="@drawable/mountain"
+            tools:visibility="visible" />
+
+        <LinearLayout
             android:layout_width="match_parent"
-            android:layout_height="300dp"
-            android:layout_gravity="center"
-            android:gravity="center"
-            android:textSize="100sp"
-            android:textColor="#9999ff"/>
+            android:layout_height="match_parent">
+
+            <TextView
+                android:id="@+id/brightness"
+                android:layout_width="match_parent"
+                android:layout_height="522dp"
+                android:gravity="center"
+                android:textColor="#FFFFFF"
+                android:textSize="100sp"
+                tools:text="test" />
+        </LinearLayout>
+
     </LinearLayout>
+
+    <!--    <LinearLayout-->
+<!--        android:layout_width="match_parent"-->
+<!--        android:layout_height="match_parent">-->
+
+<!--        <TextView-->
+<!--            android:id="@+id/orientation"-->
+<!--            android:layout_width="match_parent"-->
+<!--            android:layout_height="300dp"-->
+<!--            android:layout_gravity="center"-->
+<!--            android:gravity="center"-->
+<!--            android:textColor="#9999ff"-->
+<!--            android:textSize="100sp" />-->
+<!--    </LinearLayout>-->
+
 </androidx.constraintlayout.widget.ConstraintLayout>

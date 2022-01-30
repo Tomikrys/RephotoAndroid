@@ -38,6 +38,8 @@ import org.opencv.core.Mat;
 
 import java.io.ByteArrayOutputStream;
 import java.nio.ByteBuffer;
+import java.nio.ByteOrder;
+import java.nio.IntBuffer;
 import java.util.concurrent.ExecutionException;
 
 
@@ -102,19 +104,24 @@ public class CameraPreview extends AppCompatActivity {
                 new ImageAnalysis.Builder()
                         // enable the following line if RGBA output is needed.
                         .setOutputImageFormat(ImageAnalysis.OUTPUT_IMAGE_FORMAT_RGBA_8888)
-                        .setTargetResolution(new Size(1280, 720))
+//                        .setTargetResolution(new Size(1280, 720))
                         .setBackpressureStrategy(ImageAnalysis.STRATEGY_KEEP_ONLY_LATEST)
                         .build();
         imageAnalysis.setAnalyzer(ContextCompat.getMainExecutor(this), new ImageAnalysis.Analyzer() {
             @Override
             public void analyze(@NonNull ImageProxy imageProxy) {
-                Bitmap imageBitmap = imageProxyToBitmap(imageProxy);
-//                if (imageBitmap != null) {
-//                    Log.i(TAG, "Run analysis");
-////                    run(imageBitmap);
-//                } else {
-//                    Log.d(TAG, "imageBitmap is null, cannot run analysis");
-//                }
+                byte[] bytes = new byte[imageProxy.getPlanes()[0].getBuffer().remaining()];
+                imageProxy.getPlanes()[0].getBuffer().get(bytes);
+
+                int rotation = imageProxy.getImageInfo().getRotationDegrees();
+                Bitmap bitmap = RGBA8888BitesToBitmap(bytes, imageProxy.getWidth(), imageProxy.getHeight(), rotation);
+
+                if (bitmap != null) {
+                    Log.i(TAG, "Run analysis");
+                    run(bitmap);
+                } else {
+                    Log.d(TAG, "imageBitmap is null, cannot run analysis");
+                }
 //
                 imageProxy.close();
             }
@@ -127,43 +134,25 @@ public class CameraPreview extends AppCompatActivity {
                 imageAnalysis, preview);
     }
 
-    private Bitmap imageProxyToBitmap(ImageProxy imageProxy) {
-        Image image = imageProxy.getImage();
-        if (image == null) {
-            return null;
-        }
-        Image.Plane[] planes = image.getPlanes();
-        ByteBuffer buffer = planes[0].getBuffer();
-        int pixelStride = planes[0].getPixelStride();
-        int rowStride = planes[0].getRowStride();
-        int rowPadding = rowStride - pixelStride * image.getWidth();
-        Bitmap bitmap = Bitmap.createBitmap(image.getWidth() + rowPadding / pixelStride,
-                image.getHeight(), Bitmap.Config.ARGB_8888);
-        bitmap.copyPixelsFromBuffer(buffer);
+    private Bitmap RGBA8888BitesToBitmap(byte[] bytes, int width, int height, int rotation) {
+        IntBuffer intBuf =
+                ByteBuffer.wrap(bytes)
+                        .order(ByteOrder.BIG_ENDIAN)
+                        .asIntBuffer();
+        int[] intarray = new int[intBuf.remaining()];
+        intBuf.get(intarray);
 
-        int rotation = imageProxy.getImageInfo().getRotationDegrees();
+        for (int i = 0; i < intarray.length; i++) {
+            intarray[i] = Integer.rotateRight(intarray[i], 8);
+        }
+
+        Bitmap bitmap = Bitmap.createBitmap(intarray, width, height, Bitmap.Config.ARGB_8888);
+
         Matrix matrix = new Matrix();
         matrix.postRotate(rotation);
-
-//        image.close();
-
         Bitmap rotatedBitmap = Bitmap.createBitmap(bitmap, 0, 0, bitmap.getWidth(), bitmap.getHeight(), matrix, true);
+
         return rotatedBitmap;
-//        Image.Plane[] planes = image.getPlanes();
-//        ByteBuffer rBuffer = planes[0].getBuffer();
-//        ByteBuffer gBuffer = planes[1].getBuffer();
-//        ByteBuffer bBuffer = planes[2].getBuffer();
-//        ByteBuffer aBuffer = planes[3].getBuffer();
-//
-//        int width = image.getWidth();
-//        int height = image.getHeight();
-//        int stride = planes[0].getPixelStride();
-//
-//        int j = 0;
-//        int[] colors = new int[image.getWidth() * image.getHeight()];
-////        for (int i = 0; i < rBuffer.)
-////        colors[y * STRIDE + x] = (aBuffer << 24) | (rBuffer << 16) | (gBuffer << 8) | bBuffer;
-//        return null;
     }
 
     private void run(Bitmap bitmap) {
@@ -203,7 +192,8 @@ public class CameraPreview extends AppCompatActivity {
 
         try {
 //            OPENCVNATIVECALL
-            direction = OpenCVNative.processNavigation(currentFrames.getNativeObjAddr(), 1);
+//            direction = OpenCVNative.processNavigation(currentFrames.getNativeObjAddr(), 1);
+            direction = 10;
             Log.d(TAG, "Value of direction is: " + direction);
         } catch (java.lang.IllegalArgumentException e) {
             Log.e(TAG, e.getMessage());
