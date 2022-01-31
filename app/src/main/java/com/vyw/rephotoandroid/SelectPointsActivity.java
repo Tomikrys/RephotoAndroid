@@ -82,7 +82,8 @@ public class SelectPointsActivity extends AppCompatActivity {
                 if (isRefImage) {
                     if (event.getAction() == MotionEvent.ACTION_DOWN) {
 //                        OPENCVNATIVECALL
-                        float[] points = OpenCVNative.registrationPoints(event.getX(), event.getY());
+//                        float[] points = OpenCVNative.registrationPoints(event.getX(), event.getY());
+                        float[] points = {event.getX(), event.getY()}; // smazat
                         Log.d(TAG, "Draw point to : " + String.valueOf(points[0]) + " x " + String.valueOf(points[1]));
                         Utils.matToBitmap(first_frame, bit_first_frame);
                         Paint paint = new Paint();
@@ -96,7 +97,7 @@ public class SelectPointsActivity extends AppCompatActivity {
                         Canvas canvas1 = new Canvas(bit_ref_frame);
 //                        canvas1.drawPoint(event.getX(), event.getY(), paint);
 
-                        float[] point = new float[] {event.getX(), event.getY()};
+                        float[] point = new float[]{event.getX(), event.getY()};
 
                         Matrix inverse = new Matrix();
                         imageView.getImageMatrix().invert(inverse);
@@ -106,8 +107,8 @@ public class SelectPointsActivity extends AppCompatActivity {
                         point[0] /= density;
                         point[1] /= density;*/
 
-                        canvas1.drawPoint( point[0], point[1], paint);
-                        Log.d(TAG, "Touch point to : " +point[0] + " x " + point[1]);
+                        canvas1.drawPoint(point[0], point[1], paint);
+                        Log.d(TAG, "Touch point to : " + point[0] + " x " + point[1]);
                         imageView.setImageBitmap(bit_ref_frame);
                     }
                 }
@@ -140,11 +141,11 @@ public class SelectPointsActivity extends AppCompatActivity {
 
     public void finishRegister(MenuItem item) {
 //        OPENCVNATIVECALL
-        OpenCVNative.initNavigation();
-        ActivityCompat.finishAffinity(this);
+//        OpenCVNative.initNavigation();
+//        ActivityCompat.finishAffinity(this);
         Intent play = new Intent(this, CameraPreview.class);
         startActivity(play);
-        finish();
+//        finish();
     }
 
     public void exitApplication(MenuItem item) {
@@ -153,7 +154,8 @@ public class SelectPointsActivity extends AppCompatActivity {
 
     public void nextPoint(MenuItem item) {
 //    OPENCVNATIVECALL
-        float[] points = OpenCVNative.nextPoint();
+//        float[] points = OpenCVNative.nextPoint();
+        float[] points = {50, 50}; // smazat
         Log.d(TAG, "Draw point to : " + String.valueOf(points[0]) + " x " + String.valueOf(points[1]));
 
         Utils.matToBitmap(first_frame, bit_first_frame);

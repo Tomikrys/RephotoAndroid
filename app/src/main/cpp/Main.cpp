@@ -208,7 +208,7 @@ void Main::initNavigation() {
         ref_image.copyTo(gray_ref_image);
         cv::cvtColor(ref_image, output_ref_image, CV_GRAY2BGR);
     }
-//    TODO dopsany
+//    TODO smazat, má tu bejt 3 (glob)
     numVps = 2;
     vanish_point = processImage(msac, numVps, gray_ref_image, output_ref_image);
 

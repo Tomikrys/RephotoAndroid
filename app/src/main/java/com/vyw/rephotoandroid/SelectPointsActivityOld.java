@@ -139,7 +139,7 @@ public class SelectPointsActivityOld extends Activity {
 //        ActivityCompat.finishAffinity(this);
         Intent play = new Intent(this, NavigationProcesing.class);
         startActivity(play);
-        finish();
+//        finish();
     }
 
     public void exitApplication(MenuItem item) {

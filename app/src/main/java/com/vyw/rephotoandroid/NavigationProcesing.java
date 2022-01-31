@@ -42,10 +42,10 @@ public class NavigationProcesing extends Activity
 //        camPreview = new CameraPreview(previewSizeWidth, previewSizeHeight, myCameraPreview);
 
 
-        ActivityCompat.finishAffinity(this);
+//        ActivityCompat.finishAffinity(this);
         Intent intent = new Intent(this, MainActivityDemoJava.class);
         startActivity(intent);
-        finish();
+//        finish();
 //        camHolder.addCallback((SurfaceHolder.Callback) camPreview);
 //
 //        FrameLayout mainLayout = (FrameLayout) findViewById(R.id.frameLayout1);

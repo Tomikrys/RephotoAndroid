@@ -168,13 +168,14 @@ public class CameraActivity extends Activity {
             Utils.bitmapToMat(myBitmap2, secondFrame);
             Utils.bitmapToMat(bt_ref_frame, refFrame);
             // OPENCVNATIVECALL
-            OpenCVNative.initReconstruction(
-                    firstFrame.getNativeObjAddr(),
-                    secondFrame.getNativeObjAddr(),
-                    refFrame.getNativeObjAddr(),
-                    calibrate_params);
+//            OpenCVNative.initReconstruction(
+//                    firstFrame.getNativeObjAddr(),
+//                    secondFrame.getNativeObjAddr(),
+//                    refFrame.getNativeObjAddr(),
+//                    calibrate_params);
             // OPENCVNATIVECALL
-            float[] points = OpenCVNative.processReconstruction();
+//            float[] points = OpenCVNative.processReconstruction();
+            float[] points = {286, 538}; // smazat
             //Log.i(TAG, "Desc: " + out.dump());
 
             intent1.putExtra("first_image", firstFrame.getNativeObjAddr());
@@ -205,15 +206,15 @@ public class CameraActivity extends Activity {
 
                 Utils.bitmapToMat(images.get(0), firstFrame);
                 Utils.bitmapToMat(images.get(1), secondFrame);
+//    OPENNATIVECALL
+//                OpenCVNative.initReconstruction(firstFrame.getNativeObjAddr(), secondFrame.getNativeObjAddr(), refFrame.getNativeObjAddr(), calibrate_params);
 
-                OpenCVNative.initReconstruction(firstFrame.getNativeObjAddr(), secondFrame.getNativeObjAddr(), refFrame.getNativeObjAddr(), calibrate_params);
-
-                ActivityCompat.finishAffinity(this);
+//                ActivityCompat.finishAffinity(this);
                 Intent intent = new Intent(this, SelectPointsActivity.class);
                 intent.putExtra("first_image", firstFrame.getNativeObjAddr());
                 intent.putExtra("ref_image", refFrame.getNativeObjAddr());
                 startActivity(intent);
-                finish();
+//                finish();
             }
         }
     }

@@ -3,6 +3,7 @@ package com.vyw.rephotoandroid;
 import android.app.Dialog;
 import android.content.Intent;
 import android.os.Bundle;
+import android.os.StrictMode;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -31,6 +32,10 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.menu_layout);
+
+
+        if(BuildConfig.DEBUG)
+            StrictMode.enableDefaults();
     }
 
     @Override
@@ -53,10 +58,10 @@ public class MainActivity extends AppCompatActivity {
     }
 
     public void cameraTest(View view) {
-        ActivityCompat.finishAffinity(this);
+//        ActivityCompat.finishAffinity(this);
         Intent intent = new Intent(this, MainActivityDemoJava.class);
         startActivity(intent);
-        finish();
+//        finish();
     }
 
     public void insertCalibrationData(View view) {
@@ -87,12 +92,12 @@ public class MainActivity extends AppCompatActivity {
         }
 
         if(isCorrect){
-            ActivityCompat.finishAffinity(this);
+//            ActivityCompat.finishAffinity(this);
             dialog.dismiss();
             Intent intent = new Intent(this, SettingActivity.class);
             intent.putExtra(EXTRA_MESSAGE, message);
             startActivity(intent);
-            finish();
+//            finish();
         }
     }
 
