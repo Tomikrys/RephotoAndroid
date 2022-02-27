@@ -64,6 +64,13 @@ public class MainActivity extends AppCompatActivity {
 //        finish();
     }
 
+    public void simpleNavigation(View view) {
+//        ActivityCompat.finishAffinity(this);
+        Intent intent = new Intent(this, SimpleNavigation.class);
+        startActivity(intent);
+//        finish();
+    }
+
     public void insertCalibrationData(View view) {
         String regexStr = "^[0-9]*$";
         EditText tf[] = new EditText[8];
