@@ -2,7 +2,6 @@ package com.vyw.rephotoandroid;
 
 import android.content.Intent;
 import android.graphics.Bitmap;
-import android.graphics.Camera;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Matrix;
@@ -16,7 +15,6 @@ import android.view.View;
 import android.widget.ImageView;
 
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.core.app.ActivityCompat;
 
 import org.opencv.android.Utils;
 import org.opencv.core.Mat;
@@ -29,7 +27,8 @@ public class SelectPointsActivity extends AppCompatActivity {
 
     public static String TAG = "SelectPointsActivity";
 
-    ImageView imageView;
+    ImageView imageView1;
+    ImageView imageView2;
 
     Bitmap bit_first_frame;
     Bitmap bit_ref_frame;
@@ -64,9 +63,10 @@ public class SelectPointsActivity extends AppCompatActivity {
         bit_ref_frame = Bitmap.createBitmap(ref_frame.width(), ref_frame.height(), con_ref_frame);
         Utils.matToBitmap(ref_frame, bit_ref_frame);
 
-        imageView = (ImageView) findViewById(R.id.imageView);
-
-        imageView.setImageBitmap(bit_ref_frame);
+        imageView1 = (ImageView) findViewById(R.id.imageView1);
+        imageView1.setImageBitmap(bit_ref_frame);
+        imageView2 = (ImageView) findViewById(R.id.imageView2);
+        imageView2.setImageBitmap(bit_first_frame);
 
 
         Paint paint = new Paint();
@@ -76,14 +76,14 @@ public class SelectPointsActivity extends AppCompatActivity {
         Canvas canvas = new Canvas(bit_first_frame);
         canvas.drawPoint(pos_x, pos_y, paint);
 
-        imageView.setOnTouchListener(new View.OnTouchListener() {
+        imageView1.setOnTouchListener(new View.OnTouchListener() {
             @Override
             public boolean onTouch(View v, MotionEvent event) {
                 if (isRefImage) {
                     if (event.getAction() == MotionEvent.ACTION_DOWN) {
 //                        OPENCVNATIVECALL
-//                        float[] points = OpenCVNative.registrationPoints(event.getX(), event.getY());
-                        float[] points = {event.getX(), event.getY()}; // smazat
+                        float[] points = OpenCVNative.registrationPoints(event.getX(), event.getY());
+//                        float[] points = {event.getX(), event.getY()}; // smazat
                         Log.d(TAG, "Draw point to : " + String.valueOf(points[0]) + " x " + String.valueOf(points[1]));
                         Utils.matToBitmap(first_frame, bit_first_frame);
                         Paint paint = new Paint();
@@ -100,7 +100,7 @@ public class SelectPointsActivity extends AppCompatActivity {
                         float[] point = new float[]{event.getX(), event.getY()};
 
                         Matrix inverse = new Matrix();
-                        imageView.getImageMatrix().invert(inverse);
+                        imageView1.getImageMatrix().invert(inverse);
                         inverse.mapPoints(point);
 
                         /*float density = getResources().getDisplayMetrics().density;
@@ -109,7 +109,7 @@ public class SelectPointsActivity extends AppCompatActivity {
 
                         canvas1.drawPoint(point[0], point[1], paint);
                         Log.d(TAG, "Touch point to : " + point[0] + " x " + point[1]);
-                        imageView.setImageBitmap(bit_ref_frame);
+                        imageView1.setImageBitmap(bit_ref_frame);
                     }
                 }
                 return true;
@@ -131,17 +131,18 @@ public class SelectPointsActivity extends AppCompatActivity {
 
     public void changeView(MenuItem item) {
         if (!isRefImage) {
-            imageView.setImageBitmap(bit_ref_frame);
+            imageView1.setImageBitmap(bit_ref_frame);
             isRefImage = true;
         } else {
-            imageView.setImageBitmap(bit_first_frame);
+            imageView2.setImageBitmap(bit_first_frame);
             isRefImage = false;
         }
     }
 
     public void finishRegister(MenuItem item) {
 //        OPENCVNATIVECALL
-//        OpenCVNative.initNavigation();
+        OpenCVNative.initNavigation();
+
 //        ActivityCompat.finishAffinity(this);
         Intent play = new Intent(this, CameraPreview.class);
         startActivity(play);
@@ -154,8 +155,23 @@ public class SelectPointsActivity extends AppCompatActivity {
 
     public void nextPoint(MenuItem item) {
 //    OPENCVNATIVECALL
-//        float[] points = OpenCVNative.nextPoint();
-        float[] points = {50, 50}; // smazat
+        float[] points = OpenCVNative.nextPoint();
+//        float[] points = {50, 50}; // smazat
+        Log.d(TAG, "Draw point to : " + String.valueOf(points[0]) + " x " + String.valueOf(points[1]));
+
+        Utils.matToBitmap(first_frame, bit_first_frame);
+        Paint paint = new Paint();
+        paint.setColor(Color.RED);
+        paint.setStrokeWidth(15);
+        paint.setStyle(Paint.Style.FILL);
+        Canvas canvas = new Canvas(bit_first_frame);
+        canvas.drawPoint(points[0], points[1], paint);
+    }
+
+    public void nextPointButton(View view) {
+//    OPENCVNATIVECALL
+        float[] points = OpenCVNative.nextPoint();
+//        float[] points = {50, 50}; // smazat
         Log.d(TAG, "Draw point to : " + String.valueOf(points[0]) + " x " + String.valueOf(points[1]));
 
         Utils.matToBitmap(first_frame, bit_first_frame);

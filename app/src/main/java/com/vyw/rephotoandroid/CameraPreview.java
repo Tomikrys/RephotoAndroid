@@ -37,6 +37,8 @@ import org.opencv.android.Utils;
 import org.opencv.core.Mat;
 
 import java.io.ByteArrayOutputStream;
+import java.io.File;
+import java.io.FileOutputStream;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.nio.IntBuffer;
@@ -104,7 +106,7 @@ public class CameraPreview extends AppCompatActivity {
                 new ImageAnalysis.Builder()
                         // enable the following line if RGBA output is needed.
                         .setOutputImageFormat(ImageAnalysis.OUTPUT_IMAGE_FORMAT_RGBA_8888)
-//                        .setTargetResolution(new Size(1280, 720))
+                        .setTargetResolution(new Size(1280, 960))
                         .setBackpressureStrategy(ImageAnalysis.STRATEGY_KEEP_ONLY_LATEST)
                         .build();
         imageAnalysis.setAnalyzer(ContextCompat.getMainExecutor(this), new ImageAnalysis.Analyzer() {
@@ -118,8 +120,7 @@ public class CameraPreview extends AppCompatActivity {
 
                 if (bitmap != null) {
                     Log.i(TAG, "Run analysis");
-                    MyCameraPreview.setImageBitmap(bitmap);
-//                    run(bitmap);
+                    run(bitmap);
                 } else {
                     Log.d(TAG, "imageBitmap is null, cannot run analysis");
                 }
@@ -156,145 +157,161 @@ public class CameraPreview extends AppCompatActivity {
         return rotatedBitmap;
     }
 
+    private boolean saveBitmapToFile(Bitmap bitmap, String fileName) {
+        String filePath = "/storage/emulated/0/Download/" + fileName + ".jpg";
+        try {
+            File file = new File(filePath);
+            FileOutputStream fOut = new FileOutputStream(file);
+            bitmap.compress(Bitmap.CompressFormat.JPEG, 90, fOut);
+            fOut.flush();
+            fOut.close();
+        }
+        catch (Exception e) {
+            e.printStackTrace();
+            Log.i(null, "Save file error!");
+            return false;
+        }
+        return true;
+    }
+
     private void run(Bitmap bitmap) {
 
         bProcessing = true;
-//        Canvas canvas = new Canvas(bitmap);
-//        Paint mPaint = new Paint();
-//        mPaint.setStyle(Paint.Style.FILL);
-//        mPaint.setColor(Color.WHITE);
-//        mPaint.setStrokeWidth(4);
-//        float width = 150f;
-//        float height = 150f;
-//        PreviewSizeWidth = 1280;
-//        PreviewSizeHeight = 720;
-//        float x = PreviewSizeWidth / 2 - width / 2;
-//        float y = PreviewSizeHeight / 10;
-//
-//        canvas.drawRect(x, y, x + width, y + height, mPaint);
-//        mPaint.setColor(Color.BLACK);
-//
-//        width = width - 10f;
-//        height = height - 10f;
-//        x = x + 5f;
-//        y = y + 5f;
-//        canvas.drawRect(x, y, x + width, y + height, mPaint);
-//
-//        mPaint.setColor(Color.YELLOW);
-//        width = width - 10f;
-//        height = height - 10f;
-//        x = x + 5f;
-//        y = y + 5f;
-//
-//        Mat currentFrames = new Mat();
-//        Utils.bitmapToMat(bitmap, currentFrames);
-//
-//        int direction;
-//
-//        try {
-////            OPENCVNATIVECALL
-////            direction = OpenCVNative.processNavigation(currentFrames.getNativeObjAddr(), 1);
-//            direction = 10;
-//            Log.d(TAG, "Value of direction is: " + direction);
-//        } catch (java.lang.IllegalArgumentException e) {
-//            Log.e(TAG, e.getMessage());
-//            direction = 1;
-//        }
-//
-//
-//
-//        //1 up, 2 down, 3 right, 4 left;
-//        Path wallpath = new Path();
-//        wallpath.reset();
-//        if (direction < 10) {
-//            switch (direction) {
-//                case 0:
-//                    wallpath.moveTo(x, y + height / 8);
-//                    wallpath.lineTo(x + width / 8, y);
-//                    wallpath.lineTo(x + width, y + height * 7 / 8);
-//                    wallpath.lineTo(x + width * 7 / 8, y + height);
-//
-//                    wallpath.moveTo(x + width, y + height / 8);
-//                    wallpath.lineTo(x + width*7 / 8, y);
-//                    wallpath.lineTo(x, y + height * 7 / 8);
-//                    wallpath.lineTo(x + width / 8, y + height);
-//                    break;
-//                case 1:
-//                    wallpath.moveTo(x + width / 4, y + height / 2);
-//                    wallpath.lineTo(x + width / 4 + width / 2, y + height / 2);
-//                    wallpath.lineTo(x + width / 4 + width / 2, y + height);
-//                    wallpath.lineTo(x + width / 4 - 5f, y + height);
-//                    wallpath.lineTo(x + width / 4 - 5f, y + height / 2);
-//                    wallpath.moveTo(x, y + height / 2);
-//                    wallpath.lineTo(x + width, y + height / 2);
-//                    wallpath.lineTo(x + width / 2, y);
-//                    break;
-//                case 2:
-//                    wallpath.moveTo(x + width / 4, y);
-//                    wallpath.lineTo(x + width / 4 + width / 2, y);
-//                    wallpath.lineTo(x + width / 4 + width / 2, y + height / 2);
-//                    wallpath.lineTo(x + width / 4 - 5f, y + height / 2);
-//                    wallpath.lineTo(x + width / 4 - 5f, y);
-//                    wallpath.moveTo(x, y + height / 2);
-//                    wallpath.lineTo(x + width, y + height / 2);
-//                    wallpath.lineTo(x + width / 2, y + height);
-//                    break;
-//                case 3:
-//                    wallpath.moveTo(x, y + height / 4);
-//                    wallpath.lineTo(x, y + height / 4 + height / 2);
-//                    wallpath.lineTo(x + width / 2, y + height / 4 + height / 2);
-//                    wallpath.lineTo(x + width / 2, y + height / 4 - 5f);
-//                    wallpath.lineTo(x, y + height / 4 - 5f);
-//                    wallpath.moveTo(x + width / 2, y);
-//                    wallpath.lineTo(x + width / 2, y + height);
-//                    wallpath.lineTo(x + width, y + height / 2);
-//                    break;
-//                case 4:
-//                    wallpath.moveTo(x + width / 2, y);
-//                    wallpath.lineTo(x + width / 2, y + height);
-//                    wallpath.lineTo(x, y + height / 2);
-//                    wallpath.moveTo(x + width / 2, y + height / 4);
-//                    wallpath.lineTo(x + width / 2, y + height / 4 + height / 2);
-//                    wallpath.lineTo(x + width, y + height / 4 + height / 2);
-//                    wallpath.lineTo(x + width, y + height / 4 - 5f);
-//                    wallpath.lineTo(x + width / 2, y + height / 4 - 5f);
-//                    break;
-//            }
-//        } else {
-//            wallpath.moveTo(x + width / 2, y + height / 8);
-//            wallpath.lineTo(x + width / 8, y + height / 2);
-//            wallpath.lineTo(x + width / 2, y + height * 7 / 8);
-//            wallpath.lineTo(x + width * 7 / 8, y + height / 2);
-//            wallpath.lineTo(x + width / 2, y + height / 8);
-//            switch (direction) {
-//                case 13:
-//                    wallpath.moveTo(x + width * 1 / 3, y);
-//                    wallpath.lineTo(x + width, y + height * 2 / 3);
-//                    wallpath.lineTo(x + width, y);
-//                    canvas.drawPath(wallpath, mPaint);
-//                    break;
-//                case 14:
-//                    wallpath.moveTo(x + width * 2 / 3, y);
-//                    wallpath.lineTo(x, y + height * 2 / 3);
-//                    wallpath.lineTo(x, y);
-//                    canvas.drawPath(wallpath, mPaint);
-//                    break;
-//                case 23:
-//                    wallpath.moveTo(x + width * 2 / 3, y + height);
-//                    wallpath.lineTo(x, y + height * 1 / 3);
-//                    wallpath.lineTo(x, y + height);
-//                    canvas.drawPath(wallpath, mPaint);
-//                    break;
-//                case 24:
-//                    wallpath.moveTo(x + width * 1 / 3, y + height);
-//                    wallpath.lineTo(x + width, y + height * 1 / 3);
-//                    wallpath.lineTo(x + width, y + height);
-//                    canvas.drawPath(wallpath, mPaint);
-//                    break;
-//
-//            }
-//        }
-//        canvas.drawPath(wallpath, mPaint);
+        Canvas canvas = new Canvas(bitmap);
+        Paint mPaint = new Paint();
+        mPaint.setStyle(Paint.Style.FILL);
+        mPaint.setColor(Color.WHITE);
+        mPaint.setStrokeWidth(4);
+        float width = 150f;
+        float height = 150f;
+        PreviewSizeWidth = 720;
+        PreviewSizeHeight = 1280;
+        float x = PreviewSizeWidth / 2 - width / 2;
+        float y = PreviewSizeHeight / 10;
+
+        canvas.drawRect(x, y, x + width, y + height, mPaint);
+        mPaint.setColor(Color.BLACK);
+
+        width = width - 10f;
+        height = height - 10f;
+        x = x + 5f;
+        y = y + 5f;
+        canvas.drawRect(x, y, x + width, y + height, mPaint);
+
+        mPaint.setColor(Color.YELLOW);
+        width = width - 10f;
+        height = height - 10f;
+        x = x + 5f;
+        y = y + 5f;
+
+        Mat currentFrames = new Mat();
+        Utils.bitmapToMat(bitmap, currentFrames);
+
+        int direction;
+
+        try {
+//            OPENCVNATIVECALL
+            direction = OpenCVNative.processNavigation(currentFrames.getNativeObjAddr(), countFrames);
+            Log.d(TAG, "Value of direction is: " + direction);
+        } catch (java.lang.IllegalArgumentException e) {
+            Log.e(TAG, e.getMessage());
+            direction = 1;
+        }
+
+
+
+        //1 up, 2 down, 3 right, 4 left;
+        Path wallpath = new Path();
+        wallpath.reset();
+        if (direction < 10) {
+            switch (direction) {
+                case 0:
+                    wallpath.moveTo(x, y + height / 8);
+                    wallpath.lineTo(x + width / 8, y);
+                    wallpath.lineTo(x + width, y + height * 7 / 8);
+                    wallpath.lineTo(x + width * 7 / 8, y + height);
+
+                    wallpath.moveTo(x + width, y + height / 8);
+                    wallpath.lineTo(x + width*7 / 8, y);
+                    wallpath.lineTo(x, y + height * 7 / 8);
+                    wallpath.lineTo(x + width / 8, y + height);
+                    break;
+                case 1:
+                    wallpath.moveTo(x + width / 4, y + height / 2);
+                    wallpath.lineTo(x + width / 4 + width / 2, y + height / 2);
+                    wallpath.lineTo(x + width / 4 + width / 2, y + height);
+                    wallpath.lineTo(x + width / 4 - 5f, y + height);
+                    wallpath.lineTo(x + width / 4 - 5f, y + height / 2);
+                    wallpath.moveTo(x, y + height / 2);
+                    wallpath.lineTo(x + width, y + height / 2);
+                    wallpath.lineTo(x + width / 2, y);
+                    break;
+                case 2:
+                    wallpath.moveTo(x + width / 4, y);
+                    wallpath.lineTo(x + width / 4 + width / 2, y);
+                    wallpath.lineTo(x + width / 4 + width / 2, y + height / 2);
+                    wallpath.lineTo(x + width / 4 - 5f, y + height / 2);
+                    wallpath.lineTo(x + width / 4 - 5f, y);
+                    wallpath.moveTo(x, y + height / 2);
+                    wallpath.lineTo(x + width, y + height / 2);
+                    wallpath.lineTo(x + width / 2, y + height);
+                    break;
+                case 3:
+                    wallpath.moveTo(x, y + height / 4);
+                    wallpath.lineTo(x, y + height / 4 + height / 2);
+                    wallpath.lineTo(x + width / 2, y + height / 4 + height / 2);
+                    wallpath.lineTo(x + width / 2, y + height / 4 - 5f);
+                    wallpath.lineTo(x, y + height / 4 - 5f);
+                    wallpath.moveTo(x + width / 2, y);
+                    wallpath.lineTo(x + width / 2, y + height);
+                    wallpath.lineTo(x + width, y + height / 2);
+                    break;
+                case 4:
+                    wallpath.moveTo(x + width / 2, y);
+                    wallpath.lineTo(x + width / 2, y + height);
+                    wallpath.lineTo(x, y + height / 2);
+                    wallpath.moveTo(x + width / 2, y + height / 4);
+                    wallpath.lineTo(x + width / 2, y + height / 4 + height / 2);
+                    wallpath.lineTo(x + width, y + height / 4 + height / 2);
+                    wallpath.lineTo(x + width, y + height / 4 - 5f);
+                    wallpath.lineTo(x + width / 2, y + height / 4 - 5f);
+                    break;
+            }
+        } else {
+            wallpath.moveTo(x + width / 2, y + height / 8);
+            wallpath.lineTo(x + width / 8, y + height / 2);
+            wallpath.lineTo(x + width / 2, y + height * 7 / 8);
+            wallpath.lineTo(x + width * 7 / 8, y + height / 2);
+            wallpath.lineTo(x + width / 2, y + height / 8);
+            switch (direction) {
+                case 13:
+                    wallpath.moveTo(x + width * 1 / 3, y);
+                    wallpath.lineTo(x + width, y + height * 2 / 3);
+                    wallpath.lineTo(x + width, y);
+                    canvas.drawPath(wallpath, mPaint);
+                    break;
+                case 14:
+                    wallpath.moveTo(x + width * 2 / 3, y);
+                    wallpath.lineTo(x, y + height * 2 / 3);
+                    wallpath.lineTo(x, y);
+                    canvas.drawPath(wallpath, mPaint);
+                    break;
+                case 23:
+                    wallpath.moveTo(x + width * 2 / 3, y + height);
+                    wallpath.lineTo(x, y + height * 1 / 3);
+                    wallpath.lineTo(x, y + height);
+                    canvas.drawPath(wallpath, mPaint);
+                    break;
+                case 24:
+                    wallpath.moveTo(x + width * 1 / 3, y + height);
+                    wallpath.lineTo(x + width, y + height * 1 / 3);
+                    wallpath.lineTo(x + width, y + height);
+                    canvas.drawPath(wallpath, mPaint);
+                    break;
+
+            }
+        }
+        canvas.drawPath(wallpath, mPaint);
 
         MyCameraPreview.setImageBitmap(bitmap);
         bProcessing = false;

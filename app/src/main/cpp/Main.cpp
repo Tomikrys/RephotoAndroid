@@ -7,6 +7,42 @@
 #include <opencv2/imgproc/types_c.h>
 #include "Main.h"
 
+#include <android/bitmap.h>
+#include <android/log.h>
+#define printf(...) __android_log_print(ANDROID_LOG_DEBUG, "MAIN", __VA_ARGS__);
+
+class androidbuf : public std::streambuf {
+public:
+    enum { bufsize = 4096 }; // ... or some other suitable buffer size
+    androidbuf() { this->setp(buffer, buffer + bufsize - 1); }
+
+private:
+    int overflow(int c)
+    {
+        if (c == traits_type::eof()) {
+            *this->pptr() = traits_type::to_char_type(c);
+            this->sbumpc();
+        }
+        return this->sync()? traits_type::eof(): traits_type::not_eof(c);
+    }
+
+    int sync()
+    {
+        int rc = 0;
+        if (this->pbase() != this->pptr()) {
+            char writebuf[bufsize+1];
+            memcpy(writebuf, this->pbase(), this->pptr() - this->pbase());
+            writebuf[this->pptr() - this->pbase()] = '\0';
+
+            rc = __android_log_write(ANDROID_LOG_INFO, "std", writebuf) > 0;
+            this->setp(buffer, buffer + bufsize - 1);
+        }
+        return rc;
+    }
+
+    char buffer[bufsize];
+};
+
 void *fast_robust_matcher(void *arg) {
     struct fast_robust_matcher_struct *param = (struct fast_robust_matcher_struct *) arg;
     cv::Mat last_current_frame = param->last_current_frame;
@@ -41,6 +77,16 @@ Main::initReconstruction(cv::Mat image1, cv::Mat image2, cv::Mat ref, cv::Point2
     pnp_registration.setCameraParameter(cf.x, cf.y, ff.x, ff.y);
     pnp_detection.setCameraParameter(cc.x, cc.y, fc.x, fc.y);
 
+}
+
+void Main::printMat (cv::Mat mat) {
+    for(int i=0; i<mat.rows; i++) {
+        for (int j = 0; j < mat.cols; j++) {
+            // You can now access the pixel value with cv::Vec3b
+            printf("%4.2f ", mat.at<float>(i, j));
+        }
+        printf("\n")
+    }
 }
 
 cv::Point2f Main::processReconstruction() {
@@ -108,11 +154,13 @@ cv::Point2f Main::processReconstruction() {
     camera_matrix_a = camera_matrix * rotation_translation_matrix_first_image;
     camera_matrix_b = camera_matrix * rotation_translation_matrix_second_image;
 
+    std::cout.rdbuf(new androidbuf);
 
-    std::cout << points1 << std::endl;
-    std::cout << points2 << std::endl;
-    std::cout << camera_matrix_b << std::endl;
-    std::cout << camera_matrix_a << std::endl;
+    std::cout << "##### Triangulace #####" << std::endl;
+    std::cout << "points1 " << points1 << std::endl;
+    std::cout << "points2 " << points2 << std::endl;
+    std::cout << "camera_matrix_b " << camera_matrix_b << std::endl;
+    std::cout << "camera_matrix_a " << camera_matrix_a << std::endl;
 
     triangulatePoints(camera_matrix_b, camera_matrix_a, points1, points2, found_3D_points);
     std::cout << found_3D_points << std::endl;
@@ -131,7 +179,7 @@ cv::Point2f Main::processReconstruction() {
      * Registrace korespondencnich bodu
      * Dle tutorialu dostupneho na http://docs.opencv.org/3.1.0/dc/d2c/tutorial_real_time_pose.html
      */
-    for (int i = 0; i < list_3D_points.size(); i++) {
+     for (int i = 0; i < list_3D_points.size(); i++) {
         std::cout << list_3D_points[i] << std::endl;
     }
     registration.setRegistrationMax(number_registration);
@@ -183,6 +231,13 @@ cv::Point2f Main::nextPoint() {
     return point;
 }
 
+void saveMatToJpeg(cv::Mat img, std::string filename, bool RGBA2BGRA = false) {
+    if (RGBA2BGRA) {
+        cv::cvtColor(img, img,  cv::COLOR_RGBA2BGRA);
+    }
+    cv::imwrite("/storage/emulated/0/Download/" + filename + ".jpg", img, {cv::ImwriteFlags::IMWRITE_JPEG_QUALITY, 70});
+}
+
 void Main::initNavigation() {
 
     start = 4;
@@ -208,8 +263,10 @@ void Main::initNavigation() {
         ref_image.copyTo(gray_ref_image);
         cv::cvtColor(ref_image, output_ref_image, CV_GRAY2BGR);
     }
-//    TODO smazat, má tu bejt 3 (glob)
-    numVps = 2;
+
+//    TODO Debug Mat to jspeg file
+    saveMatToJpeg(output_ref_image, "output_ref_image");
+
     vanish_point = processImage(msac, numVps, gray_ref_image, output_ref_image);
 
     std::vector<cv::Point2f> list_vanish_points;
@@ -285,6 +342,8 @@ void Main::initNavigation() {
     robust_matcher_arg_struct.measurements = measurements;
 
     fast_robust_matcher_arg_struct.list_3D_points = list_3D_points;
+    std::cout << "list_3D_points" << std::endl;
+    std::cout << list_3D_points << std::endl;
 }
 
 int Main::processNavigation(cv::Mat current_frame, int count_frames) {
@@ -348,7 +407,7 @@ bool getRobustEstimation(cv::Mat current_frame_vis, std::vector<cv::Point3f> lis
 
 
     draw2DPoints(current_frame_vis, list_points2d_scene_match, blue);
-
+    saveMatToJpeg(current_frame_vis, "getRobustEstimation", true);
 
     bool good_measurement = false;
 
@@ -357,10 +416,13 @@ bool getRobustEstimation(cv::Mat current_frame_vis, std::vector<cv::Point3f> lis
         pnp_detection.estimatePoseRANSAC(list_points3d_model_match, list_points2d_scene_match, pnp_method,
                                          useExtrinsicGuess, iterationsCount, reprojectionError, confidence);
 
+//        todo konzultace
+//        todo false pnp_detection.getInliersPoints().size() == 0
         if (pnp_detection.getInliersPoints().size() > minInliersKalman) {
 
 
             draw2DPoints(current_frame_vis, list_points2d_scene_match, red);
+            saveMatToJpeg(current_frame_vis, "getRobustEstimation2", true);
             cv::Mat T = pnp_detection.getProjectionMatrix();
             cv::Mat refT = pnp_registration.getProjectionMatrix();
 
@@ -423,6 +485,7 @@ bool getLightweightEstimation(cv::Mat last_current_frame_vis, std::vector<cv::Po
                 list_points2d_scene_match.push_back(featuresNextPos[i]);
             }
         }
+        std::cout << list_3D_points.size() << std::endl;
         if (list_3D_points.size() == list_points2d_scene_match.size()) {
             pnp_detection.estimatePoseRANSAC(list_3D_points, list_points2d_scene_match, pnp_method, useExtrinsicGuess,
                                              iterationsCount, reprojectionError, confidence);
@@ -547,6 +610,8 @@ std::vector<cv::Mat> Main::processImage(MSAC &msac, int numVps, cv::Mat &imgGRAY
     }
 
     msac.drawCS(outputImg, lineSegmentsClusters, vps);
+    saveMatToJpeg(outputImg, "outputImgMSAC", true);
+
     return vps;
 }
 

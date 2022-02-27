@@ -33,6 +33,8 @@
 #endif
 #ifdef linux
 #include <stdio.h>
+#include <jni.h>
+
 #endif
 
 #define USE_PPHT
@@ -235,6 +237,7 @@ public:
     int processNavigation(cv::Mat current_frame, int count_frames);
 
 
+    void printMat(cv::Mat mat);
 };
 
 

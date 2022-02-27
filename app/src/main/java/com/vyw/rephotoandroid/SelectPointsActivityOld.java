@@ -61,7 +61,7 @@ public class SelectPointsActivityOld extends Activity {
         bit_ref_frame = Bitmap.createBitmap(ref_frame.width(), ref_frame.height(), con_ref_frame);
         Utils.matToBitmap(ref_frame, bit_ref_frame);
 
-        imageView = (ImageView) findViewById(R.id.imageView);
+        imageView = (ImageView) findViewById(R.id.imageView1);
 
         imageView.setImageBitmap(bit_ref_frame);
 

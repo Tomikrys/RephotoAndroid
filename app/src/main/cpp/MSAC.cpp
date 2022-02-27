@@ -126,7 +126,7 @@ void MSAC::fillDataContainers(std::vector<std::vector<cv::Point> > &lineSegments
 			__Mi.at<float>(i,2) = __c.at<float>(2,0);
 		}
 	}
-//	TODO zero division error
+	//	TODO error zero division error
 	__Lengths = __Lengths*((double)1/sum_lengths);
 }
 void MSAC::multipleVPEstimation(std::vector<std::vector<cv::Point> > &lineSegments, std::vector<std::vector<std::vector<cv::Point> > > &lineSegmentsClusters, std::vector<int> &numInliers, std::vector<cv::Mat> &vps, int numVps)
@@ -134,11 +134,17 @@ void MSAC::multipleVPEstimation(std::vector<std::vector<cv::Point> > &lineSegmen
 	// Make a copy of lineSegments because it is modified in the code (it will be restored at the end of this function)
 	std::vector<std::vector<cv::Point> > lineSegmentsCopy = lineSegments;
 
+	// todo smazat
+//    numVps = 2;
+
 	// Loop over maximum number of vanishing points	
 	int number_of_inliers = 0;
 	for(int vpNum=0; vpNum < numVps; vpNum++) {
 		// Fill data structures
-		fillDataContainers(lineSegments);
+		// todo if vpNum == 2, lineSegments.lenght = 0
+		if (lineSegments.size() != 0) {
+			fillDataContainers(lineSegments);
+		}
 		int numLines = lineSegments.size();
 
 		if(__verbose)

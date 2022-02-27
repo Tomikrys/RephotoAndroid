@@ -41,6 +41,13 @@
             android:text="Camera test" />
 
         <Button
+            android:id="@+id/camera_test2"
+            android:layout_width="200dp"
+            android:layout_height="wrap_content"
+            android:onClick="simpleNavigation"
+            android:text="Simple Navigation" />
+
+        <Button
             android:id="@+id/button_end"
             android:layout_width="200dp"
             android:layout_height="wrap_content"

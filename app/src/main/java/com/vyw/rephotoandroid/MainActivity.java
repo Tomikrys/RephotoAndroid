@@ -33,9 +33,9 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.menu_layout);
 
-
-        if(BuildConfig.DEBUG)
-            StrictMode.enableDefaults();
+//  TODO debug memory mode
+//        if(BuildConfig.DEBUG)
+//            StrictMode.enableDefaults();
     }
 
     @Override

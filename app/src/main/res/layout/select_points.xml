@@ -12,13 +12,41 @@
     tools:context="com.vyw.rephotoandroid.SelectPointsActivity">
 
     <ImageView
-        android:id="@+id/imageView"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:layout_alignParentLeft="true"
+        android:id="@+id/imageView1"
+        android:layout_width="wrap_content"
+        android:layout_height="313dp"
         android:layout_alignParentStart="true"
+        android:layout_alignParentLeft="true"
+        android:layout_marginStart="0dp"
+        android:layout_marginLeft="0dp"
         android:contentDescription="@string/ref_frame"
         android:onClick="selectPoint"
         android:src="@drawable/ref_biskupsky_palac" />
+
+    <ImageView
+        android:id="@+id/imageView2"
+        android:layout_width="377dp"
+        android:layout_height="423dp"
+        android:layout_below="@+id/imageView1"
+        android:layout_alignParentStart="true"
+        android:layout_alignParentLeft="true"
+        android:layout_marginStart="0dp"
+        android:layout_marginLeft="0dp"
+        android:layout_marginTop="7dp"
+        android:contentDescription="@string/ref_frame"
+        android:src="@drawable/ref_biskupsky_palac" />
+
+    <com.google.android.material.floatingactionbutton.FloatingActionButton
+        android:id="@+id/floatingActionButton"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentEnd="true"
+        android:layout_alignParentBottom="true"
+        android:layout_marginEnd="11dp"
+        android:layout_marginBottom="9dp"
+        android:clickable="true"
+        android:contentDescription="@string/app_name"
+        android:onClick="nextPointButton"
+        app:srcCompat="@android:drawable/ic_media_next" />
 
 </RelativeLayout>
