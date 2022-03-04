@@ -2,6 +2,7 @@ package com.vyw.rephotoandroid;
 
 import android.app.Dialog;
 import android.content.Intent;
+import android.net.Uri;
 import android.os.Bundle;
 import android.os.StrictMode;
 import android.util.Log;
@@ -27,11 +28,13 @@ public class MainActivity extends AppCompatActivity {
 
 
     Dialog dialog;
+    int simple_navigation_button;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.menu_layout);
+        simple_navigation_button = findViewById(R.id.simple_navigation).getId();
 
 //  TODO debug memory mode
 //        if(BuildConfig.DEBUG)
@@ -66,9 +69,44 @@ public class MainActivity extends AppCompatActivity {
 
     public void simpleNavigation(View view) {
 //        ActivityCompat.finishAffinity(this);
+        showFileDialog(view);
         Intent intent = new Intent(this, SimpleNavigation.class);
+        intent.putExtra("PATH_REF_IMAGE", path_ref_image);
         startActivity(intent);
 //        finish();
+    }
+
+    private static final int REQUEST_CHOOSER = 1234;
+    int id_entered_button;
+    String path_ref_image = "";
+
+    public void showFileDialog(View view) {
+        id_entered_button = view.getId();
+        Intent intent = new Intent(Intent.ACTION_OPEN_DOCUMENT);
+        intent.setType("image/*");
+        intent = Intent.createChooser(intent, "Choose file");
+
+        startActivityForResult(intent, REQUEST_CHOOSER);
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        if (resultCode == RESULT_OK) {
+            final Uri uri = data.getData();
+            String path = uri.toString();
+
+            if (path != null) {
+                if (Integer.compare(id_entered_button, simple_navigation_button) == 0) {
+                    path_ref_image = path;
+                    TextView textView = (TextView) findViewById(R.id.ref_frame_label);
+                    textView.setText(path_ref_image);
+                }
+
+            }
+            Log.d(TAG, path);
+            Log.d(TAG, String.valueOf(id_entered_button));
+        }
     }
 
     public void insertCalibrationData(View view) {

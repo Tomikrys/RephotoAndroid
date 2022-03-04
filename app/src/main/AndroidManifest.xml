@@ -6,6 +6,7 @@
     <uses-permission android:name="android.permission.CAMERA" />
     <!--File read permission-->
     <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
+    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
 
     <application
         android:allowBackup="true"
@@ -16,7 +17,7 @@
         android:theme="@style/AppTheme"
         android:requestLegacyExternalStorage="true">
         <activity
-            android:name="com.vyw.rephotoandroid.MainActivity"
+            android:name="com.vyw.rephotoandroid.SimpleMainActivity"
             android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
@@ -47,6 +48,7 @@
         <activity android:name="com.vyw.rephotoandroid.CameraPreview" />
         <activity android:name="com.vyw.rephotoandroid.MainActivityDemoJava" />
         <activity android:name="com.vyw.rephotoandroid.SimpleNavigation" />
+<!--        <activity android:name="com.vyw.rephotoandroid.SimpleMainActivity" />-->
     </application>
 
 </manifest>
