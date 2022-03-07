@@ -57,12 +57,16 @@ public class SimpleMainActivity extends AppCompatActivity {
     String path_ref_image = "";
 
     public void showFileDialog(View view) {
-        id_entered_button = view.getId();
         Intent intent = new Intent(Intent.ACTION_OPEN_DOCUMENT);
         intent.setType("image/*");
         intent = Intent.createChooser(intent, "Choose file");
 
         startActivityForResult(intent, REQUEST_CHOOSER);
+    }
+
+    public void RephotoApiButton(View view) {
+        Intent intent = new Intent(this, Rephotos_API.class);
+        startActivity(intent);
     }
 
     @Override
@@ -73,18 +77,17 @@ public class SimpleMainActivity extends AppCompatActivity {
             String path = uri.toString();
 
             if (path != null) {
-                if (Integer.compare(id_entered_button, simple_navigation_button) == 0) {
-                    path_ref_image = path;
-                    Intent intent = new Intent(this, SimpleNavigation.class);
-                    intent.putExtra("PATH_REF_IMAGE", path_ref_image);
-                    startActivity(intent);
-                }
+                path_ref_image = path;
+                Intent intent = new Intent(this, SimpleNavigation.class);
+                intent.putExtra("PATH_REF_IMAGE", path_ref_image);
+                startActivity(intent);
 
             }
             Log.d(TAG, path);
             Log.d(TAG, String.valueOf(id_entered_button));
         }
     }
+
     public void exitApplication(MenuItem item) {
         finish();
     }

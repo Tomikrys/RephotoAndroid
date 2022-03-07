@@ -22,7 +22,6 @@
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:layout_centerInParent="true"
         android:gravity="center"
         android:orientation="vertical">
 
@@ -32,6 +31,17 @@
             android:layout_height="wrap_content"
             android:onClick="simpleNavigation"
             android:text="Choose REference Photo" />
+
+        <Space
+            android:layout_width="match_parent"
+            android:layout_height="39dp" />
+
+        <Button
+            android:id="@+id/rephotos_api"
+            android:layout_width="200dp"
+            android:layout_height="wrap_content"
+            android:onClick="RephotoApiButton"
+            android:text="Rephotos API" />
 
     </LinearLayout>
 
