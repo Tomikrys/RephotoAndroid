@@ -69,6 +69,11 @@ public class SimpleMainActivity extends AppCompatActivity {
         startActivity(intent);
     }
 
+    public void GalleryButton(View view) {
+        Intent intent = new Intent(this, GalleryMainActivity.class);
+        startActivity(intent);
+    }
+
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
