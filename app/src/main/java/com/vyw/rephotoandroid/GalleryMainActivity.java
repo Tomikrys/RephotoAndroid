@@ -27,7 +27,7 @@ public class GalleryMainActivity extends AppCompatActivity implements GalleryAda
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_main);
+        setContentView(R.layout.gallery_activity_main);
         //setup RecyclerView
         RecyclerView recyclerViewGallery = (RecyclerView) findViewById(R.id.recyclerViewGallery);
         recyclerViewGallery.setLayoutManager(new GridLayoutManager(this, 2));

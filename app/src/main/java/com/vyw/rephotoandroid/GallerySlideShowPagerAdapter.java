@@ -48,7 +48,7 @@ public class GallerySlideShowPagerAdapter extends PagerAdapter {
         View itemView = mLayoutInflater.inflate(R.layout.gallery_pager_item, container, false);
         ImageView imageView = (ImageView) itemView.findViewById(R.id.imageViewThumbnail);
         //load current image in viewpager
-        Picasso.with(mContext).load(new File(galleryItems.get(position).imageUri)).fit().into(imageView);
+        Picasso.get().load(new File(galleryItems.get(position).imageUri)).fit().into(imageView);
         container.addView(itemView);
         return itemView;
     }

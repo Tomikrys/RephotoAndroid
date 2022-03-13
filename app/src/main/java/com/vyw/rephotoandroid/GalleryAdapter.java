@@ -60,7 +60,7 @@ public class GalleryAdapter extends RecyclerView.Adapter {
         //cast holder with gallery holder
         GalleryItemHolder galleryItemHolder = (GalleryItemHolder) holder;
         //Load with Picasso
-        Picasso.with(context)
+        Picasso.get()
                 .load(imageViewThoumb)
                 .centerCrop()
                 .resize(GalleryScreenUtils.getScreenWidth(context) / 2, GalleryScreenUtils.getScreenHeight(context) / 3)//Resize image to width half of screen and height 1/3 of screen height
