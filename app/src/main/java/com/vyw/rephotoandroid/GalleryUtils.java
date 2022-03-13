@@ -24,7 +24,7 @@ public class GalleryUtils {
     }
 
     //method to get images
-    public static List<com.loopwiki.androidmaterialgallery.GalleryItem> getImages(Context context) {
+    public static List<GalleryItem> getImages(Context context) {
         final String[] projection = {MediaStore.Images.Media.DISPLAY_NAME, MediaStore.Images.Media.DATA};
         final String selection = MediaStore.Images.Media.BUCKET_ID + " = ?";
         final String[] selectionArgs = {GalleryUtils.getBucketId(CAMERA_IMAGE_BUCKET_NAME)};
@@ -33,12 +33,12 @@ public class GalleryUtils {
                 selection,
                 selectionArgs,
                 null);
-        ArrayList<com.loopwiki.androidmaterialgallery.GalleryItem> result = new ArrayList<com.loopwiki.androidmaterialgallery.GalleryItem>(cursor.getCount());
+        ArrayList<GalleryItem> result = new ArrayList<GalleryItem>(cursor.getCount());
         if (cursor.moveToFirst()) {
             final int dataColumn = cursor.getColumnIndexOrThrow(MediaStore.Images.Media.DATA);
             final int nameColumn = cursor.getColumnIndexOrThrow(MediaStore.Images.Media.DISPLAY_NAME);
             do {
-                com.loopwiki.androidmaterialgallery.GalleryItem galleryItem = new com.loopwiki.androidmaterialgallery.GalleryItem(cursor.getString(dataColumn), cursor.getString(nameColumn));
+                GalleryItem galleryItem = new GalleryItem(cursor.getString(dataColumn), cursor.getString(nameColumn));
                 result.add(galleryItem);
             } while (cursor.moveToNext());
         }

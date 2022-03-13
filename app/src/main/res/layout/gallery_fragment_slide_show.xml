@@ -4,10 +4,10 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
-    tools:context="com.loopwiki.androidmaterialgallery.SlideShowFragment">
+    tools:context=".GallerySlideShowFragment">
 
     <!--Viewpager to show slideshow of images-->
-    <android.support.v4.view.ViewPager
+    <androidx.viewpager.widget.ViewPager
         android:id="@+id/viewPagerGallery"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
@@ -25,7 +25,7 @@
         android:textAppearance="@style/TextAppearance.AppCompat.Medium" />
 
     <!--Gallery strip Recyclerview-->
-    <android.support.v7.widget.RecyclerView
+    <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/recyclerViewGalleryStrip"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"

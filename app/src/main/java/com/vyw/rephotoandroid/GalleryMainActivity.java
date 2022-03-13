@@ -4,21 +4,22 @@ package com.vyw.rephotoandroid;
 import android.Manifest;
 import android.content.pm.PackageManager;
 import android.os.Bundle;
-import android.support.annotation.NonNull;
-import android.support.v4.app.ActivityCompat;
-import android.support.v4.app.DialogFragment;
-import android.support.v4.content.ContextCompat;
-import android.support.v7.app.AppCompatActivity;
-import android.support.v7.widget.GridLayoutManager;
-import android.support.v7.widget.RecyclerView;
 import android.widget.Toast;
+
+import androidx.annotation.NonNull;
+import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.app.ActivityCompat;
+import androidx.core.content.ContextCompat;
+import androidx.fragment.app.DialogFragment;
+import androidx.recyclerview.widget.GridLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
 
 import java.util.List;
 
 //Remember to implement  GalleryAdapter.GalleryAdapterCallBacks to activity  for communication of Activity and Gallery Adapter
-public class MainActivity extends AppCompatActivity implements GalleryAdapter.GalleryAdapterCallBacks {
+public class GalleryMainActivity extends AppCompatActivity implements GalleryAdapter.GalleryAdapterCallBacks {
     //Deceleration of list of  GalleryItems
-    public List<com.loopwiki.androidmaterialgallery.GalleryItem> galleryItems;
+    public List<GalleryItem> galleryItems;
     //Read storage permission request code
     private static final int RC_READ_STORAGE = 5;
     GalleryAdapter mGalleryAdapter;
@@ -37,7 +38,7 @@ public class MainActivity extends AppCompatActivity implements GalleryAdapter.Ga
         //check for read storage permission
         if (ContextCompat.checkSelfPermission(this, Manifest.permission.READ_EXTERNAL_STORAGE) == PackageManager.PERMISSION_GRANTED) {
             //Get images
-            galleryItems = com.loopwiki.androidmaterialgallery.GalleryUtils.getImages(this);
+            galleryItems = GalleryUtils.getImages(this);
             // add images to gallery recyclerview using adapter
             mGalleryAdapter.addGalleryItems(galleryItems);
         } else {
@@ -51,8 +52,8 @@ public class MainActivity extends AppCompatActivity implements GalleryAdapter.Ga
 
     @Override
     public void onItemSelected(int position) {
-        //create fullscreen SlideShowFragment dialog
-        SlideShowFragment slideShowFragment = SlideShowFragment.newInstance(position);
+        //create fullscreen GallerySlideShowFragment dialog
+        GallerySlideShowFragment slideShowFragment = GallerySlideShowFragment.newInstance(position);
         //setUp style for slide show fragment
         slideShowFragment.setStyle(DialogFragment.STYLE_NORMAL, R.style.DialogFragmentTheme);
         //finally show dialogue
@@ -65,7 +66,7 @@ public class MainActivity extends AppCompatActivity implements GalleryAdapter.Ga
         if (requestCode == RC_READ_STORAGE) {
             if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
                 //Get images
-                galleryItems = com.loopwiki.androidmaterialgallery.GalleryUtils.getImages(this);
+                galleryItems = GalleryUtils.getImages(this);
                 // add images to gallery recyclerview using adapter
                 mGalleryAdapter.addGalleryItems(galleryItems);
             } else {

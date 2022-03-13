@@ -12,7 +12,7 @@ import android.util.DisplayMetrics;
  * Created by amardeep on 11/3/2017.
  */
 
-public class ScreenUtils {
+public class GalleryScreenUtils {
 
     //static method to get screen width
     public static int getScreenWidth(Context context) {

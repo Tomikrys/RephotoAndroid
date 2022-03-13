@@ -3,11 +3,6 @@ package com.vyw.rephotoandroid;
 
 
 import android.os.Bundle;
-import android.support.v4.app.DialogFragment;
-import android.support.v4.app.Fragment;
-import android.support.v4.view.ViewPager;
-import android.support.v7.widget.LinearLayoutManager;
-import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
@@ -16,20 +11,25 @@ import android.view.animation.AlphaAnimation;
 import android.view.animation.Animation;
 import android.widget.TextView;
 
+import androidx.fragment.app.DialogFragment;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
+import androidx.viewpager.widget.ViewPager;
+
 import java.util.ArrayList;
 import java.util.List;
 
 
 //Remember to implement  GalleryStripAdapter.GalleryStripCallBacks to fragment  for communication of fragment and GalleryStripAdapter
-public class SlideShowFragment extends DialogFragment implements com.loopwiki.androidmaterialgallery.GalleryStripAdapter.GalleryStripCallBacks {
+public class GallerySlideShowFragment extends DialogFragment implements GalleryStripAdapter.GalleryStripCallBacks {
     //declare static variable which will serve as key of current position argument
     private static final String ARG_CURRENT_POSITION = "position";
     //Declare list of GalleryItems
-    List<com.loopwiki.androidmaterialgallery.GalleryItem> galleryItems;
+    List<GalleryItem> galleryItems;
     //Deceleration of  Gallery Strip Adapter
-    com.loopwiki.androidmaterialgallery.GalleryStripAdapter mGalleryStripAdapter;
+    GalleryStripAdapter mGalleryStripAdapter;
     // //Deceleration of  Slide show View Pager Adapter
-    SlideShowPagerAdapter mSlideShowPagerAdapter;
+    GallerySlideShowPagerAdapter mSlideShowPagerAdapter;
     //Deceleration of viewPager
     ViewPager mViewPagerGallery;
     TextView textViewImageName;
@@ -40,18 +40,18 @@ public class SlideShowFragment extends DialogFragment implements com.loopwiki.an
     boolean isBottomBarVisible = true;
 
 
-    public SlideShowFragment() {
+    public GallerySlideShowFragment() {
         // Required empty public constructor
     }
 
-    //This method will create new instance of SlideShowFragment
-    public static SlideShowFragment newInstance(int position) {
-        SlideShowFragment fragment = new SlideShowFragment();
+    //This method will create new instance of GallerySlideShowFragment
+    public static GallerySlideShowFragment newInstance(int position) {
+        GallerySlideShowFragment fragment = new GallerySlideShowFragment();
         //Create bundle
         Bundle args = new Bundle();
         //put Current Position in the bundle
         args.putInt(ARG_CURRENT_POSITION, position);
-        //set arguments of SlideShowFragment
+        //set arguments of GallerySlideShowFragment
         fragment.setArguments(args);
         //return fragment instance
         return fragment;
@@ -66,7 +66,7 @@ public class SlideShowFragment extends DialogFragment implements com.loopwiki.an
             //get Current selected position from arguments
             mCurrentPosition = getArguments().getInt(ARG_CURRENT_POSITION);
             //get GalleryItems from activity
-            galleryItems = ((com.loopwiki.androidmaterialgallery.MainActivity) getActivity()).galleryItems;
+            galleryItems = ((GalleryMainActivity) getActivity()).galleryItems;
         }
 
     }
@@ -74,7 +74,7 @@ public class SlideShowFragment extends DialogFragment implements com.loopwiki.an
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
-        final View view = inflater.inflate(R.layout.fragment_silde_show, container, false);
+        final View view = inflater.inflate(R.layout.gallery_fragment_slide_show, container, false);
         mViewPagerGallery = view.findViewById(R.id.viewPagerGallery);
         // set On Touch Listener on mViewPagerGallery to hide show bottom bar
         mViewPagerGallery.setOnTouchListener(new View.OnTouchListener() {
@@ -95,7 +95,7 @@ public class SlideShowFragment extends DialogFragment implements com.loopwiki.an
         });
         textViewImageName = view.findViewById(R.id.textViewImageName);
         //Initialise View Pager Adapter
-        mSlideShowPagerAdapter = new SlideShowPagerAdapter(getContext(), galleryItems);
+        mSlideShowPagerAdapter = new GallerySlideShowPagerAdapter(getContext(), galleryItems);
         //set adapter to Viewpager
         mViewPagerGallery.setAdapter(mSlideShowPagerAdapter);
         recyclerViewGalleryStrip = view.findViewById(R.id.recyclerViewGalleryStrip);
@@ -104,7 +104,7 @@ public class SlideShowFragment extends DialogFragment implements com.loopwiki.an
         //set layout manager of GalleryStripRecyclerView
         recyclerViewGalleryStrip.setLayoutManager(mGalleryStripLayoutManger);
         //Create GalleryStripRecyclerView's Adapter
-        mGalleryStripAdapter = new com.loopwiki.androidmaterialgallery.GalleryStripAdapter(galleryItems, getContext(), this, mCurrentPosition);
+        mGalleryStripAdapter = new GalleryStripAdapter(galleryItems, getContext(), this, mCurrentPosition);
         //set Adapter of GalleryStripRecyclerView
         recyclerViewGalleryStrip.setAdapter(mGalleryStripAdapter);
         //tell viewpager to open currently selected item and pass position of current item

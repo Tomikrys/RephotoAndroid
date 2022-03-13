@@ -5,25 +5,28 @@ import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.media.ThumbnailUtils;
-import android.support.v4.content.ContextCompat;
-import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
 
 
+import androidx.core.content.ContextCompat;
+import androidx.recyclerview.widget.RecyclerView;
+
+import com.vyw.rephotoandroid.layout.SquareLayout;
+
 import java.util.List;
 
 
 public class GalleryStripAdapter extends RecyclerView.Adapter {
     //Declare list of GalleryItems
-    List<com.loopwiki.androidmaterialgallery.GalleryItem> galleryItems;
+    List<GalleryItem> galleryItems;
     Context context;
     GalleryStripCallBacks mStripCallBacks;
-    com.loopwiki.androidmaterialgallery.GalleryItem mCurrentSelected;
+    GalleryItem mCurrentSelected;
 
-    public GalleryStripAdapter(List<com.loopwiki.androidmaterialgallery.GalleryItem> galleryItems, Context context, GalleryStripCallBacks StripCallBacks, int CurrentPosition) {
+    public GalleryStripAdapter(List<GalleryItem> galleryItems, Context context, GalleryStripCallBacks StripCallBacks, int CurrentPosition) {
         //set galleryItems
         this.galleryItems = galleryItems;
         this.context = context;
@@ -38,7 +41,7 @@ public class GalleryStripAdapter extends RecyclerView.Adapter {
     @Override
     public RecyclerView.ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
         LayoutInflater inflater = LayoutInflater.from(context);
-        View row = inflater.inflate(R.layout.custom_row_gallery_strip_item, parent, false);
+        View row = inflater.inflate(R.layout.gallery_custom_row_gallery_strip_item, parent, false);
         SquareLayout squareLayout = row.findViewById(R.id.squareLayout);
         return new GalleryStripItemHolder(squareLayout);
     }
@@ -46,9 +49,9 @@ public class GalleryStripAdapter extends RecyclerView.Adapter {
     @Override
     public void onBindViewHolder(RecyclerView.ViewHolder holder, final int position) {
         //get Curent Gallery Item
-        com.loopwiki.androidmaterialgallery.GalleryItem mCurrentItem = galleryItems.get(position);
+        GalleryItem mCurrentItem = galleryItems.get(position);
         //get thumb square size 1/6 of screen width
-        final int thumbSize = ScreenUtils.getScreenWidth(context) / 6;
+        final int thumbSize = GalleryScreenUtils.getScreenWidth(context) / 6;
         //cast holder to galleryStripItemHolder
         GalleryStripItemHolder galleryStripItemHolder = (GalleryStripItemHolder) holder;
         //get thumb size bitmap by using ThumbnailUtils

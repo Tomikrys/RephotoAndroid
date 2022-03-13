@@ -3,12 +3,13 @@ package com.vyw.rephotoandroid;
 
 import android.content.Context;
 
-import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
+
+import androidx.recyclerview.widget.RecyclerView;
 
 import com.squareup.picasso.Picasso;
 
@@ -46,7 +47,7 @@ public class GalleryAdapter extends RecyclerView.Adapter {
     @Override
     public RecyclerView.ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
         LayoutInflater inflater = LayoutInflater.from(context);
-        View row = inflater.inflate(R.layout.custom_row_gallery_item, parent, false);
+        View row = inflater.inflate(R.layout.gallery_custom_row_gallery_item, parent, false);
         return new GalleryItemHolder(row);
     }
 
@@ -62,7 +63,7 @@ public class GalleryAdapter extends RecyclerView.Adapter {
         Picasso.with(context)
                 .load(imageViewThoumb)
                 .centerCrop()
-                .resize(ScreenUtils.getScreenWidth(context) / 2, ScreenUtils.getScreenHeight(context) / 3)//Resize image to width half of screen and height 1/3 of screen height
+                .resize(GalleryScreenUtils.getScreenWidth(context) / 2, GalleryScreenUtils.getScreenHeight(context) / 3)//Resize image to width half of screen and height 1/3 of screen height
                 .into(galleryItemHolder.imageViewThumbnail);
         //set name of Image
         galleryItemHolder.textViewImageName.setText(currentItem.imageName);
@@ -94,7 +95,7 @@ public class GalleryAdapter extends RecyclerView.Adapter {
         }
     }
 
-    //Interface for communication of Adapter and MainActivity
+    //Interface for communication of Adapter and GalleryMainActivity
     public interface GalleryAdapterCallBacks {
         //call this method to notify about item is clicked
         void onItemSelected(int position);
