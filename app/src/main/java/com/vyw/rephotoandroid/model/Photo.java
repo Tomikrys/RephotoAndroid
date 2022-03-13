@@ -5,6 +5,7 @@ import android.graphics.BitmapFactory;
 import android.graphics.drawable.Drawable;
 import android.media.Image;
 import android.util.Log;
+import android.widget.ImageView;
 
 import com.squareup.picasso.Picasso;
 import com.squareup.picasso.Target;
@@ -58,26 +59,28 @@ public class Photo {
     Bitmap tmp_photo = null;
 //    https://square.github.io/picasso/#features
 //    https://guides.codepath.com/android/Displaying-Images-with-the-Picasso-Library
-    public Bitmap getPhoto() {
+    public Bitmap getPhoto(ImageView imageView) {
         tmp_photo = null;
         Picasso.get().setLoggingEnabled(true);
-        Picasso.get().load("http://192.168.1.12/uploads/" + id_file + ".png").into(new Target() {
-//        Picasso.get().load("https://riptutorial.com/assets/images/android-top10-logo.png").into(new Target() {
-            @Override
-            public void onBitmapLoaded(Bitmap bitmap, Picasso.LoadedFrom from) {
-                tmp_photo = bitmap;
-            }
-
-            @Override
-            public void onBitmapFailed(Exception e, Drawable errorDrawable) {
-            }
-
-            @Override
-            public void onPrepareLoad(Drawable placeHolderDrawable) {
-            }
-        });
-//        TODO null
-        return tmp_photo;
+        Picasso.get().load("http://192.168.1.12/uploads/" + id_file + ".png").into(imageView);
+        return null;
+//        Picasso.get().load("http://192.168.1.12/uploads/" + id_file + ".png").into(new Target() {
+////        Picasso.get().load("https://riptutorial.com/assets/images/android-top10-logo.png").into(new Target() {
+//            @Override
+//            public void onBitmapLoaded(Bitmap bitmap, Picasso.LoadedFrom from) {
+//                tmp_photo = bitmap;
+//            }
+//
+//            @Override
+//            public void onBitmapFailed(Exception e, Drawable errorDrawable) {
+//            }
+//
+//            @Override
+//            public void onPrepareLoad(Drawable placeHolderDrawable) {
+//            }
+//        });
+////        TODO null
+//        return tmp_photo;
     }
 
     public void setId_file(int id_file) {

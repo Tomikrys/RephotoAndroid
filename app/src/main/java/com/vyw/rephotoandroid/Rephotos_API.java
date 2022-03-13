@@ -43,8 +43,8 @@ public class Rephotos_API extends AppCompatActivity {
                         for (int i = 0; i < places.size(); i++) {
                             Place place = places.get(i);
                             Log.e(TAG, "onResponse: [" + i + "] name : " + place.getName());
-                            Bitmap newest_photo = place.getNewestPhoto().getPhoto();
-                            Bitmap oldest_photo = place.getNewestPhoto().getPhoto();
+//                            Bitmap newest_photo = place.getNewestPhoto().getPhoto();
+//                            Bitmap oldest_photo = place.getNewestPhoto().getPhoto();
                         }
                     } else {
                         Log.e(TAG, "onResponse: empty places");
