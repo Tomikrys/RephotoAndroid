@@ -2,6 +2,8 @@ package com.vyw.rephotoandroid;
 // Code inpired by https://www.loopwiki.com/application/create-gallery-android-application/
 
 
+import android.content.Intent;
+import android.graphics.Bitmap;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
@@ -10,6 +12,7 @@ import android.view.ViewGroup;
 import android.view.animation.AlphaAnimation;
 import android.view.animation.Animation;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import androidx.fragment.app.DialogFragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
@@ -41,6 +44,9 @@ public class GallerySlideShowFragment extends DialogFragment implements GalleryS
     //set bottom to visible of first load
     boolean isBottomBarVisible = true;
 
+    public GallerySlideShowPagerAdapter getGallerySlideShowPagerAdapter() {
+        return mSlideShowPagerAdapter;
+    }
 
     public GallerySlideShowFragment() {
         // Required empty public constructor
@@ -69,6 +75,10 @@ public class GallerySlideShowFragment extends DialogFragment implements GalleryS
             mCurrentPosition = getArguments().getInt(ARG_CURRENT_POSITION);
             //get GalleryItems from activity
             galleryItems = ((GalleryMainActivity) getActivity()).galleryItems;
+
+            //Initialise View Pager Adapter
+            mSlideShowPagerAdapter = new GallerySlideShowPagerAdapter(getContext(), galleryItems);
+            ((GalleryMainActivity) getActivity()).setSelectedPictureUri(mSlideShowPagerAdapter.getPictureUri(mCurrentPosition));
         }
 
     }
@@ -96,8 +106,6 @@ public class GallerySlideShowFragment extends DialogFragment implements GalleryS
 
         });
         textViewImageName = view.findViewById(R.id.textViewImageName);
-        //Initialise View Pager Adapter
-        mSlideShowPagerAdapter = new GallerySlideShowPagerAdapter(getContext(), galleryItems);
         //set adapter to Viewpager
         mViewPagerGallery.setAdapter(mSlideShowPagerAdapter);
         recyclerViewGalleryStrip = view.findViewById(R.id.recyclerViewGalleryStrip);
@@ -149,6 +157,7 @@ public class GallerySlideShowFragment extends DialogFragment implements GalleryS
     public void onGalleryStripItemSelected(int position) {
         //set current item of viewpager
         mViewPagerGallery.setCurrentItem(position);
+        ((GalleryMainActivity) getActivity()).setSelectedPictureUri(mSlideShowPagerAdapter.getPictureUri(position));
     }
 
     @Override

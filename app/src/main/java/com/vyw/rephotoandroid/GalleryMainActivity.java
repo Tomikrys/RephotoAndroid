@@ -2,8 +2,13 @@ package com.vyw.rephotoandroid;
 // Code inpired by https://www.loopwiki.com/application/create-gallery-android-application/
 
 import android.Manifest;
+import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.graphics.Bitmap;
+import android.graphics.drawable.Drawable;
 import android.os.Bundle;
+import android.util.Log;
+import android.view.View;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
@@ -14,17 +19,22 @@ import androidx.fragment.app.DialogFragment;
 import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.squareup.picasso.NetworkPolicy;
+import com.squareup.picasso.Picasso;
+import com.squareup.picasso.Target;
 import com.vyw.rephotoandroid.model.GalleryItem;
 
 import java.util.List;
 
 //Remember to implement  GalleryAdapter.GalleryAdapterCallBacks to activity  for communication of Activity and Gallery Adapter
 public class GalleryMainActivity extends AppCompatActivity implements GalleryAdapter.GalleryAdapterCallBacks {
+    private static final String TAG = "GalleryMainActivity";
     //Deceleration of list of  GalleryItems
     public List<GalleryItem> galleryItems;
     //Read storage permission request code
     private static final int RC_READ_STORAGE = 5;
     GalleryAdapter mGalleryAdapter;
+    private String selectedPictureUri = "";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -73,6 +83,15 @@ public class GalleryMainActivity extends AppCompatActivity implements GalleryAda
         }).start();
     }
 
+    public void takeRephoto(View view) {
+        Log.d(TAG, "takeRephoto");
+        Intent intent = new Intent(this, SimpleNavigation.class);
+        intent.putExtra("PATH_REF_IMAGE", selectedPictureUri);
+        intent.putExtra("SOURCE", "ONLINE");
+        startActivity(intent);
+//        Toast.makeText(this, "Images cannot be fetched, check your internet connection.", Toast.LENGTH_LONG).show();
+    }
+
 
     @Override
     public void onItemSelected(int position) {
@@ -82,6 +101,15 @@ public class GalleryMainActivity extends AppCompatActivity implements GalleryAda
         slideShowFragment.setStyle(DialogFragment.STYLE_NORMAL, R.style.DialogFragmentTheme);
         //finally show dialogue
         slideShowFragment.show(getSupportFragmentManager(), null);
+        if (slideShowFragment.getGallerySlideShowPagerAdapter() != null) {
+            selectedPictureUri = slideShowFragment.getGallerySlideShowPagerAdapter().getPictureUri(position);
+        } else {
+//            will be set with setSelectedPictureUri from Create function in slideShowFragment
+        }
+    }
+
+    public void setSelectedPictureUri(String uri) {
+        selectedPictureUri = uri;
     }
 
     @Override

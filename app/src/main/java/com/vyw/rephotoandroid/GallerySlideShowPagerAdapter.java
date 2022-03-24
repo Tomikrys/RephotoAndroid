@@ -2,6 +2,8 @@ package com.vyw.rephotoandroid;
 // Code inpired by https://www.loopwiki.com/application/create-gallery-android-application/
 
 import android.content.Context;
+import android.net.Uri;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -21,6 +23,7 @@ import java.util.List;
 
 public class GallerySlideShowPagerAdapter extends PagerAdapter {
 
+    private static final String TAG = "GallerySlideShowPagerAdapter";
     Context mContext;
     //Layout inflater
     LayoutInflater mLayoutInflater;
@@ -57,9 +60,12 @@ public class GallerySlideShowPagerAdapter extends PagerAdapter {
         return itemView;
     }
 
+    public String getPictureUri(int position) {
+        return galleryItems.get(position).imageUri;
+    }
+
     @Override
     public void destroyItem(ViewGroup container, int position, Object object) {
         container.removeView((ImageView) object);
     }
-
 }

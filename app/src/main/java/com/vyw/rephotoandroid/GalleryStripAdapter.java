@@ -5,6 +5,7 @@ import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.media.ThumbnailUtils;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -22,6 +23,7 @@ import java.util.List;
 
 
 public class GalleryStripAdapter extends RecyclerView.Adapter {
+    private static final String TAG = "GalleryStripAdapter";
     //Declare list of GalleryItems
     List<GalleryItem> galleryItems;
     Context context;
@@ -82,6 +84,7 @@ public class GalleryStripAdapter extends RecyclerView.Adapter {
             }
         });
     }
+
 
     @Override
     public int getItemCount() {

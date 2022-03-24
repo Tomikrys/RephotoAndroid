@@ -2,6 +2,7 @@ package com.vyw.rephotoandroid;
 
 import android.app.Dialog;
 import android.content.Intent;
+import android.graphics.Bitmap;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.StrictMode;
@@ -11,6 +12,7 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.EditText;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import static android.provider.AlarmClock.EXTRA_MESSAGE;
 
@@ -67,11 +69,20 @@ public class MainActivity extends AppCompatActivity {
 //        finish();
     }
 
+
+//    public void simpleNavigation(View view, Bitmap ref_image) {
+//        Intent intent = new Intent(this, SimpleNavigation.class);
+//        intent.putExtra("REF_IMAGE", ref_image);
+//        intent.putExtra("PATH_REF_IMAGE", "");
+//        startActivity(intent);
+//    }
+
     public void simpleNavigation(View view) {
 //        ActivityCompat.finishAffinity(this);
         showFileDialog(view);
         Intent intent = new Intent(this, SimpleNavigation.class);
         intent.putExtra("PATH_REF_IMAGE", path_ref_image);
+        intent.putExtra("SOURCE", "");
         startActivity(intent);
 //        finish();
     }

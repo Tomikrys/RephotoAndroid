@@ -4,7 +4,9 @@ package com.vyw.rephotoandroid.model;
 import android.icu.text.SimpleDateFormat;
 import android.util.Log;
 
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
 
 
 /**
@@ -13,6 +15,7 @@ import java.util.Date;
 //This class represents single gallery item
 public class GalleryItem {
     public String imageUri;
+    public List<GalleryItem> placePhotos;
     public String imageName;
     public String year = null;
     public boolean isSelected = false;
@@ -37,5 +40,10 @@ public class GalleryItem {
             Log.e(TAG, "GalleryItem: " + e.toString() );
         }
         this.year = year;
+        this.placePhotos = new ArrayList<>();
+    }
+
+    public void addPlacePhoto(GalleryItem photo) {
+        this.placePhotos.add(photo);
     }
 }

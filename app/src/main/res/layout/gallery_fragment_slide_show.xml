@@ -1,20 +1,28 @@
 <!-- Code inpired by https://www.loopwiki.com/application/create-gallery-android-application/ -->
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
-    tools:context=".GallerySlideShowFragment">
+    tools:context="com.vyw.rephotoandroid.GallerySlideShowFragment">
 
     <!--Viewpager to show slideshow of images-->
     <!--Image name textview-->
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"/>
+
     <androidx.viewpager.widget.ViewPager
         android:id="@+id/viewPagerGallery"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:scaleType="centerInside"
         android:layout_above="@+id/recyclerViewGalleryStrip"
-        android:layout_marginBottom="2dp" />
+        android:layout_marginBottom="2dp" >
+
+    </androidx.viewpager.widget.ViewPager>
 
     <TextView
         android:id="@+id/textViewImageName"
@@ -28,10 +36,30 @@
         android:textAppearance="@style/TextAppearance.AppCompat.Medium" />
 
     <!--Gallery strip Recyclerview-->
+
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/recyclerViewGalleryStrip"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_alignParentBottom="true" />
+        android:layout_alignParentBottom="true">
+
+    </androidx.recyclerview.widget.RecyclerView>
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+
+        <com.google.android.material.floatingactionbutton.FloatingActionButton
+            android:id="@+id/floatingActionButton3"
+            android:layout_width="wrap_content"
+            android:layout_height="256dp"
+            android:clickable="true"
+            android:onClick="takeRephoto"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:srcCompat="@android:drawable/ic_menu_camera" />
+
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
 
 </RelativeLayout>

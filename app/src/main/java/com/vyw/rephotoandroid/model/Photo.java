@@ -1,17 +1,9 @@
 package com.vyw.rephotoandroid.model;
 
 import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
-import android.graphics.drawable.Drawable;
-import android.media.Image;
-import android.util.Log;
 import android.widget.ImageView;
 
 import com.squareup.picasso.Picasso;
-import com.squareup.picasso.Target;
-
-import java.io.IOException;
-import java.net.URL;
 
 public class Photo {
     private int id;
@@ -20,6 +12,7 @@ public class Photo {
     private int id_place;
     private int id_user;
     private User user;
+    private File file;
     private String TAG = "Photo";
 
     public Photo(int id,
@@ -27,13 +20,15 @@ public class Photo {
                  int id_file,
                  int id_place,
                  int id_user,
-                 User user) {
+                 User user,
+                 File file) {
         this.id = id;
         this.captured_at = captured_at;
         this.id_file = id_file;
         this.id_place = id_place;
         this.id_user = id_user;
         this.user = user;
+        this.file = file;
     }
 
     public int getId() {
@@ -62,6 +57,7 @@ public class Photo {
     public Bitmap getPhoto(ImageView imageView) {
         tmp_photo = null;
         Picasso.get().setLoggingEnabled(true);
+//        TODO upravit na get file from api
         Picasso.get().load(Configuration.baseUrl +  "uploads/" + id_file + ".png").into(imageView);
         return null;
 //        Picasso.get().load(Configuration.baseUrl + "uploads/" + id_file + ".png").into(new Target() {
@@ -112,6 +108,15 @@ public class Photo {
     }
 
     public String getPhotoUri() {
-        return Configuration.baseUrl + "uploads/" + id_file + ".jpg";
+        String extension = this.getFile().getExtension();
+        return Configuration.baseUrl + "uploads/" + id_file + "." + extension;
+    }
+
+    public File getFile() {
+        return file;
+    }
+
+    public void setFile(File file) {
+        this.file = file;
     }
 }

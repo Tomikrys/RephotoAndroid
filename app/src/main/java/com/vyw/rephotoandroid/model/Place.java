@@ -1,28 +1,26 @@
 package com.vyw.rephotoandroid.model;
 
+import java.util.List;
+
 public class Place {
     private int id;
     private String name;
     private String description;
     private String latitude;
     private String longtitude;
-    private Photo oldestPhoto;
-    private Photo newestPhoto;
+    private List<Photo> photos;
 
     public Place(int id,
                  String name,
                  String description,
                  String latitude,
-                 String longtitude,
-                 Photo oldestPhoto,
-                 Photo newestPhoto) {
+                 String longtitude, List<Photo> photos) {
         this.id = id;
         this.name = name;
         this.description = description;
         this.latitude = latitude;
         this.longtitude = longtitude;
-        this.oldestPhoto = oldestPhoto;
-        this.newestPhoto = newestPhoto;
+        this.photos = photos;
     }
 
     public int getId() {
@@ -65,19 +63,11 @@ public class Place {
         this.longtitude = longtitude;
     }
 
-    public Photo getOldestPhoto() {
-        return oldestPhoto;
+    public List<Photo> getPhotos() {
+        return photos;
     }
 
-    public void setOldestPhoto(Photo oldestPhoto) {
-        this.oldestPhoto = oldestPhoto;
-    }
-
-    public Photo getNewestPhoto() {
-        return newestPhoto;
-    }
-
-    public void setNewestPhoto(Photo newestPhoto) {
-        this.newestPhoto = newestPhoto;
+    public void setPhotos(List<Photo> photos) {
+        this.photos = photos;
     }
 }

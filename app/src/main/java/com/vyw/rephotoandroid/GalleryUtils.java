@@ -9,6 +9,7 @@ import android.util.Log;
 
 import com.vyw.rephotoandroid.model.GalleryItem;
 import com.vyw.rephotoandroid.model.ListPlace;
+import com.vyw.rephotoandroid.model.Photo;
 import com.vyw.rephotoandroid.model.Place;
 
 import java.util.ArrayList;
@@ -71,7 +72,19 @@ public class GalleryUtils {
                         for (int i = 0; i < places.size(); i++) {
                             Place place = places.get(i);
                             Log.e(TAG, "onResponse: [" + i + "] name : " + place.getName());
-                            GalleryItem galleryItem = new GalleryItem(place.getOldestPhoto().getPhotoUri(), place.getName(), place.getOldestPhoto().getCaptured_at());
+                            GalleryItem galleryItem = new GalleryItem(
+                                    place.getPhotos().get(0).getPhotoUri(),
+                                    place.getName(),
+                                    place.getPhotos().get(0).getCaptured_at()
+                            );
+                            for (Photo photo : place.getPhotos()) {
+                                GalleryItem photoItem = new GalleryItem(
+                                        photo.getPhotoUri(),
+                                        "photoItem",
+                                        photo.getCaptured_at()
+                                );
+                                galleryItem.addPlacePhoto(photoItem);
+                            }
                             results.add(galleryItem);
                         }
                         return results;

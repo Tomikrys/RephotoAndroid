@@ -8,6 +8,7 @@ import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Color;
 import android.graphics.Matrix;
+import android.graphics.drawable.Drawable;
 import android.media.ExifInterface;
 import android.net.Uri;
 import android.os.Build;
@@ -45,6 +46,8 @@ import androidx.core.content.ContextCompat;
 import androidx.lifecycle.LifecycleOwner;
 
 import com.google.common.util.concurrent.ListenableFuture;
+import com.squareup.picasso.Picasso;
+import com.squareup.picasso.Target;
 
 import org.opencv.android.BaseLoaderCallback;
 import org.opencv.android.LoaderCallbackInterface;
@@ -121,24 +124,49 @@ public class SimpleNavigation extends AppCompatActivity {
         getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN,
                 WindowManager.LayoutParams.FLAG_FULLSCREEN);
         setContentView(R.layout.simple_navigation);
-        getSupportActionBar().hide();
+        if (getSupportActionBar() != null) {
+            getSupportActionBar().hide();
+        }
         previewView = findViewById(R.id.previewView);
         Intent intent = getIntent();
         path_ref_image = intent.getStringExtra("PATH_REF_IMAGE");
-        Uri uri_ref_image = Uri.parse(path_ref_image);
-        try {
-            bt_ref_frame = getBitmapFromUri(uri_ref_image);
-        } catch (IOException e) {
-            e.printStackTrace();
+        if (intent.getStringExtra("SOURCE").equals("ONLINE")) {
+            Target target = new Target() {
+                @Override
+                public void onBitmapLoaded(Bitmap bitmap, Picasso.LoadedFrom from) {
+                    bt_ref_frame = bitmap;
+
+                    refImage = findViewById(R.id.refImage);
+                    refImage.setImageBitmap(bt_ref_frame);
+
+                    refImageBitmapCopy = deepCopyBitmap(bt_ref_frame);
+                    refImageBitmap = deepCopyBitmap(refImageBitmapCopy);
+                }
+
+                @Override
+                public void onBitmapFailed(Exception e, Drawable errorDrawable) {}
+
+                @Override
+                public void onPrepareLoad(Drawable placeHolderDrawable) {}
+            };
+
+            Picasso.get().load(path_ref_image).into(target);
+
+        } else {
+            Uri uri_ref_image = Uri.parse(path_ref_image);
+            try {
+                bt_ref_frame = getBitmapFromUri(uri_ref_image);
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+            bt_ref_frame = rotateImage(bt_ref_frame, getOrientation(uri_ref_image));
+
+            refImage = findViewById(R.id.refImage);
+            refImage.setImageBitmap(bt_ref_frame);
+
+            refImageBitmapCopy = deepCopyBitmap(bt_ref_frame);
+            refImageBitmap = deepCopyBitmap(refImageBitmapCopy);
         }
-
-        bt_ref_frame = rotateImage(bt_ref_frame, getOrientation(uri_ref_image));
-
-        refImage = findViewById(R.id.refImage);
-        refImage.setImageBitmap(bt_ref_frame);
-
-        refImageBitmapCopy = deepCopyBitmap(bt_ref_frame);
-        refImageBitmap = deepCopyBitmap(refImageBitmapCopy);
 
         if (!isOCVSetUp) { // if OCV hasn't been setup yet, init it
             if (!OpenCVLoader.initDebug()) {
