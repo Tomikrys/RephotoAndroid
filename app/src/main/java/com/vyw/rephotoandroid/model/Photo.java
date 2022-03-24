@@ -62,9 +62,9 @@ public class Photo {
     public Bitmap getPhoto(ImageView imageView) {
         tmp_photo = null;
         Picasso.get().setLoggingEnabled(true);
-        Picasso.get().load("http://192.168.1.12/uploads/" + id_file + ".png").into(imageView);
+        Picasso.get().load(Configuration.baseUrl +  "uploads/" + id_file + ".png").into(imageView);
         return null;
-//        Picasso.get().load("http://192.168.1.12/uploads/" + id_file + ".png").into(new Target() {
+//        Picasso.get().load(Configuration.baseUrl + "uploads/" + id_file + ".png").into(new Target() {
 ////        Picasso.get().load("https://riptutorial.com/assets/images/android-top10-logo.png").into(new Target() {
 //            @Override
 //            public void onBitmapLoaded(Bitmap bitmap, Picasso.LoadedFrom from) {
@@ -109,5 +109,9 @@ public class Photo {
 
     public void setUser(User user) {
         this.user = user;
+    }
+
+    public String getPhotoUri() {
+        return Configuration.baseUrl + "uploads/" + id_file + ".jpg";
     }
 }

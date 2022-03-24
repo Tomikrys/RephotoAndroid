@@ -14,7 +14,9 @@ import android.widget.ImageView;
 import androidx.core.content.ContextCompat;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.squareup.picasso.Picasso;
 import com.vyw.rephotoandroid.layout.SquareLayout;
+import com.vyw.rephotoandroid.model.GalleryItem;
 
 import java.util.List;
 
@@ -55,10 +57,16 @@ public class GalleryStripAdapter extends RecyclerView.Adapter {
         //cast holder to galleryStripItemHolder
         GalleryStripItemHolder galleryStripItemHolder = (GalleryStripItemHolder) holder;
         //get thumb size bitmap by using ThumbnailUtils
-        Bitmap ThumbImage = ThumbnailUtils.extractThumbnail(BitmapFactory.decodeFile(mCurrentItem.imageUri),
-                thumbSize, thumbSize);
-        //set thumbnail
-        galleryStripItemHolder.imageViewThumbnail.setImageBitmap(ThumbImage);
+//        TODO local
+        Picasso.get()
+            .load(mCurrentItem.imageUri)
+            .centerCrop()
+            .resize(thumbSize, thumbSize)//Resize image to width half of screen and height 1/3 of screen height
+            .into(galleryStripItemHolder.imageViewThumbnail);
+//        Bitmap ThumbImage = ThumbnailUtils.extractThumbnail(BitmapFactory.decodeFile(mCurrentItem.imageUri),
+//                thumbSize, thumbSize);
+//        //set thumbnail
+//        galleryStripItemHolder.imageViewThumbnail.setImageBitmap(ThumbImage);
         //set current selected
         if (mCurrentItem.isSelected) {
             galleryStripItemHolder.imageViewThumbnail.setBackgroundColor(ContextCompat.getColor(context, android.R.color.white));

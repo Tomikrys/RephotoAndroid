@@ -14,6 +14,8 @@ import androidx.fragment.app.DialogFragment;
 import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.vyw.rephotoandroid.model.GalleryItem;
+
 import java.util.List;
 
 //Remember to implement  GalleryAdapter.GalleryAdapterCallBacks to activity  for communication of Activity and Gallery Adapter
@@ -38,15 +40,37 @@ public class GalleryMainActivity extends AppCompatActivity implements GalleryAda
         //check for read storage permission
         if (ContextCompat.checkSelfPermission(this, Manifest.permission.READ_EXTERNAL_STORAGE) == PackageManager.PERMISSION_GRANTED) {
             //Get images
-            galleryItems = GalleryUtils.getImages(this);
-            // add images to gallery recyclerview using adapter
-            mGalleryAdapter.addGalleryItems(galleryItems);
+            loadImagesFromAPIAsynchronously();
         } else {
             //request permission
             ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.READ_EXTERNAL_STORAGE}, RC_READ_STORAGE);
         }
+    }
 
+    private void loadImagesFromAPIAsynchronously() {
+        // do
+        GalleryMainActivity thisCopy = this;
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                // Run async
+//                TODO local
+//                galleryItems = GalleryUtils.getLocalImages(thisCopy);
+                galleryItems = GalleryUtils.getImagesFromAPI();
 
+                runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        // do after
+                        // add images to gallery recyclerview using adapter
+                        if (galleryItems == null) {
+                            Toast.makeText(thisCopy, "Images cannot be fetched, check your internet connection.", Toast.LENGTH_LONG).show();
+                        }
+                        mGalleryAdapter.addGalleryItems(galleryItems);
+                    }
+                });
+            }
+        }).start();
     }
 
 
@@ -65,10 +89,7 @@ public class GalleryMainActivity extends AppCompatActivity implements GalleryAda
         super.onRequestPermissionsResult(requestCode, permissions, grantResults);
         if (requestCode == RC_READ_STORAGE) {
             if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-                //Get images
-                galleryItems = GalleryUtils.getImages(this);
-                // add images to gallery recyclerview using adapter
-                mGalleryAdapter.addGalleryItems(galleryItems);
+                loadImagesFromAPIAsynchronously();
             } else {
                 Toast.makeText(this, "Storage Permission denied", Toast.LENGTH_SHORT).show();
             }

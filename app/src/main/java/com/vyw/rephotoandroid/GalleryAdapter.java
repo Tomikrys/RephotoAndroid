@@ -12,6 +12,7 @@ import android.widget.TextView;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.squareup.picasso.Picasso;
+import com.vyw.rephotoandroid.model.GalleryItem;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -38,10 +39,11 @@ public class GalleryAdapter extends RecyclerView.Adapter {
 
     //This method will take care of adding new Gallery items to RecyclerView
     public void addGalleryItems(List<GalleryItem> galleryItems) {
-        int previousSize = this.galleryItems.size();
-        this.galleryItems.addAll(galleryItems);
-        notifyItemRangeInserted(previousSize, galleryItems.size());
-
+        if (galleryItems != null) {
+            int previousSize = this.galleryItems.size();
+            this.galleryItems.addAll(galleryItems);
+            notifyItemRangeInserted(previousSize, galleryItems.size());
+        }
     }
 
     @Override
@@ -60,8 +62,14 @@ public class GalleryAdapter extends RecyclerView.Adapter {
         //cast holder with gallery holder
         GalleryItemHolder galleryItemHolder = (GalleryItemHolder) holder;
         //Load with Picasso
+//                TODO local
+//        Picasso.get()
+//                .load(imageViewThoumb)
+//                .centerCrop()
+//                .resize(GalleryScreenUtils.getScreenWidth(context) / 2, GalleryScreenUtils.getScreenHeight(context) / 3)//Resize image to width half of screen and height 1/3 of screen height
+//                .into(galleryItemHolder.imageViewThumbnail);
         Picasso.get()
-                .load(imageViewThoumb)
+                .load(currentItem.imageUri)
                 .centerCrop()
                 .resize(GalleryScreenUtils.getScreenWidth(context) / 2, GalleryScreenUtils.getScreenHeight(context) / 3)//Resize image to width half of screen and height 1/3 of screen height
                 .into(galleryItemHolder.imageViewThumbnail);

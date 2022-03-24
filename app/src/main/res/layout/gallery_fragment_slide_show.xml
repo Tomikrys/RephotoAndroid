@@ -7,12 +7,15 @@
     tools:context=".GallerySlideShowFragment">
 
     <!--Viewpager to show slideshow of images-->
+    <!--Image name textview-->
     <androidx.viewpager.widget.ViewPager
         android:id="@+id/viewPagerGallery"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_above="@+id/recyclerViewGalleryStrip" />
-    <!--Image name textview-->
+        android:scaleType="centerInside"
+        android:layout_above="@+id/recyclerViewGalleryStrip"
+        android:layout_marginBottom="2dp" />
+
     <TextView
         android:id="@+id/textViewImageName"
         android:layout_width="match_parent"

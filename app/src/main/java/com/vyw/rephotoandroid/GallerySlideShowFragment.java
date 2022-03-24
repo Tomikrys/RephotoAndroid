@@ -16,6 +16,8 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 import androidx.viewpager.widget.ViewPager;
 
+import com.vyw.rephotoandroid.model.GalleryItem;
+
 import java.util.ArrayList;
 import java.util.List;
 

@@ -5,15 +5,25 @@ import android.content.Context;
 import android.database.Cursor;
 import android.os.Environment;
 import android.provider.MediaStore;
+import android.util.Log;
+
+import com.vyw.rephotoandroid.model.GalleryItem;
+import com.vyw.rephotoandroid.model.ListPlace;
+import com.vyw.rephotoandroid.model.Place;
 
 import java.util.ArrayList;
 import java.util.List;
+
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
 
 /**
  * Created by amardeep on 10/25/2017.
  */
 
 public class GalleryUtils {
+    public static String TAG = "GalleryUtils";
 
     //Define bucket name from which you want to take images Example '/DCIM/Camera' for camera images
     public static final String CAMERA_IMAGE_BUCKET_NAME = Environment.getExternalStorageDirectory().toString() + "/Download";
@@ -24,7 +34,7 @@ public class GalleryUtils {
     }
 
     //method to get images
-    public static List<GalleryItem> getImages(Context context) {
+    public static List<GalleryItem> getLocalImages(Context context) {
         final String[] projection = {MediaStore.Images.Media.DISPLAY_NAME, MediaStore.Images.Media.DATA};
         final String selection = MediaStore.Images.Media.BUCKET_ID + " = ?";
         final String[] selectionArgs = {GalleryUtils.getBucketId(CAMERA_IMAGE_BUCKET_NAME)};
@@ -44,6 +54,67 @@ public class GalleryUtils {
         }
         cursor.close();
         return result;
+    }
+
+    public static List<GalleryItem> getImagesFromAPI() {
+        ApiInterface apiInterface = RetrofitClient.getRetrofitInstance().create(ApiInterface.class);
+        Call<ListPlace> call = apiInterface.getPlaces();
+
+        try
+        {
+            Response<ListPlace> response = call.execute();
+            ListPlace listPlace = response.body();
+            if (listPlace != null) {
+                    List<Place> places = listPlace.getPlaces();
+                    if (places != null) {
+                        ArrayList<GalleryItem> results = new ArrayList<GalleryItem>(places.size());
+                        for (int i = 0; i < places.size(); i++) {
+                            Place place = places.get(i);
+                            Log.e(TAG, "onResponse: [" + i + "] name : " + place.getName());
+                            GalleryItem galleryItem = new GalleryItem(place.getOldestPhoto().getPhotoUri(), place.getName(), place.getOldestPhoto().getCaptured_at());
+                            results.add(galleryItem);
+                        }
+                        return results;
+                    } else {
+                        Log.e(TAG, "onResponse: empty places");
+                    }
+            }
+        }
+        catch (Exception e)
+        {
+            Log.e(TAG, e.getMessage());
+        }
+        return null;
+
+//        call.enqueue(new Callback<ListPlace>() {
+//            @Override
+//            public void onResponse(Call<ListPlace> call, Response<ListPlace> response) {
+//                Log.e(TAG, "onResponse: " + response.code());
+//                ListPlace listPlace = response.body();
+//                if (listPlace != null) {
+//                    List<Place> places = listPlace.getPlaces();
+//                    if (places != null) {
+//                        ArrayList<GalleryItem> results = new ArrayList<GalleryItem>(places.size());
+//                        for (int i = 0; i < places.size(); i++) {
+//                            Place place = places.get(i);
+//                            Log.e(TAG, "onResponse: [" + i + "] name : " + place.getName());
+//                            GalleryItem galleryItem = new GalleryItem(place.getOldestPhoto().getPhotoUri(), place.getName(), place.getOldestPhoto().getCaptured_at());
+//                            results.add(galleryItem);
+//                        }
+//                    } else {
+//                        Log.e(TAG, "onResponse: empty places");
+//                    }
+//                } else {
+//                    Log.e(TAG, "onResponse: empty response");
+//                }
+//            }
+//
+//            @Override
+//            public void onFailure(Call<ListPlace> call, Throwable t) {
+//                Log.e(TAG, "onFailure: " + call.toString());
+//                Log.e(TAG, "onFailure: " + t.getMessage());
+//            }
+//        });
 
     }
 }

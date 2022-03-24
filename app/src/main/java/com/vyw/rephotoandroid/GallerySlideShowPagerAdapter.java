@@ -10,6 +10,7 @@ import android.widget.ImageView;
 import androidx.viewpager.widget.PagerAdapter;
 
 import com.squareup.picasso.Picasso;
+import com.vyw.rephotoandroid.model.GalleryItem;
 
 import java.io.File;
 import java.util.List;
@@ -48,7 +49,10 @@ public class GallerySlideShowPagerAdapter extends PagerAdapter {
         View itemView = mLayoutInflater.inflate(R.layout.gallery_pager_item, container, false);
         ImageView imageView = (ImageView) itemView.findViewById(R.id.imageViewThumbnail);
         //load current image in viewpager
-        Picasso.get().load(new File(galleryItems.get(position).imageUri)).fit().into(imageView);
+
+//                TODO local
+//        Picasso.get().load(new File(galleryItems.get(position).imageUri)).fit().centerInside().into(imageView);
+        Picasso.get().load(galleryItems.get(position).imageUri).fit().centerInside().into(imageView);
         container.addView(itemView);
         return itemView;
     }
