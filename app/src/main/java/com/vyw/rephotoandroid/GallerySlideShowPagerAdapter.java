@@ -64,6 +64,10 @@ public class GallerySlideShowPagerAdapter extends PagerAdapter {
         return galleryItems.get(position).imageUri;
     }
 
+    public GalleryItem getPicture(int position) {
+        return galleryItems.get(position);
+    }
+
     @Override
     public void destroyItem(ViewGroup container, int position, Object object) {
         container.removeView((ImageView) object);

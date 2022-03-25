@@ -10,9 +10,16 @@
     <!--Viewpager to show slideshow of images-->
     <!--Image name textview-->
 
-    <androidx.constraintlayout.widget.ConstraintLayout
+    <TextView
+        android:id="@+id/textViewImageTitle"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"/>
+        android:layout_height="wrap_content"
+        android:background="#aa000000"
+        android:ellipsize="end"
+        android:gravity="center_horizontal"
+        android:padding="16dp"
+        android:textAppearance="@style/TextAppearance.AppCompat.Medium" />
+
 
     <androidx.viewpager.widget.ViewPager
         android:id="@+id/viewPagerGallery"
@@ -49,15 +56,30 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent">
 
-        <com.google.android.material.floatingactionbutton.FloatingActionButton
-            android:id="@+id/floatingActionButton3"
+        <LinearLayout
             android:layout_width="wrap_content"
-            android:layout_height="256dp"
-            android:clickable="true"
-            android:onClick="takeRephoto"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
             app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:srcCompat="@android:drawable/ic_menu_camera" />
+            app:layout_constraintEnd_toEndOf="parent">
+
+            <com.google.android.material.floatingactionbutton.FloatingActionButton
+                android:id="@+id/floatingActionButton4"
+                android:layout_width="wrap_content"
+                android:layout_height="256dp"
+                android:clickable="true"
+                android:onClick="openNavigation"
+                app:srcCompat="@android:drawable/ic_menu_compass" />
+
+            <com.google.android.material.floatingactionbutton.FloatingActionButton
+                android:id="@+id/floatingActionButton3"
+                android:layout_width="wrap_content"
+                android:layout_height="256dp"
+                android:clickable="true"
+                android:onClick="takeRephoto"
+                app:srcCompat="@android:drawable/ic_menu_camera" />
+
+        </LinearLayout>
 
 
     </androidx.constraintlayout.widget.ConstraintLayout>

@@ -75,13 +75,15 @@ public class GalleryUtils {
                             GalleryItem galleryItem = new GalleryItem(
                                     place.getPhotos().get(0).getPhotoUri(),
                                     place.getName(),
-                                    place.getPhotos().get(0).getCaptured_at()
+                                    place.getPhotos().get(0).getCaptured_at(),
+                                    place
                             );
                             for (Photo photo : place.getPhotos()) {
                                 GalleryItem photoItem = new GalleryItem(
                                         photo.getPhotoUri(),
                                         "photoItem",
-                                        photo.getCaptured_at()
+                                        photo.getCaptured_at(),
+                                        place
                                 );
                                 galleryItem.addPlacePhoto(photoItem);
                             }

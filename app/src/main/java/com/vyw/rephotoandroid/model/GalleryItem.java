@@ -20,13 +20,14 @@ public class GalleryItem {
     public String year = null;
     public boolean isSelected = false;
     public String TAG = "GalleryItem";
+    public Place place;
 
     public GalleryItem(String imageUri, String imageName) {
         this.imageUri = imageUri;
         this.imageName = imageName;
     }
 
-    public GalleryItem(String imageUri, String imageName, String strDate) {
+    public GalleryItem(String imageUri, String imageName, String strDate, Place place) {
         this.imageUri = imageUri;
         this.imageName = imageName;
         String year = null;
@@ -41,6 +42,7 @@ public class GalleryItem {
         }
         this.year = year;
         this.placePhotos = new ArrayList<>();
+        this.place = place;
     }
 
     public void addPlacePhoto(GalleryItem photo) {

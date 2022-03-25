@@ -38,6 +38,7 @@ public class GallerySlideShowFragment extends DialogFragment implements GalleryS
     //Deceleration of viewPager
     ViewPager mViewPagerGallery;
     TextView textViewImageName;
+    TextView textViewImageTitle;
     RecyclerView recyclerViewGalleryStrip;
 
     private int mCurrentPosition;
@@ -75,10 +76,12 @@ public class GallerySlideShowFragment extends DialogFragment implements GalleryS
             mCurrentPosition = getArguments().getInt(ARG_CURRENT_POSITION);
             //get GalleryItems from activity
             galleryItems = ((GalleryMainActivity) getActivity()).galleryItems;
+            GalleryItem galleryPhotos = galleryItems.get(mCurrentPosition);
 
             //Initialise View Pager Adapter
-            mSlideShowPagerAdapter = new GallerySlideShowPagerAdapter(getContext(), galleryItems);
-            ((GalleryMainActivity) getActivity()).setSelectedPictureUri(mSlideShowPagerAdapter.getPictureUri(mCurrentPosition));
+            mSlideShowPagerAdapter = new GallerySlideShowPagerAdapter(getContext(), galleryPhotos.placePhotos);
+            int firstIndex = 0;
+            ((GalleryMainActivity) getActivity()).setSelectedPicture(mSlideShowPagerAdapter.getPicture(firstIndex));
         }
 
     }
@@ -106,6 +109,7 @@ public class GallerySlideShowFragment extends DialogFragment implements GalleryS
 
         });
         textViewImageName = view.findViewById(R.id.textViewImageName);
+        textViewImageTitle = view.findViewById(R.id.textViewImageTitle);
         //set adapter to Viewpager
         mViewPagerGallery.setAdapter(mSlideShowPagerAdapter);
         recyclerViewGalleryStrip = view.findViewById(R.id.recyclerViewGalleryStrip);
@@ -120,7 +124,8 @@ public class GallerySlideShowFragment extends DialogFragment implements GalleryS
         //tell viewpager to open currently selected item and pass position of current item
         mViewPagerGallery.setCurrentItem(mCurrentPosition);
         //set image name textview's text according to position
-        textViewImageName.setText(galleryItems.get(mCurrentPosition).imageName);
+        textViewImageName.setText(galleryItems.get(mCurrentPosition).year);
+        textViewImageTitle.setText(galleryItems.get(mCurrentPosition).imageName);
         //Add OnPageChangeListener to viewpager to handle page changes
         mViewPagerGallery.addOnPageChangeListener(new ViewPager.OnPageChangeListener() {
             @Override
@@ -131,7 +136,7 @@ public class GallerySlideShowFragment extends DialogFragment implements GalleryS
             @Override
             public void onPageSelected(int position) {
                 //set image name textview's text on any page selected
-                textViewImageName.setText(galleryItems.get(position).imageName);
+                textViewImageName.setText(galleryItems.get(position).year);
             }
 
             @Override
@@ -157,7 +162,7 @@ public class GallerySlideShowFragment extends DialogFragment implements GalleryS
     public void onGalleryStripItemSelected(int position) {
         //set current item of viewpager
         mViewPagerGallery.setCurrentItem(position);
-        ((GalleryMainActivity) getActivity()).setSelectedPictureUri(mSlideShowPagerAdapter.getPictureUri(position));
+        ((GalleryMainActivity) getActivity()).setSelectedPicture(mSlideShowPagerAdapter.getPicture(position));
     }
 
     @Override

@@ -99,7 +99,6 @@ public class GalleryAdapter extends RecyclerView.Adapter {
             super(itemView);
             imageViewThumbnail = itemView.findViewById(R.id.imageViewThumbnail);
             textViewImageName = itemView.findViewById(R.id.textViewImageName);
-
         }
     }
 

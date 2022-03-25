@@ -32,7 +32,7 @@ public class GalleryStripAdapter extends RecyclerView.Adapter {
 
     public GalleryStripAdapter(List<GalleryItem> galleryItems, Context context, GalleryStripCallBacks StripCallBacks, int CurrentPosition) {
         //set galleryItems
-        this.galleryItems = galleryItems;
+        this.galleryItems = galleryItems.get(CurrentPosition).placePhotos;
         this.context = context;
         //set stripcallbacks
         this.mStripCallBacks = StripCallBacks;

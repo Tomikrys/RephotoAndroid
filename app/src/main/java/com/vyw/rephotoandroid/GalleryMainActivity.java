@@ -4,8 +4,7 @@ package com.vyw.rephotoandroid;
 import android.Manifest;
 import android.content.Intent;
 import android.content.pm.PackageManager;
-import android.graphics.Bitmap;
-import android.graphics.drawable.Drawable;
+import android.net.Uri;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
@@ -19,9 +18,6 @@ import androidx.fragment.app.DialogFragment;
 import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
-import com.squareup.picasso.NetworkPolicy;
-import com.squareup.picasso.Picasso;
-import com.squareup.picasso.Target;
 import com.vyw.rephotoandroid.model.GalleryItem;
 
 import java.util.List;
@@ -34,7 +30,7 @@ public class GalleryMainActivity extends AppCompatActivity implements GalleryAda
     //Read storage permission request code
     private static final int RC_READ_STORAGE = 5;
     GalleryAdapter mGalleryAdapter;
-    private String selectedPictureUri = "";
+    private GalleryItem selectedPicture = null;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -86,10 +82,18 @@ public class GalleryMainActivity extends AppCompatActivity implements GalleryAda
     public void takeRephoto(View view) {
         Log.d(TAG, "takeRephoto");
         Intent intent = new Intent(this, SimpleNavigation.class);
-        intent.putExtra("PATH_REF_IMAGE", selectedPictureUri);
+        intent.putExtra("PATH_REF_IMAGE", selectedPicture.imageUri);
         intent.putExtra("SOURCE", "ONLINE");
         startActivity(intent);
 //        Toast.makeText(this, "Images cannot be fetched, check your internet connection.", Toast.LENGTH_LONG).show();
+    }
+
+    public void openNavigation(View view) {
+        Log.d(TAG, "getDirection");
+        Uri geoLocation = Uri.parse("geo:0,0?q=" + selectedPicture.place.getLatitude() + "," + selectedPicture.place.getLongitude());
+        Intent intent = new Intent(Intent.ACTION_VIEW);
+        intent.setData(geoLocation);
+        startActivity(intent);
     }
 
 
@@ -102,15 +106,13 @@ public class GalleryMainActivity extends AppCompatActivity implements GalleryAda
         //finally show dialogue
         slideShowFragment.show(getSupportFragmentManager(), null);
         if (slideShowFragment.getGallerySlideShowPagerAdapter() != null) {
-            selectedPictureUri = slideShowFragment.getGallerySlideShowPagerAdapter().getPictureUri(position);
+            selectedPicture = slideShowFragment.getGallerySlideShowPagerAdapter().getPicture(position);
         } else {
 //            will be set with setSelectedPictureUri from Create function in slideShowFragment
         }
     }
 
-    public void setSelectedPictureUri(String uri) {
-        selectedPictureUri = uri;
-    }
+    public void setSelectedPicture(GalleryItem picture) { selectedPicture = picture; }
 
     @Override
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
