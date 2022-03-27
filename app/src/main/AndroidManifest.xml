@@ -53,6 +53,7 @@
         <activity android:name="com.vyw.rephotoandroid.SimpleNavigation" />
         <activity android:name="com.vyw.rephotoandroid.Rephotos_API" />
         <activity android:name="com.vyw.rephotoandroid.GalleryMainActivity" />
+        <activity android:name="com.vyw.rephotoandroid.UploadPhoto" />
 
 <!--        <activity android:name="com.vyw.rephotoandroid.SimpleMainActivity" />-->
     </application>

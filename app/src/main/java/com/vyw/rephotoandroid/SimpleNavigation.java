@@ -470,16 +470,22 @@ public class SimpleNavigation extends AppCompatActivity {
         ImageCapture.OutputFileOptions outputFileOptions = new ImageCapture.OutputFileOptions.Builder(
                 getContentResolver(),
                 MediaStore.Images.Media.EXTERNAL_CONTENT_URI,
-                contentValues).build();
+                contentValues
+        ).build();
+        SimpleNavigation thisCopy = this;
         imageCapture.takePicture(outputFileOptions, executor, new ImageCapture.OnImageSavedCallback() {
             @Override
             public void onImageSaved(@NonNull ImageCapture.OutputFileResults outputFileResults) {
-//                	outputFileResults.getSavedUri()
                 runOnUiThread(new Runnable() {
                     @Override
                     public void run() {
                         Toast.makeText(getApplicationContext(),
                                 "Image Saved successfully", Toast.LENGTH_LONG).show();
+                        String savedImage = outputFileResults.getSavedUri().toString();
+                        Intent intent = new Intent(thisCopy, UploadPhoto.class);
+                        intent.putExtra("PATH_REF_IMAGE", path_ref_image);
+                        intent.putExtra("PATH_NEW_IMAGE", savedImage);
+                        startActivity(intent);
                     }
                 });
             }
