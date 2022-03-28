@@ -11,11 +11,9 @@ import android.graphics.Matrix;
 import android.graphics.drawable.Drawable;
 import android.media.ExifInterface;
 import android.net.Uri;
-import android.os.Build;
 import android.os.Bundle;
-import android.os.Environment;
-import android.os.Handler;
 import android.os.ParcelFileDescriptor;
+import android.os.Parcelable;
 import android.provider.MediaStore;
 import android.renderscript.Element;
 import android.renderscript.RenderScript;
@@ -58,16 +56,11 @@ import org.opencv.core.CvType;
 import org.opencv.core.Mat;
 import org.opencv.imgproc.Imgproc;
 
-import java.io.File;
 import java.io.FileDescriptor;
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
-import java.util.Locale;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
@@ -463,8 +456,10 @@ public class SimpleNavigation extends AppCompatActivity {
     public void capturePhoto(View view) {
         Log.d(TAG, "capture");
 
+        String displayName = "Rephoto_" + System.currentTimeMillis();
+
         ContentValues contentValues = new ContentValues();
-        contentValues.put(MediaStore.MediaColumns.DISPLAY_NAME, "Rephoto" + System.currentTimeMillis());
+        contentValues.put(MediaStore.MediaColumns.DISPLAY_NAME, displayName);
         contentValues.put(MediaStore.MediaColumns.MIME_TYPE, "image/jpeg");
 
         ImageCapture.OutputFileOptions outputFileOptions = new ImageCapture.OutputFileOptions.Builder(
@@ -485,6 +480,7 @@ public class SimpleNavigation extends AppCompatActivity {
                         Intent intent = new Intent(thisCopy, UploadPhoto.class);
                         intent.putExtra("PATH_REF_IMAGE", path_ref_image);
                         intent.putExtra("PATH_NEW_IMAGE", savedImage);
+                        intent.putExtra("SimpleNavigation", (Parcelable) thisCopy);
                         startActivity(intent);
                     }
                 });

@@ -1,4 +1,4 @@
-package com.vyw.rephotoandroid.model;
+package com.vyw.rephotoandroid.model.api;
 
 import java.io.File;
 
