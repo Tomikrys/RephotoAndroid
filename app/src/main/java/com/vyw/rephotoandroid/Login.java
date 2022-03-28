@@ -80,6 +80,8 @@ public class Login extends AppCompatActivity {
                             "logged in as " + Configuration.first_name + " " + Configuration.last_name,
                             Toast.LENGTH_SHORT
                     ).show();
+
+//                    TODO update menu
                     copyThis.finish();
                 } else {
                     Log.e(TAG, "onResponse: " + response.code());

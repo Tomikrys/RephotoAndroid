@@ -12,10 +12,17 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.Toast;
 
+import androidx.annotation.NonNull;
+import androidx.appcompat.app.ActionBarDrawerToggle;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.drawerlayout.widget.DrawerLayout;
 
 import com.vyw.rephotoandroid.model.Configuration;
+import com.vyw.rephotoandroid.model.api.LoginResponse;
+import com.vyw.rephotoandroid.model.api.OneLoginResponse;
 import com.vyw.rephotoandroid.model.api.Status;
+import com.vyw.rephotoandroid.model.api.UserLogin;
+import com.vyw.rephotoandroid.model.api.UserLogout;
 
 import java.io.File;
 
@@ -37,12 +44,32 @@ public class SimpleMainActivity extends AppCompatActivity {
 
     Dialog dialog;
     int simple_navigation_button;
+    public DrawerLayout drawerLayout;
+    public ActionBarDrawerToggle actionBarDrawerToggle;
+    Menu menu = null;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.simple_ref_choose);
         simple_navigation_button = findViewById(R.id.simple_navigation).getId();
+
+
+
+        // drawer layout instance to toggle the menu icon to open
+        // drawer and back button to close drawer
+        drawerLayout = findViewById(R.id.my_drawer_layout);
+        actionBarDrawerToggle = new ActionBarDrawerToggle(this, drawerLayout, R.string.nav_open, R.string.nav_close);
+
+        // pass the Open and Close toggle for the drawer layout listener
+        // to toggle the button
+        drawerLayout.addDrawerListener(actionBarDrawerToggle);
+        actionBarDrawerToggle.syncState();
+
+        // to make the Navigation drawer icon always appear on the action bar
+        if (getSupportActionBar() != null) {
+            getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+        }
 
 //  TODO debug memory mode
 //        if(BuildConfig.DEBUG)
@@ -52,6 +79,7 @@ public class SimpleMainActivity extends AppCompatActivity {
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         getMenuInflater().inflate(R.menu.menu_main, menu);
+        this.menu = menu;
         return true;
     }
 
@@ -168,5 +196,63 @@ public class SimpleMainActivity extends AppCompatActivity {
 
     public void exitApplication(MenuItem item) {
         finish();
+    }
+
+
+    // override the onOptionsItemSelected()
+    // function to implement
+    // the item click listener callback
+    // to open and close the navigation
+    // drawer when the icon is clicked
+    @Override
+    public boolean onOptionsItemSelected(@NonNull MenuItem item) {
+
+        if (actionBarDrawerToggle.onOptionsItemSelected(item)) {
+            return true;
+        }
+        switch (item.getItemId()) {
+            case R.id.login:
+                if (Configuration.logged) {
+                    Logout(null);
+                } else {
+                    Login(null);
+                }
+                return true;
+            default:
+                return super.onOptionsItemSelected(item);
+        }
+    }
+
+    public void Logout(View view) {
+        UserLogout userLogout = new UserLogout(Configuration.access_token);
+        ApiInterface apiInterface = RetrofitClient.getRetrofitInstance().create(ApiInterface.class);
+        Call<Status> call = apiInterface.logout(userLogout);
+        SimpleMainActivity copyThis = this;
+        call.enqueue(new Callback<Status>() {
+            @Override
+            public void onResponse(Call<Status> call, Response<Status> response) {
+                if (response.code() == 200) {
+                    Configuration.access_token = null;
+                    Configuration.logged = false;
+                    Configuration.last_name = null;
+                    Configuration.first_name = null;
+                    Configuration.email = null;
+//                    TODO update menu
+                    Toast.makeText(
+                            copyThis,
+                            "logged out",
+                            Toast.LENGTH_SHORT
+                    ).show();
+                } else {
+                    Log.e(TAG, "onResponse: " + response.code());
+                }
+            }
+
+            @Override
+            public void onFailure(Call<Status> call, Throwable t) {
+                Log.e(TAG, "onFailure: " + call.toString());
+                Log.e(TAG, "onFailure: " + t.getMessage());
+            }
+        });
     }
 }

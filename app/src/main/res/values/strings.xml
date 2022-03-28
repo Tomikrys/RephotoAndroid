@@ -49,4 +49,9 @@
     <string name="_2040">2040</string>
     <string name="_1548">1548</string>
     <string name="nextPoint">Další bod</string>
+
+    <!--to toggle the open close button
+        of the navigation drawer-->
+    <string name="nav_open">Open</string>
+    <string name="nav_close">Close</string>
 </resources>

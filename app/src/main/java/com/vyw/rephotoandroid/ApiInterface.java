@@ -7,6 +7,7 @@ import com.vyw.rephotoandroid.model.api.OneLoginResponse;
 import com.vyw.rephotoandroid.model.api.Status;
 import com.vyw.rephotoandroid.model.api.UploadFile;
 import com.vyw.rephotoandroid.model.api.UserLogin;
+import com.vyw.rephotoandroid.model.api.UserLogout;
 
 import java.io.File;
 
@@ -46,4 +47,7 @@ public interface ApiInterface {
 
     @POST("user/login")
     Call<OneLoginResponse> login(@Body UserLogin userLogin );
+
+    @POST("user/logout")
+    Call<Status> logout(@Body UserLogout userLogout );
 }

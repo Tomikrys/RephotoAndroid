@@ -1,83 +1,105 @@
-<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:tools="http://schemas.android.com/tools" android:layout_width="match_parent"
-    android:layout_height="match_parent" android:paddingLeft="@dimen/activity_horizontal_margin"
-    android:paddingRight="@dimen/activity_horizontal_margin"
-    android:paddingTop="@dimen/activity_vertical_margin"
-    android:orientation="vertical"
-    android:paddingBottom="@dimen/activity_vertical_margin" tools:context="com.vyw.rephotoandroid.SimpleMainActivity">
+<!--the root view must be the DrawerLayout-->
+<androidx.drawerlayout.widget.DrawerLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/my_drawer_layout"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context="com.vyw.rephotoandroid.SimpleMainActivity"
+    tools:ignore="HardcodedText">
 
-
-    <TextView
-        android:id="@+id/textView"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_alignParentEnd="true"
-        android:layout_alignParentLeft="true"
-        android:layout_alignParentRight="true"
-        android:layout_alignParentStart="true"
-        android:text="@string/re_fotografie"
-        android:textAppearance="@style/TextAppearance.AppCompat.Headline"
-        android:textSize="50sp" />
-
-    <LinearLayout
+    <RelativeLayout
         android:layout_width="match_parent"
+        android:layout_height="match_parent">
+
+
+        <TextView
+            android:id="@+id/textView"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentStart="true"
+            android:layout_alignParentEnd="true"
+            android:text="@string/re_fotografie"
+            android:textAppearance="@style/TextAppearance.AppCompat.Headline"
+            android:textSize="50sp" />
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:gravity="center"
+            android:orientation="vertical">
+
+            <Button
+                android:id="@+id/simple_navigation"
+                android:layout_width="200dp"
+                android:layout_height="wrap_content"
+                android:onClick="simpleNavigation"
+                android:text="Choose REference Photo" />
+
+            <Space
+                android:layout_width="match_parent"
+                android:layout_height="39dp" />
+
+            <Button
+                android:id="@+id/rephotos_api"
+                android:layout_width="200dp"
+                android:layout_height="wrap_content"
+                android:onClick="RephotoApiButton"
+                android:text="Rephotos API" />
+
+            <Space
+                android:layout_width="match_parent"
+                android:layout_height="39dp" />
+
+            <Button
+                android:id="@+id/gallery"
+                android:layout_width="200dp"
+                android:layout_height="wrap_content"
+                android:onClick="GalleryButton"
+                android:text="Gallery" />
+
+            <Space
+                android:layout_width="match_parent"
+                android:layout_height="39dp" />
+
+            <Button
+                android:id="@+id/login"
+                android:layout_width="200dp"
+                android:layout_height="wrap_content"
+                android:onClick="Login"
+                android:text="Log in" />
+
+            <Space
+                android:layout_width="match_parent"
+                android:layout_height="39dp" />
+
+            <Button
+                android:id="@+id/upload_photo"
+                android:layout_width="200dp"
+                android:layout_height="wrap_content"
+                android:onClick="UploadPhoto"
+                android:text="Upload Photo" />
+
+            <Space
+                android:layout_width="match_parent"
+                android:layout_height="39dp" />
+
+            <Button
+                android:id="@+id/logout"
+                android:layout_width="200dp"
+                android:layout_height="wrap_content"
+                android:onClick="Logout"
+                android:text="Logout" />
+        </LinearLayout>
+
+    </RelativeLayout>
+    <!--this the navigation view which draws
+        and shows the navigation drawer-->
+    <!--include the menu created in the menu folder-->
+    <com.google.android.material.navigation.NavigationView
+        android:layout_width="wrap_content"
         android:layout_height="match_parent"
-        android:gravity="center"
-        android:orientation="vertical">
+        android:layout_gravity="start"
+        app:menu="@menu/navigation_menu" />
 
-        <Button
-            android:id="@+id/simple_navigation"
-            android:layout_width="200dp"
-            android:layout_height="wrap_content"
-            android:onClick="simpleNavigation"
-            android:text="Choose REference Photo" />
-
-        <Space
-            android:layout_width="match_parent"
-            android:layout_height="39dp" />
-
-        <Button
-            android:id="@+id/rephotos_api"
-            android:layout_width="200dp"
-            android:layout_height="wrap_content"
-            android:onClick="RephotoApiButton"
-            android:text="Rephotos API" />
-
-        <Space
-            android:layout_width="match_parent"
-            android:layout_height="39dp" />
-
-        <Button
-            android:id="@+id/gallery"
-            android:layout_width="200dp"
-            android:layout_height="wrap_content"
-            android:onClick="GalleryButton"
-            android:text="Gallery" />
-
-        <Space
-            android:layout_width="match_parent"
-            android:layout_height="39dp" />
-
-        <Button
-            android:id="@+id/login"
-            android:layout_width="200dp"
-            android:layout_height="wrap_content"
-            android:onClick="Login"
-            android:text="Log in" />
-
-        <Space
-            android:layout_width="match_parent"
-            android:layout_height="39dp" />
-
-        <Button
-            android:id="@+id/upload_photo"
-            android:layout_width="200dp"
-            android:layout_height="wrap_content"
-            android:onClick="UploadPhoto"
-            android:text="Upload Photo" />
-
-
-    </LinearLayout>
-
-
-</RelativeLayout>
+</androidx.drawerlayout.widget.DrawerLayout>
