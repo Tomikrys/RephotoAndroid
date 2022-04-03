@@ -25,7 +25,6 @@ import java.util.List;
 //Remember to implement  GalleryAdapter.GalleryAdapterCallBacks to activity  for communication of Activity and Gallery Adapter
 public class GalleryMainActivity extends AppCompatActivity implements GalleryAdapter.GalleryAdapterCallBacks {
     private static final String TAG = "GalleryMainActivity";
-    //Deceleration of list of  GalleryItems
     public List<GalleryItem> galleryItems;
     //Read storage permission request code
     private static final int RC_READ_STORAGE = 5;
@@ -36,7 +35,7 @@ public class GalleryMainActivity extends AppCompatActivity implements GalleryAda
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.gallery_activity_main);
-//        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         //setup RecyclerView
         RecyclerView recyclerViewGallery = (RecyclerView) findViewById(R.id.recyclerViewGallery);
         recyclerViewGallery.setLayoutManager(new GridLayoutManager(this, 2));
@@ -86,7 +85,6 @@ public class GalleryMainActivity extends AppCompatActivity implements GalleryAda
         intent.putExtra("PATH_REF_IMAGE", selectedPicture.imageUri);
         intent.putExtra("SOURCE", "ONLINE");
         startActivity(intent);
-//        Toast.makeText(this, "Images cannot be fetched, check your internet connection.", Toast.LENGTH_LONG).show();
     }
 
     public void openNavigation(View view) {
@@ -96,7 +94,6 @@ public class GalleryMainActivity extends AppCompatActivity implements GalleryAda
         intent.setData(geoLocation);
         startActivity(intent);
     }
-
 
     @Override
     public void onItemSelected(int position) {
@@ -109,7 +106,7 @@ public class GalleryMainActivity extends AppCompatActivity implements GalleryAda
         if (slideShowFragment.getGallerySlideShowPagerAdapter() != null) {
             selectedPicture = slideShowFragment.getGallerySlideShowPagerAdapter().getPicture(position);
         } else {
-//            will be set with setSelectedPictureUri from Create function in slideShowFragment
+            // will be set with setSelectedPictureUri from Create function in slideShowFragment
         }
     }
 

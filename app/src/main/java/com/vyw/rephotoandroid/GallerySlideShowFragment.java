@@ -83,12 +83,10 @@ public class GallerySlideShowFragment extends DialogFragment implements GalleryS
             int firstIndex = 0;
             ((GalleryMainActivity) getActivity()).setSelectedPicture(mSlideShowPagerAdapter.getPicture(firstIndex));
         }
-
     }
 
     @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container,
-                             Bundle savedInstanceState) {
+    public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         final View view = inflater.inflate(R.layout.gallery_fragment_slide_show, container, false);
         mViewPagerGallery = view.findViewById(R.id.viewPagerGallery);
         // set On Touch Listener on mViewPagerGallery to hide show bottom bar
@@ -130,7 +128,6 @@ public class GallerySlideShowFragment extends DialogFragment implements GalleryS
         mViewPagerGallery.addOnPageChangeListener(new ViewPager.OnPageChangeListener() {
             @Override
             public void onPageScrolled(int position, float positionOffset, int positionOffsetPixels) {
-
             }
 
             @Override
@@ -149,9 +146,7 @@ public class GallerySlideShowFragment extends DialogFragment implements GalleryS
                     mGalleryStripLayoutManger.smoothScrollToPosition(recyclerViewGalleryStrip, null, currentSelected);
                     //select current item of viewpager on gallery strip at bottom
                     mGalleryStripAdapter.setSelected(currentSelected);
-
                 }
-
             }
         });
         return view;
@@ -182,7 +177,6 @@ public class GallerySlideShowFragment extends DialogFragment implements GalleryS
         fadeIn.setAnimationListener(new Animation.AnimationListener() {
             @Override
             public void onAnimationStart(Animation animation) {
-
             }
 
             @Override
@@ -193,7 +187,6 @@ public class GallerySlideShowFragment extends DialogFragment implements GalleryS
 
             @Override
             public void onAnimationRepeat(Animation animation) {
-
             }
         });
         //start animation
@@ -210,7 +203,6 @@ public class GallerySlideShowFragment extends DialogFragment implements GalleryS
         fadeOut.setAnimationListener(new Animation.AnimationListener() {
             @Override
             public void onAnimationStart(Animation animation) {
-
             }
 
             @Override
@@ -221,12 +213,10 @@ public class GallerySlideShowFragment extends DialogFragment implements GalleryS
 
             @Override
             public void onAnimationRepeat(Animation animation) {
-
             }
         });
         //start animation
         textViewImageName.startAnimation(fadeOut);
         isBottomBarVisible = false;
-
     }
 }

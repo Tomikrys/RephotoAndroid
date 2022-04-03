@@ -50,16 +50,15 @@ import retrofit2.Response;
 public class SimpleMainActivity extends AppCompatActivity {
 
     private static String TAG = "SimpleMainActivity";
-
-    static {
-        System.loadLibrary("native-lib");
-    }
-
     public DrawerLayout drawerLayout;
     public ActionBarDrawerToggle actionBarDrawerToggle;
     private static final int REQUEST_CHOOSER = 1234;
     int id_entered_button;
     String path_ref_image = "";
+
+    static {
+        System.loadLibrary("native-lib");
+    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -81,9 +80,9 @@ public class SimpleMainActivity extends AppCompatActivity {
             getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         }
 
-//  TODO debug memory mode
-//        if(BuildConfig.DEBUG)
-//            StrictMode.enableDefaults();
+        //  TODO debug memory mode
+        //        if(BuildConfig.DEBUG)
+        //            StrictMode.enableDefaults();
 
         String access_token = Configuration.getAccessToken(this);
         if (access_token == null) {
@@ -95,163 +94,6 @@ public class SimpleMainActivity extends AppCompatActivity {
 
     public void checkLogin(View view) {
         testAccessTokenAndSetDrawer(Configuration.getAccessToken(this));
-    }
-
-    private void testAccessTokenAndSetDrawer(String access_token) {
-        UserLogout accesToken = new UserLogout(access_token);
-        ApiInterface apiInterface = RetrofitClient.getRetrofitInstance().create(ApiInterface.class);
-        Call<OneLoginResponse> call = apiInterface.checkLogin(accesToken);
-        SimpleMainActivity copyThis = this;
-        call.enqueue(new Callback<OneLoginResponse>() {
-            @Override
-            public void onResponse(Call<OneLoginResponse> call, Response<OneLoginResponse> response) {
-                if (response.code() == 200) {
-                    assert response.body() != null;
-                    LoginResponse status = response.body().getLoginResponse();
-
-                    SharedPreferences sharedPref = copyThis.getPreferences(Context.MODE_PRIVATE);
-                    SharedPreferences.Editor editor = sharedPref.edit();
-                    editor.putString(getString(R.string.access_token), status.getAccess_token());
-                    editor.apply();
-
-                    setDrawerLogged();
-                } else {
-                    setDrawerNotLogged();
-                    setVariablesNotLogged(copyThis);
-                }
-            }
-
-            @Override
-            public void onFailure(Call<OneLoginResponse> call, Throwable t) {
-                Log.e(TAG, "onFailure: " + call.toString());
-                Log.e(TAG, "onFailure: " + t.getMessage());
-            }
-        });
-    }
-
-    @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
-        MaterialMenuInflater
-                .with(this) // Provide the activity context
-                // Set the fall-back color for all the icons. Colors set inside the XML will always have higher priority
-                .setDefaultColor(Color.RED)
-                // Inflate the menu
-                .inflate(R.menu.menu_main, menu);
-        return true;
-    }
-
-    @Override
-    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-        super.onActivityResult(requestCode, resultCode, data);
-        if (resultCode == RESULT_OK) {
-            final Uri uri = data.getData();
-            String path = uri.toString();
-
-            path_ref_image = path;
-            Intent intent = new Intent(this, SimpleNavigation.class);
-            intent.putExtra("PATH_REF_IMAGE", path_ref_image);
-            intent.putExtra("SOURCE", "LOCAL");
-            startActivity(intent);
-
-            Log.d(TAG, path);
-            Log.d(TAG, String.valueOf(id_entered_button));
-        }
-    }
-
-    public void showFileDialog(View view) {
-        Intent intent = new Intent(Intent.ACTION_OPEN_DOCUMENT);
-        intent.setType("image/*");
-        intent = Intent.createChooser(intent, "Choose file");
-
-        startActivityForResult(intent, REQUEST_CHOOSER);
-    }
-
-    public void RephotoApiButton(View view) {
-        Intent intent = new Intent(this, Rephotos_API.class);
-        startActivity(intent);
-    }
-
-    public void GalleryButton(View view) {
-        Intent intent = new Intent(this, GalleryMainActivity.class);
-        startActivity(intent);
-    }
-
-    public String getPath(Uri contentUri) {
-        String res = null;
-        String[] proj = {MediaStore.Images.Media.DATA};
-        Cursor cursor = getContentResolver().query(contentUri, proj, null, null, null);
-        if (cursor.moveToFirst()) {
-            ;
-            int column_index = cursor.getColumnIndexOrThrow(MediaStore.Images.Media.DATA);
-            res = cursor.getString(column_index);
-        }
-        cursor.close();
-        return res;
-    }
-
-    public void UploadPhoto(View view) {
-        Toast.makeText(getApplicationContext(),
-                "Begin Upload", Toast.LENGTH_LONG).show();
-//        File path = Environment.getExternalStoragePublicDirectory(
-//                Environment.DIRECTORY_PICTURES);
-//        File file = new File(path, "DemoPicture.jpg");
-        String path_new_image = "content://media/external/images/media/67";
-        Uri file_uri = Uri.parse(path_new_image);
-        String absolute_path = getPath(file_uri);
-        File file = new File(absolute_path);
-        RequestBody requestFile = RequestBody.create(MediaType.parse("image/*"), file);
-        MultipartBody.Part multipartBodyPart = MultipartBody.Part.createFormData("file", file.getName(), requestFile);
-
-        ApiInterface apiInterface = RetrofitClient.getRetrofitInstance().create(ApiInterface.class);
-        Call<Status> call = apiInterface.addPhoto(Configuration.getAccessToken(this), 6, multipartBodyPart);
-
-        SimpleMainActivity copyThis = this;
-        call.enqueue(new Callback<Status>() {
-            @Override
-            public void onResponse(Call<Status> call, Response<Status> response) {
-//                LoginResponse status = response.body().getLoginResponse();
-                if (response.code() == 200) {
-                    Toast.makeText(
-                            copyThis,
-                            "Uploaded",
-                            Toast.LENGTH_SHORT
-                    ).show();
-                } else {
-                    Log.e(TAG, "onResponse: " + response.code());
-                }
-            }
-
-            @Override
-            public void onFailure(Call<Status> call, Throwable t) {
-                Log.e(TAG, "onFailure: " + call.toString());
-                Log.e(TAG, "onFailure: " + t.getMessage());
-            }
-        });
-
-
-    }
-
-    public void exitApplication(MenuItem item) {
-        finish();
-    }
-
-
-    // override the onOptionsItemSelected()
-    // function to implement
-    // the item click listener callback
-    // to open and close the navigation
-    // drawer when the icon is clicked
-    @Override
-    public boolean onOptionsItemSelected(@NonNull MenuItem item) {
-
-        if (actionBarDrawerToggle.onOptionsItemSelected(item)) {
-            return true;
-        }
-        return super.onOptionsItemSelected(item);
-    }
-
-    public void Logout(View view) {
-        Logout();
     }
 
     public void Logout() {
@@ -282,67 +124,6 @@ public class SimpleMainActivity extends AppCompatActivity {
                 Log.e(TAG, "onFailure: " + t.getMessage());
             }
         });
-    }
-
-    public void setVariablesNotLogged(AppCompatActivity view) {
-        SharedPreferences sharedPref = view.getPreferences(Context.MODE_PRIVATE);
-        SharedPreferences.Editor editor = sharedPref.edit();
-        editor.putString(getString(R.string.access_token), null);
-        editor.putString(getString(R.string.last_name), null);
-        editor.putString(getString(R.string.first_name), null);
-        editor.putString(getString(R.string.email), null);
-        editor.apply();
-    }
-
-    private void setDrawerNotLogged() {
-        NavigationView navigationView = (NavigationView) findViewById(R.id.drawer_navigation);
-        if (navigationView != null) {
-            Menu navigation_menu = navigationView.getMenu();
-            navigation_menu.findItem(R.id.logout).setVisible(false);
-            navigation_menu.findItem(R.id.login).setVisible(true);
-            TextView header_title = navigationView.getHeaderView(0).findViewById(R.id.header_title);
-            if (header_title != null) {
-                header_title.setText("Not logged in");
-            }
-        }
-    }
-
-    private void setDrawerLogged() {
-        NavigationView navigationView = (NavigationView) findViewById(R.id.drawer_navigation);
-        if (navigationView != null) {
-            Menu navigation_menu = navigationView.getMenu();
-            navigation_menu.findItem(R.id.logout).setVisible(true);
-            navigation_menu.findItem(R.id.login).setVisible(false);
-            TextView header_title = navigationView.getHeaderView(0).findViewById(R.id.header_title);
-            if (header_title != null) {
-                header_title.setText("Logged in as " + Configuration.getFirstName(this) + " " + Configuration.getLastName(this));
-            }
-        }
-    }
-
-    public void Logout(MenuItem item) {
-        Logout();
-    }
-
-    public void Login(MenuItem item) {
-        Login();
-    }
-
-    public void Login(View view) {
-        Login();
-    }
-
-
-    public void choosePhoto(View view) {
-//        ActivityCompat.finishAffinity(this);
-        showFileDialog(view);
-//        finish();
-    }
-
-    public void choosePhoto(MenuItem menu) {
-//        ActivityCompat.finishAffinity(this);
-        showFileDialog(null);
-//        finish();
     }
 
     public void Login() {
@@ -419,10 +200,221 @@ public class SimpleMainActivity extends AppCompatActivity {
         });
     }
 
+    private void testAccessTokenAndSetDrawer(String access_token) {
+        UserLogout accesToken = new UserLogout(access_token);
+        ApiInterface apiInterface = RetrofitClient.getRetrofitInstance().create(ApiInterface.class);
+        Call<OneLoginResponse> call = apiInterface.checkLogin(accesToken);
+        SimpleMainActivity copyThis = this;
+        call.enqueue(new Callback<OneLoginResponse>() {
+            @Override
+            public void onResponse(Call<OneLoginResponse> call, Response<OneLoginResponse> response) {
+                if (response.code() == 200) {
+                    assert response.body() != null;
+                    LoginResponse status = response.body().getLoginResponse();
+
+                    SharedPreferences sharedPref = copyThis.getPreferences(Context.MODE_PRIVATE);
+                    SharedPreferences.Editor editor = sharedPref.edit();
+                    editor.putString(getString(R.string.access_token), status.getAccess_token());
+                    editor.apply();
+
+                    setDrawerLogged();
+                } else {
+                    setDrawerNotLogged();
+                    setVariablesNotLogged(copyThis);
+                }
+            }
+
+            @Override
+            public void onFailure(Call<OneLoginResponse> call, Throwable t) {
+                Log.e(TAG, "onFailure: " + call.toString());
+                Log.e(TAG, "onFailure: " + t.getMessage());
+            }
+        });
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        if (resultCode == RESULT_OK) {
+            final Uri uri = data.getData();
+            String path = uri.toString();
+
+            path_ref_image = path;
+            Intent intent = new Intent(this, SimpleNavigation.class);
+            intent.putExtra("PATH_REF_IMAGE", path_ref_image);
+            intent.putExtra("SOURCE", "LOCAL");
+            startActivity(intent);
+
+            Log.d(TAG, path);
+            Log.d(TAG, String.valueOf(id_entered_button));
+        }
+    }
+
+    public void showFileDialog(View view) {
+        Intent intent = new Intent(Intent.ACTION_OPEN_DOCUMENT);
+        intent.setType("image/*");
+        intent = Intent.createChooser(intent, "Choose file");
+
+        startActivityForResult(intent, REQUEST_CHOOSER);
+    }
+
+    public void RephotoApiButton(View view) {
+        Intent intent = new Intent(this, Rephotos_API.class);
+        startActivity(intent);
+    }
+
+    public void GalleryButton(View view) {
+        Intent intent = new Intent(this, GalleryMainActivity.class);
+        startActivity(intent);
+    }
+
+    public void UploadPhoto(View view) {
+        Toast.makeText(getApplicationContext(),
+                "Begin Upload", Toast.LENGTH_LONG).show();
+//        File path = Environment.getExternalStoragePublicDirectory(
+//                Environment.DIRECTORY_PICTURES);
+//        File file = new File(path, "DemoPicture.jpg");
+        String path_new_image = "content://media/external/images/media/67";
+        Uri file_uri = Uri.parse(path_new_image);
+        String absolute_path = getPath(file_uri);
+        File file = new File(absolute_path);
+        RequestBody requestFile = RequestBody.create(MediaType.parse("image/*"), file);
+        MultipartBody.Part multipartBodyPart = MultipartBody.Part.createFormData("file", file.getName(), requestFile);
+
+        ApiInterface apiInterface = RetrofitClient.getRetrofitInstance().create(ApiInterface.class);
+        Call<Status> call = apiInterface.addPhoto(Configuration.getAccessToken(this), 6, multipartBodyPart);
+
+        SimpleMainActivity copyThis = this;
+        call.enqueue(new Callback<Status>() {
+            @Override
+            public void onResponse(Call<Status> call, Response<Status> response) {
+//                LoginResponse status = response.body().getLoginResponse();
+                if (response.code() == 200) {
+                    Toast.makeText(
+                            copyThis,
+                            "Uploaded",
+                            Toast.LENGTH_SHORT
+                    ).show();
+                } else {
+                    Log.e(TAG, "onResponse: " + response.code());
+                }
+            }
+
+            @Override
+            public void onFailure(Call<Status> call, Throwable t) {
+                Log.e(TAG, "onFailure: " + call.toString());
+                Log.e(TAG, "onFailure: " + t.getMessage());
+            }
+        });
+    }
+
+
+
+    public void setVariablesNotLogged(AppCompatActivity view) {
+        SharedPreferences sharedPref = view.getPreferences(Context.MODE_PRIVATE);
+        SharedPreferences.Editor editor = sharedPref.edit();
+        editor.putString(getString(R.string.access_token), null);
+        editor.putString(getString(R.string.last_name), null);
+        editor.putString(getString(R.string.first_name), null);
+        editor.putString(getString(R.string.email), null);
+        editor.apply();
+    }
+
+    private void setDrawerNotLogged() {
+        NavigationView navigationView = (NavigationView) findViewById(R.id.drawer_navigation);
+        if (navigationView != null) {
+            Menu navigation_menu = navigationView.getMenu();
+            navigation_menu.findItem(R.id.logout).setVisible(false);
+            navigation_menu.findItem(R.id.login).setVisible(true);
+            TextView header_title = navigationView.getHeaderView(0).findViewById(R.id.header_title);
+            if (header_title != null) {
+                header_title.setText("Not logged in");
+            }
+        }
+    }
+
+    private void setDrawerLogged() {
+        NavigationView navigationView = (NavigationView) findViewById(R.id.drawer_navigation);
+        if (navigationView != null) {
+            Menu navigation_menu = navigationView.getMenu();
+            navigation_menu.findItem(R.id.logout).setVisible(true);
+            navigation_menu.findItem(R.id.login).setVisible(false);
+            TextView header_title = navigationView.getHeaderView(0).findViewById(R.id.header_title);
+            if (header_title != null) {
+                header_title.setText("Logged in as " + Configuration.getFirstName(this) + " " + Configuration.getLastName(this));
+            }
+        }
+    }
+
+
+    public void Login(MenuItem item) {
+        Login();
+    }
+    public void Login(View view) {
+        Login();
+    }
+    public void Logout(MenuItem item) {
+        Logout();
+    }
+    public void Logout(View view) {
+        Logout();
+    }
+
+    public void exitApplication(MenuItem item) {
+        finish();
+    }
+
+    public void choosePhoto(View view) {
+        showFileDialog(view);
+    }
+
+    public void choosePhoto(MenuItem menu) {
+        showFileDialog(null);
+    }
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        MaterialMenuInflater
+                .with(this) // Provide the activity context
+                // Set the fall-back color for all the icons. Colors set inside the XML will always have higher priority
+                .setDefaultColor(Color.RED)
+                // Inflate the menu
+                .inflate(R.menu.menu_main, menu);
+        return true;
+    }
+
+    // override the onOptionsItemSelected()
+    // function to implement
+    // the item click listener callback
+    // to open and close the navigation
+    // drawer when the icon is clicked
+    @Override
+    public boolean onOptionsItemSelected(@NonNull MenuItem item) {
+
+        if (actionBarDrawerToggle.onOptionsItemSelected(item)) {
+            return true;
+        }
+        return super.onOptionsItemSelected(item);
+    }
+
     public void openSettings(MenuItem item) {
         // opening a new intent to open settings activity.
         Intent i = new Intent(SimpleMainActivity.this, PreferenceActivity.class);
         startActivity(i);
     }
+
+    public String getPath(Uri contentUri) {
+        String res = null;
+        String[] proj = {MediaStore.Images.Media.DATA};
+        Cursor cursor = getContentResolver().query(contentUri, proj, null, null, null);
+        if (cursor.moveToFirst()) {
+            ;
+            int column_index = cursor.getColumnIndexOrThrow(MediaStore.Images.Media.DATA);
+            res = cursor.getString(column_index);
+        }
+        cursor.close();
+        return res;
+    }
+
 }
 

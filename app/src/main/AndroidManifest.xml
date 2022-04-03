@@ -53,7 +53,6 @@
         <activity android:name=".Rephotos_API" />
         <activity android:name=".GalleryMainActivity" />
         <activity android:name=".UploadPhoto" />
-        <activity android:name=".Login" />
         <activity android:name=".PreferenceActivity" />
     </application>
 

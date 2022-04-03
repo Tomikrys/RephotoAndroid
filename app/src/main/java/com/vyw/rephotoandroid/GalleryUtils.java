@@ -71,7 +71,7 @@ public class GalleryUtils {
                         ArrayList<GalleryItem> results = new ArrayList<GalleryItem>(places.size());
                         for (int i = 0; i < places.size(); i++) {
                             Place place = places.get(i);
-                            Log.e(TAG, "onResponse: [" + i + "] name : " + place.getName());
+                            Log.d(TAG, "onResponse: [" + i + "] name : " + place.getName());
                             GalleryItem galleryItem = new GalleryItem(
                                     place.getPhotos().get(0).getPhotoUri(),
                                     place.getName(),
@@ -100,36 +100,5 @@ public class GalleryUtils {
             Log.e(TAG, e.getMessage());
         }
         return null;
-
-//        call.enqueue(new Callback<ListPlace>() {
-//            @Override
-//            public void onResponse(Call<ListPlace> call, Response<ListPlace> response) {
-//                Log.e(TAG, "onResponse: " + response.code());
-//                ListPlace listPlace = response.body();
-//                if (listPlace != null) {
-//                    List<Place> places = listPlace.getPlaces();
-//                    if (places != null) {
-//                        ArrayList<GalleryItem> results = new ArrayList<GalleryItem>(places.size());
-//                        for (int i = 0; i < places.size(); i++) {
-//                            Place place = places.get(i);
-//                            Log.e(TAG, "onResponse: [" + i + "] name : " + place.getName());
-//                            GalleryItem galleryItem = new GalleryItem(place.getOldestPhoto().getPhotoUri(), place.getName(), place.getOldestPhoto().getCaptured_at());
-//                            results.add(galleryItem);
-//                        }
-//                    } else {
-//                        Log.e(TAG, "onResponse: empty places");
-//                    }
-//                } else {
-//                    Log.e(TAG, "onResponse: empty response");
-//                }
-//            }
-//
-//            @Override
-//            public void onFailure(Call<ListPlace> call, Throwable t) {
-//                Log.e(TAG, "onFailure: " + call.toString());
-//                Log.e(TAG, "onFailure: " + t.getMessage());
-//            }
-//        });
-
     }
 }
