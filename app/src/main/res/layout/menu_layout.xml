@@ -44,7 +44,7 @@
             android:id="@+id/simple_navigation"
             android:layout_width="200dp"
             android:layout_height="wrap_content"
-            android:onClick="simpleNavigation"
+            android:onClick="choosePhoto"
             android:text="Simple Navigation" />
 
         <Button

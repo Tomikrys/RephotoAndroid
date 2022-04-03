@@ -1,10 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    package="com.vyw.rephotoandroid">
-    <uses-feature android:name="android.hardware.camera.any" />
-    <!--Camera permission-->
-    <uses-permission android:name="android.permission.CAMERA" />
-    <!--File read permission-->
+    package="com.vyw.rephotoandroid" >
+
+    <uses-feature android:name="android.hardware.camera.any" /> <!-- Camera permission -->
+    <uses-permission android:name="android.permission.CAMERA" /> <!-- File read permission -->
     <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
     <uses-permission android:name="android.permission.INTERNET" />
@@ -13,50 +12,49 @@
         android:allowBackup="true"
         android:icon="@mipmap/ic_launcher"
         android:label="@string/app_name"
+        android:networkSecurityConfig="@xml/network_security_config"
+        android:requestLegacyExternalStorage="true"
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/AppTheme"
-        android:usesCleartextTraffic="true"
-        android:networkSecurityConfig="@xml/network_security_config"
-        android:requestLegacyExternalStorage="true">
+        android:usesCleartextTraffic="true" >
         <activity
-            android:name="com.vyw.rephotoandroid.SimpleMainActivity"
-            android:exported="true">
+            android:name=".SimpleMainActivity"
+            android:exported="true" >
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
+
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
-        </activity>
-<!--        <activity-->
-<!--            android:name="com.vyw.rephotoandroid.MainActivityDemo"-->
-<!--            android:exported="true">-->
-<!--            <intent-filter>-->
-<!--                <action android:name="android.intent.action.MAIN" />-->
-<!--                <category android:name="android.intent.category.LAUNCHER" />-->
-<!--            </intent-filter>-->
-<!--&lt;!&ndash;        </activity>&ndash;&gt;-->
-<!--        <activity-->
-<!--            android:name="com.vyw.rephotoandroid.MainActivityDemoJava"-->
-<!--            android:exported="true">-->
-<!--            <intent-filter>-->
-<!--                <action android:name="android.intent.action.MAIN" />-->
-<!--                <category android:name="android.intent.category.LAUNCHER" />-->
-<!--            </intent-filter>-->
-<!--        </activity>-->
-        <activity android:name="com.vyw.rephotoandroid.CameraActivity" />
-        <activity android:name="com.vyw.rephotoandroid.NavigationProcesing" />
-        <activity android:name="com.vyw.rephotoandroid.SelectPointsActivity" />
-        <activity android:name="com.vyw.rephotoandroid.RefotografieActivity" />
-        <activity android:name="com.vyw.rephotoandroid.SettingActivity" />
-        <activity android:name="com.vyw.rephotoandroid.CameraPreview" />
-        <activity android:name="com.vyw.rephotoandroid.MainActivityDemoJava" />
-        <activity android:name="com.vyw.rephotoandroid.SimpleNavigation" />
-        <activity android:name="com.vyw.rephotoandroid.Rephotos_API" />
-        <activity android:name="com.vyw.rephotoandroid.GalleryMainActivity" />
-        <activity android:name="com.vyw.rephotoandroid.UploadPhoto" />
-        <activity android:name="com.vyw.rephotoandroid.Login" />
-
-<!--        <activity android:name="com.vyw.rephotoandroid.SimpleMainActivity" />-->
+        </activity> <!-- <activity -->
+        <!-- android:name="com.vyw.rephotoandroid.MainActivityDemo" -->
+        <!-- android:exported="true"> -->
+        <!-- <intent-filter> -->
+        <!-- <action android:name="android.intent.action.MAIN" /> -->
+        <!-- <category android:name="android.intent.category.LAUNCHER" /> -->
+        <!-- </intent-filter> -->
+        <!-- &lt;!&ndash;        </activity>&ndash;&gt; -->
+        <!-- <activity -->
+        <!-- android:name="com.vyw.rephotoandroid.MainActivityDemoJava" -->
+        <!-- android:exported="true"> -->
+        <!-- <intent-filter> -->
+        <!-- <action android:name="android.intent.action.MAIN" /> -->
+        <!-- <category android:name="android.intent.category.LAUNCHER" /> -->
+        <!-- </intent-filter> -->
+        <!-- </activity> -->
+        <activity android:name=".CameraActivity" />
+        <activity android:name=".NavigationProcesing" />
+        <activity android:name=".SelectPointsActivity" />
+        <activity android:name=".RefotografieActivity" />
+        <activity android:name=".SettingActivity" />
+        <activity android:name=".CameraPreview" />
+        <activity android:name=".MainActivityDemoJava" />
+        <activity android:name=".SimpleNavigation" />
+        <activity android:name=".Rephotos_API" />
+        <activity android:name=".GalleryMainActivity" />
+        <activity android:name=".UploadPhoto" />
+        <activity android:name=".Login" />
+        <activity android:name=".PreferenceActivity" />
     </application>
 
 </manifest>

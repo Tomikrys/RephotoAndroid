@@ -12,33 +12,22 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent">
 
-
-        <TextView
-            android:id="@+id/textView"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_alignParentStart="true"
-            android:layout_alignParentEnd="true"
-            android:text="@string/re_fotografie"
-            android:textAppearance="@style/TextAppearance.AppCompat.Headline"
-            android:textSize="50sp" />
-
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:gravity="center"
             android:orientation="vertical">
 
-            <Button
-                android:id="@+id/simple_navigation"
-                android:layout_width="200dp"
-                android:layout_height="wrap_content"
-                android:onClick="simpleNavigation"
-                android:text="Choose REference Photo" />
+<!--            <Button-->
+<!--                android:id="@+id/simple_navigation"-->
+<!--                android:layout_width="200dp"-->
+<!--                android:layout_height="wrap_content"-->
+<!--                android:onClick="choosePhoto"-->
+<!--                android:text="Choose Reference Photo" />-->
 
-            <Space
-                android:layout_width="match_parent"
-                android:layout_height="39dp" />
+<!--            <Space-->
+<!--                android:layout_width="match_parent"-->
+<!--                android:layout_height="39dp" />-->
 
             <Button
                 android:id="@+id/rephotos_api"
@@ -58,16 +47,16 @@
                 android:onClick="GalleryButton"
                 android:text="Gallery" />
 
-            <Space
-                android:layout_width="match_parent"
-                android:layout_height="39dp" />
+<!--            <Space-->
+<!--                android:layout_width="match_parent"-->
+<!--                android:layout_height="39dp" />-->
 
-            <Button
-                android:id="@+id/login"
-                android:layout_width="200dp"
-                android:layout_height="wrap_content"
-                android:onClick="Login"
-                android:text="Log in" />
+<!--            <Button-->
+<!--                android:id="@+id/login"-->
+<!--                android:layout_width="200dp"-->
+<!--                android:layout_height="wrap_content"-->
+<!--                android:onClick="Login"-->
+<!--                android:text="Log in" />-->
 
             <Space
                 android:layout_width="match_parent"
@@ -79,17 +68,28 @@
                 android:layout_height="wrap_content"
                 android:onClick="UploadPhoto"
                 android:text="Upload Photo" />
-
             <Space
                 android:layout_width="match_parent"
                 android:layout_height="39dp" />
 
             <Button
-                android:id="@+id/logout"
+                android:id="@+id/check_login"
                 android:layout_width="200dp"
                 android:layout_height="wrap_content"
-                android:onClick="Logout"
-                android:text="Logout" />
+                android:onClick="checkLogin"
+                android:text="checkLogin" />
+
+<!--            <Space-->
+<!--                android:layout_width="match_parent"-->
+<!--                android:layout_height="39dp" />-->
+
+<!--            <Button-->
+<!--                android:id="@+id/logout"-->
+<!--                android:layout_width="200dp"-->
+<!--                android:layout_height="wrap_content"-->
+<!--                android:onClick="Logout"-->
+<!--                android:text="Logout" />-->
+
         </LinearLayout>
 
     </RelativeLayout>
@@ -97,9 +97,11 @@
         and shows the navigation drawer-->
     <!--include the menu created in the menu folder-->
     <com.google.android.material.navigation.NavigationView
+        android:id="@id/drawer_navigation"
         android:layout_width="wrap_content"
         android:layout_height="match_parent"
         android:layout_gravity="start"
+        app:headerLayout="@layout/nav_header"
         app:menu="@menu/navigation_menu" />
 
 </androidx.drawerlayout.widget.DrawerLayout>

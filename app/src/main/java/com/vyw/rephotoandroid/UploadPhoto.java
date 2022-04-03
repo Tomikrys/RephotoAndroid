@@ -103,7 +103,8 @@ public class UploadPhoto extends AppCompatActivity {
         MultipartBody.Part multipartBodyPart = MultipartBody.Part.createFormData("file", file.getName(), requestFile);
 
         ApiInterface apiInterface = RetrofitClient.getRetrofitInstance().create(ApiInterface.class);
-        Call<Status> call = apiInterface.addPhoto(Configuration.access_token, 6, multipartBodyPart);
+//        TODO get id
+        Call<Status> call = apiInterface.addPhoto(Configuration.getAccessToken(this), 6, multipartBodyPart);
 
         UploadPhoto copyThis = this;
         call.enqueue(new Callback<Status>() {
@@ -317,7 +318,6 @@ public class UploadPhoto extends AppCompatActivity {
         Matrix matrix = new Matrix();
         matrix.postRotate(degrees);
         Bitmap scaledBitmap = Bitmap.createScaledBitmap(bitmap, bitmap.getWidth(), bitmap.getHeight(), true);
-        Bitmap rotatedBitmap = Bitmap.createBitmap(scaledBitmap, 0, 0, scaledBitmap.getWidth(), scaledBitmap.getHeight(), matrix, true);
-        return rotatedBitmap;
+        return Bitmap.createBitmap(scaledBitmap, 0, 0, scaledBitmap.getWidth(), scaledBitmap.getHeight(), matrix, true);
     }
 }

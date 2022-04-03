@@ -1,6 +1,9 @@
 package com.vyw.rephotoandroid;
 
+import android.app.Activity;
 import android.app.Dialog;
+import android.content.Context;
+import android.content.ContextWrapper;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
@@ -9,10 +12,12 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.EditText;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
 
+import com.google.android.material.navigation.NavigationView;
 import com.vyw.rephotoandroid.model.Configuration;
 import com.vyw.rephotoandroid.model.ListPlace;
 import com.vyw.rephotoandroid.model.Place;
@@ -51,6 +56,10 @@ public class Login extends AppCompatActivity {
 
 
     public void Login(View view) {
+        Login();
+    }
+
+    public void Login() {
         EditText emailInput = (EditText) findViewById(R.id.email);
         EditText passwordInput = (EditText) findViewById(R.id.password);
         String email = emailInput.getText().toString();
@@ -70,16 +79,23 @@ public class Login extends AppCompatActivity {
             public void onResponse(Call<OneLoginResponse> call, Response<OneLoginResponse> response) {
                 LoginResponse status = response.body().getLoginResponse();
                 if (response.code() == 200) {
-                    Configuration.access_token = status.getAccess_token();
-                    Configuration.email = status.getEmail();
-                    Configuration.first_name = status.getFirst_name();
-                    Configuration.last_name = status.getLast_name();
-                    Configuration.logged = true;
-                    Toast.makeText(
-                            copyThis,
-                            "logged in as " + Configuration.first_name + " " + Configuration.last_name,
-                            Toast.LENGTH_SHORT
-                    ).show();
+//                    Configuration.access_token = status.getAccess_token();
+//                    Configuration.email = status.getEmail();
+//                    Configuration.first_name = status.getFirst_name();
+//                    Configuration.last_name = status.getLast_name();
+//                    Configuration.logged = true;
+//                    Toast.makeText(
+//                            copyThis,
+//                            "Logged in as " + Configuration.first_name + " " + Configuration.last_name,
+//                            Toast.LENGTH_SHORT
+//                    ).show();
+
+                    NavigationView navigationView = findViewById(R.id.drawer_navigation);
+                    Menu navigation_menu = navigationView.getMenu();
+                    navigation_menu.findItem(R.id.logout).setVisible(true);
+                    navigation_menu.findItem(R.id.login).setVisible(false);
+                    TextView header_title = findViewById(R.id.header_title);
+//                    header_title.setText("Logged in as " + Configuration.first_name + " " + Configuration.last_name);
 
 //                    TODO update menu
                     copyThis.finish();
@@ -99,4 +115,5 @@ public class Login extends AppCompatActivity {
     public void exitApplication(MenuItem item) {
         finish();
     }
+
 }

@@ -50,4 +50,7 @@ public interface ApiInterface {
 
     @POST("user/logout")
     Call<Status> logout(@Body UserLogout userLogout );
+
+    @POST("user/check-login")
+    Call<OneLoginResponse> checkLogin(@Body UserLogout accessToken);
 }
