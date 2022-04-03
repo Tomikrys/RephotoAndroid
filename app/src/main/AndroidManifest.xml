@@ -19,7 +19,7 @@
         android:theme="@style/AppTheme"
         android:usesCleartextTraffic="true" >
         <activity
-            android:name=".SimpleMainActivity"
+            android:name=".GalleryMainActivity"
             android:exported="true" >
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
@@ -51,7 +51,6 @@
         <activity android:name=".MainActivityDemoJava" />
         <activity android:name=".SimpleNavigation" />
         <activity android:name=".Rephotos_API" />
-        <activity android:name=".GalleryMainActivity" />
         <activity android:name=".UploadPhoto" />
         <activity android:name=".PreferenceActivity" />
     </application>
