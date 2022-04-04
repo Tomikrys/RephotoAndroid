@@ -1,6 +1,7 @@
 package com.vyw.rephotoandroid;
 
 import android.Manifest;
+import android.app.Activity;
 import android.content.ContentValues;
 import android.content.Intent;
 import android.content.pm.PackageManager;
@@ -10,8 +11,10 @@ import android.graphics.Color;
 import android.graphics.Matrix;
 import android.graphics.drawable.Drawable;
 import android.media.ExifInterface;
+import android.media.Image;
 import android.net.Uri;
 import android.os.Bundle;
+import android.os.Parcel;
 import android.os.ParcelFileDescriptor;
 import android.os.Parcelable;
 import android.provider.MediaStore;
@@ -28,6 +31,10 @@ import android.view.WindowManager;
 import android.widget.ImageView;
 import android.widget.Toast;
 
+import androidx.activity.result.ActivityResult;
+import androidx.activity.result.ActivityResultCallback;
+import androidx.activity.result.ActivityResultLauncher;
+import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
@@ -46,6 +53,7 @@ import androidx.lifecycle.LifecycleOwner;
 import com.google.common.util.concurrent.ListenableFuture;
 import com.squareup.picasso.Picasso;
 import com.squareup.picasso.Target;
+import com.vyw.rephotoandroid.model.Configuration;
 
 import org.opencv.android.BaseLoaderCallback;
 import org.opencv.android.LoaderCallbackInterface;
@@ -68,7 +76,7 @@ import java.util.concurrent.Executors;
 
 // https://medium.com/swlh/introduction-to-androids-camerax-with-java-ca384c522c5
 
-public class SimpleNavigation extends AppCompatActivity {
+public class SimpleNavigation extends AppCompatActivity implements Parcelable {
     private Executor executor = Executors.newSingleThreadExecutor();
     private static final String[] CAMERA_PERMISSION = new String[]{Manifest.permission.CAMERA};
     private static final int CAMERA_REQUEST_CODE = 10;
@@ -81,8 +89,8 @@ public class SimpleNavigation extends AppCompatActivity {
     private ImageView cameraPreview = null;
     private RenderScript rs;
     private ScriptIntrinsicYuvToRGB yuvToRgbIntrinsic;
-    String path_ref_image = "";
-    Bitmap bt_ref_frame = null;
+    private String path_ref_image = "";
+    private Bitmap bt_ref_frame = null;
     private static String TAG = "SimpleNavigation";
     private float origX = 0;
     private float origY = 0;
@@ -92,6 +100,7 @@ public class SimpleNavigation extends AppCompatActivity {
     private float newCrop = 0;
     private float origCrop = 0;
     private ImageCapture imageCapture;
+    private String source = "";
 
     private BaseLoaderCallback mOpenCVCallBack = new BaseLoaderCallback(this) {
         @Override
@@ -109,8 +118,6 @@ public class SimpleNavigation extends AppCompatActivity {
         }
     };
 
-    boolean onlyOnce = true;
-
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -123,7 +130,8 @@ public class SimpleNavigation extends AppCompatActivity {
         previewView = findViewById(R.id.previewView);
         Intent intent = getIntent();
         path_ref_image = intent.getStringExtra("PATH_REF_IMAGE");
-        if (intent.getStringExtra("SOURCE").equals("ONLINE")) {
+        source = intent.getStringExtra("SOURCE");
+        if (source.equals("ONLINE")) {
             Target target = new Target() {
                 @Override
                 public void onBitmapLoaded(Bitmap bitmap, Picasso.LoadedFrom from) {
@@ -132,15 +140,17 @@ public class SimpleNavigation extends AppCompatActivity {
                     refImage = findViewById(R.id.refImage);
                     refImage.setImageBitmap(bt_ref_frame);
 
-                    refImageBitmapCopy = deepCopyBitmap(bt_ref_frame);
-                    refImageBitmap = deepCopyBitmap(refImageBitmapCopy);
+                    refImageBitmapCopy = ImageFunctions.deepCopyBitmap(bt_ref_frame);
+                    refImageBitmap = ImageFunctions.deepCopyBitmap(refImageBitmapCopy);
                 }
 
                 @Override
-                public void onBitmapFailed(Exception e, Drawable errorDrawable) {}
+                public void onBitmapFailed(Exception e, Drawable errorDrawable) {
+                }
 
                 @Override
-                public void onPrepareLoad(Drawable placeHolderDrawable) {}
+                public void onPrepareLoad(Drawable placeHolderDrawable) {
+                }
             };
 
             Picasso.get().load(path_ref_image).into(target);
@@ -148,17 +158,17 @@ public class SimpleNavigation extends AppCompatActivity {
         } else {
             Uri uri_ref_image = Uri.parse(path_ref_image);
             try {
-                bt_ref_frame = getBitmapFromUri(uri_ref_image);
+                bt_ref_frame = ImageFunctions.getBitmapFromUri(uri_ref_image, this);
             } catch (IOException e) {
                 e.printStackTrace();
             }
-            bt_ref_frame = rotateImage(bt_ref_frame, getOrientation(uri_ref_image));
+            bt_ref_frame = ImageFunctions.rotateImage(bt_ref_frame, ImageFunctions.getOrientation(uri_ref_image, this));
 
             refImage = findViewById(R.id.refImage);
             refImage.setImageBitmap(bt_ref_frame);
 
-            refImageBitmapCopy = deepCopyBitmap(bt_ref_frame);
-            refImageBitmap = deepCopyBitmap(refImageBitmapCopy);
+            refImageBitmapCopy = ImageFunctions.deepCopyBitmap(bt_ref_frame);
+            refImageBitmap = ImageFunctions.deepCopyBitmap(refImageBitmapCopy);
         }
 
         if (!isOCVSetUp) { // if OCV hasn't been setup yet, init it
@@ -287,7 +297,7 @@ public class SimpleNavigation extends AppCompatActivity {
                 newCrop = newCrop > 1 ? 1 : newCrop < 0 ? 0 : newCrop;
                 Log.d(TAG, "newCrop " + newCrop);
 
-                refImage.setImageBitmap(cropAndSetTransparency(newCrop, newAlpha));
+                refImage.setImageBitmap(ImageFunctions.cropAndSetTransparency(newCrop, newAlpha, refImageBitmap));
                 return true;
             case (MotionEvent.ACTION_UP):
                 Log.d(TAG, "Action was UP");
@@ -306,62 +316,6 @@ public class SimpleNavigation extends AppCompatActivity {
         }
     }
 
-    private static Bitmap makeBlackTransparent(Bitmap image) {
-        // convert image to matrix
-        Mat src = new Mat(image.getWidth(), image.getHeight(), CvType.CV_8UC4);
-        Utils.bitmapToMat(image, src);
-
-        // init new matrices
-        Mat dst = new Mat(image.getWidth(), image.getHeight(), CvType.CV_8UC4);
-        Mat tmp = new Mat(image.getWidth(), image.getHeight(), CvType.CV_8UC4);
-        Mat alpha = new Mat(image.getWidth(), image.getHeight(), CvType.CV_8UC4);
-
-        // convert image to grayscale
-        Imgproc.cvtColor(src, tmp, Imgproc.COLOR_BGR2GRAY);
-
-        // threshold the image to create alpha channel with complete transparency in black background region and zero transparency in foreground object region.
-        Imgproc.threshold(tmp, alpha, 100, 255, Imgproc.THRESH_BINARY);
-
-        // split the original image into three single channel.
-        List<Mat> rgb = new ArrayList<Mat>(3);
-        Core.split(src, rgb);
-
-        // Create the final result by merging three single channel and alpha(BGRA order)
-        List<Mat> rgba = new ArrayList<Mat>(4);
-        rgba.add(rgb.get(0));
-        rgba.add(rgb.get(1));
-        rgba.add(rgb.get(2));
-        rgba.add(alpha);
-        Core.merge(rgba, dst);
-
-        // convert matrix to output bitmap
-        Bitmap output = Bitmap.createBitmap(image.getWidth(), image.getHeight(), Bitmap.Config.ARGB_8888);
-        Utils.matToBitmap(dst, output);
-        return output;
-    }
-
-    private Bitmap RefImageEdges(Bitmap origImage) {
-        Bitmap image = deepCopyBitmap(origImage);
-
-        Mat rgbMat = new Mat();
-        Utils.bitmapToMat(image, rgbMat);
-
-        Mat grayMat = new Mat();
-        Mat bwMat = new Mat();
-
-        Imgproc.cvtColor(rgbMat, grayMat, Imgproc.COLOR_RGB2GRAY);
-        Imgproc.equalizeHist(grayMat, grayMat);
-
-//        Imgproc.adaptiveThreshold(grayMat, grayMat, 255, Imgproc.ADAPTIVE_THRESH_MEAN_C, Imgproc.THRESH_BINARY, 15, 40);
-        Imgproc.Canny(grayMat, bwMat, 50, 200, 3, false);
-
-        Bitmap edges = image;
-        Utils.matToBitmap(bwMat, edges);
-
-        Bitmap transparentBlack = makeBlackTransparent(edges);
-        return invertImage(transparentBlack);
-    }
-
     private boolean hasCameraPermission() {
         return ContextCompat.checkSelfPermission(
                 this,
@@ -377,79 +331,19 @@ public class SimpleNavigation extends AppCompatActivity {
         );
     }
 
-
-    public static Bitmap cropAndSetTransparency(double newCrop, double newAlpha) {
-        assert (0 <= newAlpha) && (newAlpha <= 1);
-        assert (0 <= newCrop) && (newCrop <= 1);
-
-        int width = refImageBitmap.getWidth();
-        int height = refImageBitmap.getHeight();
-        Bitmap myBitmap = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888);
-        int[] allpixels = new int[myBitmap.getHeight() * myBitmap.getWidth()];
-        Bitmap tmpBitmap = deepCopyBitmap(refImageBitmap);
-        tmpBitmap.getPixels(allpixels, 0, myBitmap.getWidth(), 0, 0, myBitmap.getWidth(),
-                myBitmap.getHeight());
-
-        int transparency = (int) Math.round(newAlpha * 255);
-        int numberOfPixels = (int) Math.round(newCrop * width);
-
-        for (int i = 0; i < myBitmap.getHeight() * myBitmap.getWidth(); i++) {
-            boolean shouldBeCropped = width - numberOfPixels <= (i % myBitmap.getWidth());
-            boolean isAlreadyTransparent = allpixels[i] == Color.alpha(Color.TRANSPARENT);
-            if (shouldBeCropped) {
-                allpixels[i] = Color.alpha(Color.TRANSPARENT);
-            } else if (!isAlreadyTransparent) {
-                allpixels[i] = setAplha(allpixels[i], transparency);
-            }
-        }
-
-        myBitmap.setPixels(allpixels, 0, myBitmap.getWidth(), 0, 0, myBitmap.getWidth(),
-                myBitmap.getHeight());
-        return myBitmap;
-    }
-
-    public Bitmap invertImage(Bitmap image) {
-        int width = image.getWidth();
-        int height = image.getHeight();
-        Bitmap myBitmap = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888);
-        int[] allpixels = new int[myBitmap.getHeight() * myBitmap.getWidth()];
-        image.getPixels(allpixels, 0, myBitmap.getWidth(), 0, 0, myBitmap.getWidth(), myBitmap.getHeight());
-        myBitmap.setPixels(allpixels, 0, width, 0, 0, width, height);
-
-        for (int i = 0; i < myBitmap.getHeight() * myBitmap.getWidth(); i++) {
-            allpixels[i] = (0xFFFFFF - (allpixels[i] & 0x00ffffff)) + (allpixels[i] & 0xff000000);
-        }
-
-        myBitmap.setPixels(allpixels, 0, myBitmap.getWidth(), 0, 0, myBitmap.getWidth(), myBitmap.getHeight());
-        return myBitmap;
-    }
-
-    public static int setAplha(int pixel, int transparency) {
-        return (pixel & 0x00ffffff) + (transparency << 24);
-    }
-
-    private Bitmap getBitmapFromUri(Uri uri) throws IOException {
-        ParcelFileDescriptor parcelFileDescriptor =
-                getContentResolver().openFileDescriptor(uri, "r");
-        FileDescriptor fileDescriptor = parcelFileDescriptor.getFileDescriptor();
-        Bitmap image = BitmapFactory.decodeFileDescriptor(fileDescriptor);
-        parcelFileDescriptor.close();
-        return image;
-    }
-
     boolean isEdges = false;
 
     public void toggleEdges(View view) {
         Log.d(TAG, "toggle");
         if (isEdges) {
-            bt_ref_frame = deepCopyBitmap(refImageBitmapCopy);
-            refImageBitmap = deepCopyBitmap(refImageBitmapCopy);
+            bt_ref_frame = ImageFunctions.deepCopyBitmap(refImageBitmapCopy);
+            refImageBitmap = ImageFunctions.deepCopyBitmap(refImageBitmapCopy);
         } else {
-            Bitmap edges = RefImageEdges(refImageBitmapCopy);
+            Bitmap edges = ImageFunctions.RefImageEdges(refImageBitmapCopy);
             bt_ref_frame = edges;
             refImageBitmap = edges;
         }
-        refImage.setImageBitmap(cropAndSetTransparency(newCrop, newAlpha));
+        refImage.setImageBitmap(ImageFunctions.cropAndSetTransparency(newCrop, newAlpha, refImageBitmap));
         isEdges = !isEdges;
     }
 
@@ -480,8 +374,10 @@ public class SimpleNavigation extends AppCompatActivity {
                         Intent intent = new Intent(thisCopy, UploadPhoto.class);
                         intent.putExtra("PATH_REF_IMAGE", path_ref_image);
                         intent.putExtra("PATH_NEW_IMAGE", savedImage);
-                        intent.putExtra("SimpleNavigation", (Parcelable) thisCopy);
-                        startActivity(intent);
+                        intent.putExtra("SOURCE", source);
+
+//                        intent.putExtra("SimpleNavigation", (Parcelable) thisCopy);
+                        UploadPhotoActivityResultLauncher.launch(intent);
                     }
                 });
             }
@@ -493,38 +389,67 @@ public class SimpleNavigation extends AppCompatActivity {
         });
     }
 
-    public static Bitmap deepCopyBitmap(Bitmap b) {
-        return b.copy(b.getConfig(), true);
-    }
+    // You can do the assignment inside onAttach or onCreate, i.e, before the activity is displayed
+    ActivityResultLauncher<Intent> UploadPhotoActivityResultLauncher = registerForActivityResult(
+            new ActivityResultContracts.StartActivityForResult(),
+            new ActivityResultCallback<ActivityResult>() {
+                @Override
+                public void onActivityResult(ActivityResult result) {
+                    if (result.getResultCode() == Activity.RESULT_OK) {
+                        // There are no request codes
+                        Intent data = result.getData();
+                        if (data != null && data.getBooleanExtra("CLOSE", false)) {
+                            finish();
+                        }
+                    }
+                }
+            });
 
-    public int getOrientation(Uri photoUri) {
-        try {
-            InputStream inputStream = getContentResolver().openInputStream(photoUri);
-            ExifInterface exif = new ExifInterface(inputStream);
-            switch (exif.getAttributeInt(ExifInterface.TAG_ORIENTATION,
-                    ExifInterface.ORIENTATION_UNDEFINED)) {
-                case ExifInterface.ORIENTATION_NORMAL:
-                    return 0;
-                case ExifInterface.ORIENTATION_ROTATE_90:
-                    return 90;
-                case ExifInterface.ORIENTATION_ROTATE_180:
-                    return 180;
-                case ExifInterface.ORIENTATION_ROTATE_270:
-                    return 270;
-                default:
-                    return ExifInterface.ORIENTATION_UNDEFINED;
-            }
-        } catch (IOException e) {
-            Log.e("WallOfLightApp", e.getMessage());
-            return 0;
+    public static final Creator<SimpleNavigation> CREATOR = new Creator<SimpleNavigation>() {
+        @Override
+        public SimpleNavigation createFromParcel(Parcel in) {
+            return new SimpleNavigation(in);
         }
+
+        @Override
+        public SimpleNavigation[] newArray(int size) {
+            return new SimpleNavigation[size];
+        }
+    };
+
+    @Override
+    public int describeContents() {
+        return 0;
     }
 
-    public Bitmap rotateImage(Bitmap bitmap, int degrees) {
-        Matrix matrix = new Matrix();
-        matrix.postRotate(degrees);
-        Bitmap scaledBitmap = Bitmap.createScaledBitmap(bitmap, bitmap.getWidth(), bitmap.getHeight(), true);
-        Bitmap rotatedBitmap = Bitmap.createBitmap(scaledBitmap, 0, 0, scaledBitmap.getWidth(), scaledBitmap.getHeight(), matrix, true);
-        return rotatedBitmap;
+    public SimpleNavigation() {
+    }
+
+
+    protected SimpleNavigation(Parcel in) {
+        isOCVSetUp = in.readByte() != 0;
+        path_ref_image = in.readString();
+        bt_ref_frame = in.readParcelable(Bitmap.class.getClassLoader());
+        origX = in.readFloat();
+        origY = in.readFloat();
+        newAlpha = in.readFloat();
+        origAlpha = in.readFloat();
+        newCrop = in.readFloat();
+        origCrop = in.readFloat();
+        isEdges = in.readByte() != 0;
+    }
+
+    @Override
+    public void writeToParcel(Parcel dest, int flags) {
+        dest.writeByte((byte) (isOCVSetUp ? 1 : 0));
+        dest.writeString(path_ref_image);
+        dest.writeParcelable(bt_ref_frame, flags);
+        dest.writeFloat(origX);
+        dest.writeFloat(origY);
+        dest.writeFloat(newAlpha);
+        dest.writeFloat(origAlpha);
+        dest.writeFloat(newCrop);
+        dest.writeFloat(origCrop);
+        dest.writeByte((byte) (isEdges ? 1 : 0));
     }
 }

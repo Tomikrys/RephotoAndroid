@@ -16,6 +16,14 @@
             android:layout_width="match_parent"
             android:layout_height="match_parent">
 
+            <com.google.android.material.floatingactionbutton.FloatingActionButton
+                android:id="@+id/retake"
+                android:layout_width="162dp"
+                android:layout_height="wrap_content"
+                android:clickable="true"
+                android:focusable="true"
+                android:onClick="Retake"
+                app:srcCompat="@drawable/baseline_arrow_back_black_24dp" />
         </androidx.camera.view.PreviewView>
     </FrameLayout>
 
@@ -57,7 +65,7 @@
         android:layout_height="match_parent">
 
         <com.google.android.material.floatingactionbutton.FloatingActionButton
-            android:id="@+id/floatingActionButton2"
+            android:id="@+id/upload_photo"
             android:layout_width="162dp"
             android:layout_height="wrap_content"
             android:clickable="true"
@@ -65,7 +73,20 @@
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:srcCompat="@android:drawable/ic_menu_upload" />
+            app:srcCompat="@android:drawable/ic_menu_upload"
+            android:focusable="true" />
+
+        <com.google.android.material.floatingactionbutton.FloatingActionButton
+            android:id="@+id/save_photo"
+            android:layout_width="162dp"
+            android:layout_height="wrap_content"
+            android:clickable="true"
+            android:onClick="SavePhoto"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:srcCompat="@android:drawable/ic_menu_save"
+            android:focusable="true" />
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 

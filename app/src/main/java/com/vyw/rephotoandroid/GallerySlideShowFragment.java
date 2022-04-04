@@ -2,9 +2,9 @@ package com.vyw.rephotoandroid;
 // Code inpired by https://www.loopwiki.com/application/create-gallery-android-application/
 
 
-import android.content.Intent;
-import android.graphics.Bitmap;
 import android.os.Bundle;
+import android.os.Parcelable;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
@@ -12,7 +12,6 @@ import android.view.ViewGroup;
 import android.view.animation.AlphaAnimation;
 import android.view.animation.Animation;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import androidx.fragment.app.DialogFragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
@@ -20,6 +19,7 @@ import androidx.recyclerview.widget.RecyclerView;
 import androidx.viewpager.widget.ViewPager;
 
 import com.vyw.rephotoandroid.model.GalleryItem;
+import com.vyw.rephotoandroid.model.ListGalleryItems;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -29,6 +29,7 @@ import java.util.List;
 public class GallerySlideShowFragment extends DialogFragment implements GalleryStripAdapter.GalleryStripCallBacks {
     //declare static variable which will serve as key of current position argument
     private static final String ARG_CURRENT_POSITION = "position";
+    private static final String GALLERY_ITEMS = "activity";
     //Declare list of GalleryItems
     List<GalleryItem> galleryItems;
     //Deceleration of  Gallery Strip Adapter
@@ -54,12 +55,14 @@ public class GallerySlideShowFragment extends DialogFragment implements GalleryS
     }
 
     //This method will create new instance of GallerySlideShowFragment
-    public static GallerySlideShowFragment newInstance(int position) {
+    public static GallerySlideShowFragment newInstance(int position, GalleryMainActivity galleryMainActivity) {
         GallerySlideShowFragment fragment = new GallerySlideShowFragment();
         //Create bundle
         Bundle args = new Bundle();
         //put Current Position in the bundle
         args.putInt(ARG_CURRENT_POSITION, position);
+        ListGalleryItems listGalleryItems = new ListGalleryItems(galleryMainActivity.galleryItems);
+        args.putParcelable(GALLERY_ITEMS, (Parcelable) listGalleryItems);
         //set arguments of GallerySlideShowFragment
         fragment.setArguments(args);
         //return fragment instance
@@ -75,13 +78,16 @@ public class GallerySlideShowFragment extends DialogFragment implements GalleryS
             //get Current selected position from arguments
             mCurrentPosition = getArguments().getInt(ARG_CURRENT_POSITION);
             //get GalleryItems from activity
-            galleryItems = ((GalleryMainActivity) getActivity()).galleryItems;
-            GalleryItem galleryPhotos = galleryItems.get(mCurrentPosition);
+            galleryItems = ((ListGalleryItems) getArguments().getParcelable(GALLERY_ITEMS)).getListGalleryItem();
+            Log.e("KURVA UŽ ", "onCreate: " + mCurrentPosition + " " + galleryItems);
+            if (galleryItems != null) {
+                GalleryItem galleryPhotos = galleryItems.get(mCurrentPosition);
 
-            //Initialise View Pager Adapter
-            mSlideShowPagerAdapter = new GallerySlideShowPagerAdapter(getContext(), galleryPhotos.placePhotos);
-            int firstIndex = 0;
-            ((GalleryMainActivity) getActivity()).setSelectedPicture(mSlideShowPagerAdapter.getPicture(firstIndex));
+                //Initialise View Pager Adapter
+                mSlideShowPagerAdapter = new GallerySlideShowPagerAdapter(getContext(), galleryPhotos.placePhotos);
+                int firstIndex = 0;
+                ((GalleryMainActivity) getActivity()).setSelectedPicture(mSlideShowPagerAdapter.getPicture(firstIndex));
+            }
         }
     }
 
@@ -116,39 +122,41 @@ public class GallerySlideShowFragment extends DialogFragment implements GalleryS
         //set layout manager of GalleryStripRecyclerView
         recyclerViewGalleryStrip.setLayoutManager(mGalleryStripLayoutManger);
         //Create GalleryStripRecyclerView's Adapter
-        mGalleryStripAdapter = new GalleryStripAdapter(galleryItems, getContext(), this, mCurrentPosition);
-        //set Adapter of GalleryStripRecyclerView
-        recyclerViewGalleryStrip.setAdapter(mGalleryStripAdapter);
-        //tell viewpager to open currently selected item and pass position of current item
-        mViewPagerGallery.setCurrentItem(mCurrentPosition);
-        //set image name textview's text according to position
-        textViewImageName.setText(galleryItems.get(mCurrentPosition).year);
-        textViewImageTitle.setText(galleryItems.get(mCurrentPosition).imageName);
-        //Add OnPageChangeListener to viewpager to handle page changes
-        mViewPagerGallery.addOnPageChangeListener(new ViewPager.OnPageChangeListener() {
-            @Override
-            public void onPageScrolled(int position, float positionOffset, int positionOffsetPixels) {
-            }
-
-            @Override
-            public void onPageSelected(int position) {
-                //set image name textview's text on any page selected
-                textViewImageName.setText(galleryItems.get(position).year);
-            }
-
-            @Override
-            public void onPageScrollStateChanged(int state) {
-                //first check When Page is scrolled and gets stable
-                if (state == ViewPager.SCROLL_STATE_IDLE) {
-                    //get current  item on view pager
-                    int currentSelected = mViewPagerGallery.getCurrentItem();
-                    //scroll strip smoothly to current  position of viewpager
-                    mGalleryStripLayoutManger.smoothScrollToPosition(recyclerViewGalleryStrip, null, currentSelected);
-                    //select current item of viewpager on gallery strip at bottom
-                    mGalleryStripAdapter.setSelected(currentSelected);
+        if (galleryItems != null) {
+            mGalleryStripAdapter = new GalleryStripAdapter(galleryItems, getContext(), this, mCurrentPosition);
+            //set Adapter of GalleryStripRecyclerView
+            recyclerViewGalleryStrip.setAdapter(mGalleryStripAdapter);
+            //tell viewpager to open currently selected item and pass position of current item
+            mViewPagerGallery.setCurrentItem(mCurrentPosition);
+            //set image name textview's text according to position
+            textViewImageName.setText(galleryItems.get(mCurrentPosition).year);
+            textViewImageTitle.setText(galleryItems.get(mCurrentPosition).imageName);
+            //Add OnPageChangeListener to viewpager to handle page changes
+            mViewPagerGallery.addOnPageChangeListener(new ViewPager.OnPageChangeListener() {
+                @Override
+                public void onPageScrolled(int position, float positionOffset, int positionOffsetPixels) {
                 }
-            }
-        });
+
+                @Override
+                public void onPageSelected(int position) {
+                    //set image name textview's text on any page selected
+                    textViewImageName.setText(galleryItems.get(position).year);
+                }
+
+                @Override
+                public void onPageScrollStateChanged(int state) {
+                    //first check When Page is scrolled and gets stable
+                    if (state == ViewPager.SCROLL_STATE_IDLE) {
+                        //get current  item on view pager
+                        int currentSelected = mViewPagerGallery.getCurrentItem();
+                        //scroll strip smoothly to current  position of viewpager
+                        mGalleryStripLayoutManger.smoothScrollToPosition(recyclerViewGalleryStrip, null, currentSelected);
+                        //select current item of viewpager on gallery strip at bottom
+                        mGalleryStripAdapter.setSelected(currentSelected);
+                    }
+                }
+            });
+        }
         return view;
     }
 
@@ -164,7 +172,9 @@ public class GallerySlideShowFragment extends DialogFragment implements GalleryS
     public void onDestroyView() {
         super.onDestroyView();
         //remove selection on destroy
-        mGalleryStripAdapter.removeSelection();
+        if (mGalleryStripAdapter != null) {
+            mGalleryStripAdapter.removeSelection();
+        }
     }
 
     //Method to fadeIn bottom bar which is image textview name

@@ -1,4 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <item name="drawer_navigation" type="id" />
+    <item name="retake" type="id" />
+    <item name="save_photo" type="id" />
+    <item name="upload_photo" type="id" />
 </resources>

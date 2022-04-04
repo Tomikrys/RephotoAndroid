@@ -11,7 +11,7 @@ import com.vyw.rephotoandroid.R;
 public class Configuration {
     // TODO dont forget to change it in res/xml/network_security_config.xml
 //    public static String baseUrl = "http://192.168.0.17/";
-    public static String baseUrl = "http://10.0.2.2/";
+    public static final String baseUrl = "http://10.0.2.2/";
 
     public static String getSharedValue(AppCompatActivity context, String key) {
         SharedPreferences sharedPreferences = context.getPreferences(Context.MODE_PRIVATE);

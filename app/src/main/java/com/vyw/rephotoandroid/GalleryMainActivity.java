@@ -11,6 +11,7 @@ import android.database.Cursor;
 import android.graphics.Color;
 import android.net.Uri;
 import android.os.Bundle;
+import android.os.Parcelable;
 import android.provider.MediaStore;
 import android.util.Log;
 import android.view.Menu;
@@ -45,6 +46,7 @@ import com.vyw.rephotoandroid.model.api.UserLogout;
 import net.steamcrafted.materialiconlib.MaterialMenuInflater;
 
 import java.io.File;
+import java.io.Serializable;
 import java.util.List;
 
 import okhttp3.MediaType;
@@ -65,8 +67,8 @@ public class GalleryMainActivity extends AppCompatActivity implements GalleryAda
     public DrawerLayout drawerLayout;
     public ActionBarDrawerToggle actionBarDrawerToggle;
     private static final int REQUEST_CHOOSER = 1234;
-    int id_entered_button;
-    String path_ref_image = "";
+    private int id_entered_button;
+    private String path_ref_image = "";
 
     static {
         System.loadLibrary("native-lib");
@@ -466,7 +468,7 @@ public class GalleryMainActivity extends AppCompatActivity implements GalleryAda
     @Override
     public void onItemSelected(int position) {
         //create fullscreen GallerySlideShowFragment dialog
-        GallerySlideShowFragment slideShowFragment = GallerySlideShowFragment.newInstance(position);
+        GallerySlideShowFragment slideShowFragment = GallerySlideShowFragment.newInstance(position, this);
         //setUp style for slide show fragment
         slideShowFragment.setStyle(DialogFragment.STYLE_NORMAL, R.style.DialogFragmentTheme);
         //finally show dialogue
