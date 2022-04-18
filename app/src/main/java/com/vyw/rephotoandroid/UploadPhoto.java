@@ -23,6 +23,7 @@ import android.widget.Toast;
 
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.camera.core.internal.utils.ImageUtil;
 
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.squareup.picasso.Picasso;
@@ -61,11 +62,12 @@ public class UploadPhoto extends AppCompatActivity {
     private float origX = 0;
     private float origY = 0;
 
-    private float newAlpha = 1;
-    private float origAlpha = 1;
-    private float newCrop = 0;
+    private float newAlpha = 0.5F;
+    private float origAlpha = 0;
+    private float newCrop = 0.5F;
     private float origCrop = 0;
     private String source = "";
+    private String image_id;
 //    private SimpleNavigation simpleNavigationIntent = null;
 
 
@@ -94,10 +96,13 @@ public class UploadPhoto extends AppCompatActivity {
         if (getSupportActionBar() != null) {
             getSupportActionBar().hide();
         }
+        refImage = findViewById(R.id.refImage);
 
-        path_ref_image = getIntent().getStringExtra("PATH_REF_IMAGE");
-        path_new_image = getIntent().getStringExtra("PATH_NEW_IMAGE");
-        source = getIntent().getStringExtra("SOURCE");
+        Intent intent = getIntent();
+        path_ref_image = intent.getStringExtra("PATH_REF_IMAGE");
+        path_new_image = intent.getStringExtra("PATH_NEW_IMAGE");
+        image_id = intent.getStringExtra("IMAGE_ID");
+        source = intent.getStringExtra("SOURCE");
         if (source.equals("ONLINE")) {
             ((FloatingActionButton) findViewById(R.id.retake)).setVisibility(View.GONE);
             ((FloatingActionButton) findViewById(R.id.save_photo)).setVisibility(View.GONE);
@@ -109,37 +114,54 @@ public class UploadPhoto extends AppCompatActivity {
         }
 //        simpleNavigationIntent = (SimpleNavigation) getIntent().getParcelableExtra("SimpleNavigation");
 
-//      get online ref photo
-        Target target = new Target() {
-            @Override
-            public void onBitmapLoaded(Bitmap bitmap, Picasso.LoadedFrom from) {
-                bt_ref_frame = bitmap;
+        if (source.equals("ONLINE")) {
+            //      get online ref photo
+            Target target = new Target() {
+                @Override
+                public void onBitmapLoaded(Bitmap bitmap, Picasso.LoadedFrom from) {
+                    bt_ref_frame = bitmap;
 
-                refImage = findViewById(R.id.refImage);
-                refImage.setImageBitmap(bt_ref_frame);
-                refImageBitmapCopy = ImageFunctions.deepCopyBitmap(bt_ref_frame);
-                refImageBitmap = ImageFunctions.deepCopyBitmap(refImageBitmapCopy);
+                    refImage.setImageBitmap(ImageFunctions.cropAndSetTransparency(newCrop, newAlpha, bt_ref_frame));
+                    refImageBitmapCopy = ImageFunctions.deepCopyBitmap(bt_ref_frame);
+                    refImageBitmap = ImageFunctions.deepCopyBitmap(refImageBitmapCopy);
+                }
+
+                @Override
+                public void onBitmapFailed(Exception e, Drawable errorDrawable) {
+                }
+
+                @Override
+                public void onPrepareLoad(Drawable placeHolderDrawable) {
+                }
+            };
+
+//        Uri uri_ref_image = Uri.parse(path_ref_image);
+//        int rotationDegrees = ImageFunctions.getOrientation(uri_ref_image, this);
+
+            Picasso.get().load(path_ref_image).into(target);
+        } else {
+            Uri uri_ref_image = Uri.parse(path_ref_image);
+            try {
+                bt_ref_frame = ImageFunctions.getBitmapFromUri(uri_ref_image, this);
+            } catch (IOException e) {
+                e.printStackTrace();
             }
+            bt_ref_frame = ImageFunctions.rotateImage(bt_ref_frame, ImageFunctions.getOrientation(uri_ref_image, this));
+            refImage.setImageBitmap(ImageFunctions.cropAndSetTransparency(newCrop, newAlpha, bt_ref_frame));
 
-            @Override
-            public void onBitmapFailed(Exception e, Drawable errorDrawable) {
-            }
-
-            @Override
-            public void onPrepareLoad(Drawable placeHolderDrawable) {
-            }
-        };
-
-        Picasso.get().load(path_ref_image).into(target);
+            refImageBitmapCopy = ImageFunctions.deepCopyBitmap(bt_ref_frame);
+            refImageBitmap = ImageFunctions.deepCopyBitmap(refImageBitmapCopy);
+        }
 
 //      get local new photo
-        Uri uri_ref_image = Uri.parse(path_new_image);
+        Uri uri_new_image = Uri.parse(path_new_image);
         try {
-            bt_new_frame = ImageFunctions.getBitmapFromUri(uri_ref_image, this);
+            bt_new_frame = ImageFunctions.getBitmapFromUri(uri_new_image, this);
         } catch (IOException e) {
             e.printStackTrace();
         }
-        bt_new_frame = ImageFunctions.rotateImage(bt_new_frame, ImageFunctions.getOrientation(uri_ref_image, this));
+        bt_new_frame = ImageFunctions.rotateImage(bt_new_frame, ImageFunctions.getOrientation(uri_new_image, this));
+        bt_new_frame = ImageFunctions.cropToAspectRatio(bt_new_frame, bt_ref_frame.getWidth(), bt_ref_frame.getHeight());
 
         newImage = findViewById(R.id.newImage);
         newImage.setImageBitmap(bt_new_frame);
@@ -170,6 +192,8 @@ public class UploadPhoto extends AppCompatActivity {
     }
 
     public void UploadPhoto(View view) {
+//        TODO if not logged
+//        TODO update gallery
         Toast.makeText(getApplicationContext(),
                 "Begin Upload", Toast.LENGTH_LONG).show();
         Uri file_uri = Uri.parse(path_new_image);
@@ -180,7 +204,7 @@ public class UploadPhoto extends AppCompatActivity {
 
         ApiInterface apiInterface = RetrofitClient.getRetrofitInstance().create(ApiInterface.class);
 //        TODO get id
-        Call<Status> call = apiInterface.addPhoto(Configuration.getAccessToken(this), 6, multipartBodyPart);
+        Call<Status> call = apiInterface.addPhoto(Configuration.getAccessToken(this), Integer.parseInt(image_id), multipartBodyPart);
 
         UploadPhoto copyThis = this;
         call.enqueue(new Callback<Status>() {
@@ -194,9 +218,9 @@ public class UploadPhoto extends AppCompatActivity {
                     ).show();
                     Intent intent = new Intent();
                     intent.putExtra("CLOSE", true);
+                    intent.putExtra("IMAGE_ID", image_id);
                     setResult(Activity.RESULT_OK, intent);
                     copyThis.finish();
-//                    simpleNavigationIntent.finish();
                 } else {
                     Log.e(TAG, "onResponse: " + response.code());
                 }

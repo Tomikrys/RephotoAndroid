@@ -89,6 +89,7 @@ public class GalleryUtils {
                             }
                             results.add(galleryItem);
                         }
+//                        TODO SORT PLACES
                         return results;
                     } else {
                         Log.e(TAG, "onResponse: empty places");

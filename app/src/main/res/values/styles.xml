@@ -29,4 +29,11 @@
         <item name="android:windowNoTitle">true</item>
     </style>
 
+
+    <style name="ThemeOverlay.App.FloatingActionButton" parent="">
+        <item name="colorSecondary">@color/colorWhite</item>
+        <item name="colorOnSecondary">@color/colorWhite</item>
+        <item name="colorOnSurface">@color/colorWhite</item>
+    </style>
+
 </resources>

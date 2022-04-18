@@ -8,32 +8,66 @@
     tools:context="com.vyw.rephotoandroid.GalleryMainActivity"
     tools:ignore="HardcodedText">
 
-    <!-- Code inpired by https://www.loopwiki.com/application/create-gallery-android-application/ -->
-    <!--Define Gallery RecyclerView-->
-    <ImageView
-        android:id="@+id/imageView"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        app:srcCompat="@drawable/baseline_cloud_sync_black_24dp" />
-
-    <androidx.recyclerview.widget.RecyclerView
-        android:id="@+id/recyclerViewGallery"
+    <androidx.swiperefreshlayout.widget.SwipeRefreshLayout
+        android:id="@+id/swipe_layout"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:scrollbars="vertical"
-        tools:context=".GalleryMainActivity"
-        tools:showIn="@layout/activity_main">
-    </androidx.recyclerview.widget.RecyclerView>
+        android:layout_height="match_parent">
 
+        <!-- Code inpired by https://www.loopwiki.com/application/create-gallery-android-application/ -->
+        <!--Define Gallery RecyclerView-->
+
+        <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/recyclerViewGallery"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:scrollbars="vertical"
+            tools:context=".GalleryMainActivity"
+            tools:showIn="@layout/activity_main"></androidx.recyclerview.widget.RecyclerView>
+
+    </androidx.swiperefreshlayout.widget.SwipeRefreshLayout>
     <!--this the navigation view which draws
         and shows the navigation drawer-->
     <!--include the menu created in the menu folder-->
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+
+        <ImageView
+            android:id="@+id/loading"
+            android:layout_width="104dp"
+            android:layout_height="96dp"
+            android:layout_marginBottom="44dp"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintHorizontal_bias="0.498"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintVertical_bias="0.226"
+            app:srcCompat="@drawable/baseline_cloud_sync_black_24dp" />
+
+        <Button
+            android:id="@+id/choose_photo_gallery"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:onClick="showFileDialog"
+            android:text="@string/choose_photo"
+            android:visibility="invisible"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/loading"
+            app:layout_constraintVertical_bias="0.104" />
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
     <com.google.android.material.navigation.NavigationView
         android:id="@id/drawer_navigation"
         android:layout_width="wrap_content"
         android:layout_height="match_parent"
         android:layout_gravity="start"
         app:headerLayout="@layout/nav_header"
-        app:menu="@menu/navigation_menu" />
+        app:menu="@menu/navigation_menu">
+
+    </com.google.android.material.navigation.NavigationView>
 
 </androidx.drawerlayout.widget.DrawerLayout>

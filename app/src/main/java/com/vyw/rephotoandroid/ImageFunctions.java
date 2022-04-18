@@ -1,5 +1,7 @@
 package com.vyw.rephotoandroid;
 
+import static org.opencv.core.Core.meanStdDev;
+
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
@@ -19,6 +21,9 @@ import org.opencv.android.Utils;
 import org.opencv.core.Core;
 import org.opencv.core.CvType;
 import org.opencv.core.Mat;
+import org.opencv.core.MatOfDouble;
+import org.opencv.core.Scalar;
+import org.opencv.core.Size;
 import org.opencv.imgproc.Imgproc;
 
 import java.io.FileDescriptor;
@@ -126,14 +131,25 @@ public class ImageFunctions {
         Mat rgbMat = new Mat();
         Utils.bitmapToMat(image, rgbMat);
 
+        // apply gaussian blur
+        Imgproc.GaussianBlur(rgbMat, rgbMat, new Size(3, 3), 0, 0);
+
         Mat grayMat = new Mat();
         Mat bwMat = new Mat();
 
         Imgproc.cvtColor(rgbMat, grayMat, Imgproc.COLOR_RGB2GRAY);
         Imgproc.equalizeHist(grayMat, grayMat);
 
-//        Imgproc.adaptiveThreshold(grayMat, grayMat, 255, Imgproc.ADAPTIVE_THRESH_MEAN_C, Imgproc.THRESH_BINARY, 15, 40);
-        Imgproc.Canny(grayMat, bwMat, 50, 200, 3, false);
+
+        MatOfDouble mean = new MatOfDouble();
+        MatOfDouble std = new MatOfDouble();
+        Core.meanStdDev(grayMat, mean, std);
+        double[] means = mean.get(0, 0);
+        double[] stds = std.get(0, 0);
+
+//        Imgproc.adaptiveThreshold(grayMat, bwMat, 255, Imgproc.ADAPTIVE_THRESH_MEAN_C, Imgproc.THRESH_BINARY, 15, 40);
+//        Imgproc.Canny(grayMat, bwMat, 50, 200, 3, false);
+        Imgproc.Canny(grayMat, bwMat, means[0] - stds[0], means[0] + stds[0], 3, false);
 
         Bitmap edges = image;
         Utils.matToBitmap(bwMat, edges);
@@ -235,6 +251,45 @@ public class ImageFunctions {
             default:
                 return false;
         }
+    }
+
+    public static Bitmap cropToAspectRatio(Bitmap srcBmp, int refWidth, int refHeight) {
+        float refAspectRatio = (float) refWidth / refHeight;
+        int srcWidth = srcBmp.getWidth();
+        int srcHeight = srcBmp.getHeight();
+        float srcAspectRatio = (float) srcWidth / srcHeight;
+        float refCoefRatio = (float) Math.min(refWidth, refHeight) / Math.max(refWidth, refHeight);
+        if ((srcAspectRatio > 0 && refAspectRatio > 0 && srcAspectRatio < refAspectRatio) ||
+            (srcAspectRatio > 0 && refAspectRatio < 0 && srcAspectRatio > refAspectRatio) ||
+            (srcAspectRatio < 0 && refAspectRatio > 0 && srcAspectRatio < refAspectRatio) ||
+            (srcAspectRatio < 0 && refAspectRatio < 0 && srcAspectRatio > refAspectRatio)
+        ) {
+//            crop height
+            int newHeight = Math.round(srcWidth * refCoefRatio);
+            return Bitmap.createBitmap(
+                    srcBmp,
+                    0,
+                    Math.round((srcHeight - newHeight) / 2),
+                    srcWidth,
+                    newHeight
+            );
+
+        } else if ((srcAspectRatio > 0 && refAspectRatio > 0 && srcAspectRatio > refAspectRatio) ||
+                   (srcAspectRatio > 0 && refAspectRatio < 0 && srcAspectRatio < refAspectRatio) ||
+                   (srcAspectRatio < 0 && refAspectRatio > 0 && srcAspectRatio > refAspectRatio) ||
+                   (srcAspectRatio < 0 && refAspectRatio < 0 && srcAspectRatio < refAspectRatio)
+        ) {
+//            crop width
+            int newWidth = Math.round(srcHeight * refAspectRatio);
+            return Bitmap.createBitmap(
+                    srcBmp,
+                    Math.round((srcWidth - newWidth) / 2),
+                    0,
+                    newWidth,
+                    srcHeight
+            );
+        }
+        return srcBmp;
     }
 
 

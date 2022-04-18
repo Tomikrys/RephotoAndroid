@@ -2,6 +2,7 @@ package com.vyw.rephotoandroid;
 // Code inpired by https://www.loopwiki.com/application/create-gallery-android-application/
 
 import android.content.Context;
+import android.content.res.Configuration;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.media.ThumbnailUtils;
@@ -55,7 +56,8 @@ public class GalleryStripAdapter extends RecyclerView.Adapter {
         //get Curent Gallery Item
         GalleryItem mCurrentItem = galleryItems.get(position);
         //get thumb square size 1/6 of screen width
-        final int thumbSize = GalleryScreenUtils.getScreenWidth(context) / 6;
+        int orientation = context.getResources().getConfiguration().orientation;
+        final int thumbSize = GalleryScreenUtils.getScreenWidth(context) / (orientation == Configuration.ORIENTATION_LANDSCAPE ? 12 : 6);
         //cast holder to galleryStripItemHolder
         GalleryStripItemHolder galleryStripItemHolder = (GalleryStripItemHolder) holder;
         //get thumb size bitmap by using ThumbnailUtils

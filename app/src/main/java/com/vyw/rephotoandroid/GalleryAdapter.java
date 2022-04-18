@@ -3,6 +3,7 @@ package com.vyw.rephotoandroid;
 
 import android.content.Context;
 
+import android.content.res.Configuration;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -45,6 +46,15 @@ public class GalleryAdapter extends RecyclerView.Adapter {
             notifyItemRangeInserted(previousSize, galleryItems.size());
         }
     }
+    //This method will take care of adding new Gallery items to RecyclerView
+    public void addOnlyNewGalleryItems(List<GalleryItem> galleryItems) {
+        if (galleryItems != null) {
+            int previousSize = this.galleryItems.size();
+            this.galleryItems.removeAll(this.galleryItems);
+            this.galleryItems.addAll(galleryItems);
+            notifyItemRangeInserted(previousSize, galleryItems.size());
+        }
+    }
 
     @Override
     public RecyclerView.ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
@@ -58,21 +68,25 @@ public class GalleryAdapter extends RecyclerView.Adapter {
         //get current Gallery Item
         GalleryItem currentItem = galleryItems.get(position);
         //Create file to load with Picasso lib
-        File imageViewThoumb = new File(currentItem.imageUri);
+//        File imageViewThoumb = new File(currentItem.imageUri);
         //cast holder with gallery holder
         GalleryItemHolder galleryItemHolder = (GalleryItemHolder) holder;
         //Load with Picasso
-//                TODO local
-//        Picasso.get()
-//                .load(imageViewThoumb)
-//                .centerCrop()
-//                .resize(GalleryScreenUtils.getScreenWidth(context) / 2, GalleryScreenUtils.getScreenHeight(context) / 3)//Resize image to width half of screen and height 1/3 of screen height
-//                .into(galleryItemHolder.imageViewThumbnail);
-        Picasso.get()
-                .load(currentItem.imageUri)
-                .centerCrop()
-                .resize(GalleryScreenUtils.getScreenWidth(context) / 2, GalleryScreenUtils.getScreenHeight(context) / 3)//Resize image to width half of screen and height 1/3 of screen height
-                .into(galleryItemHolder.imageViewThumbnail);
+        int orientation = context.getResources().getConfiguration().orientation;
+        if (orientation == Configuration.ORIENTATION_LANDSCAPE) {
+            Picasso.get()
+                    .load(currentItem.imageUri)
+                    .centerCrop()
+                    .resize(GalleryScreenUtils.getScreenWidth(context) / 2, GalleryScreenUtils.getScreenWidth(context) / 2)//Resize image to width half of screen and height 1/3 of screen height
+                    .into(galleryItemHolder.imageViewThumbnail);
+        } else {
+            Picasso.get()
+                    .load(currentItem.imageUri)
+                    .centerCrop()
+                    .resize(GalleryScreenUtils.getScreenWidth(context) / 2, GalleryScreenUtils.getScreenHeight(context) / 3)//Resize image to width half of screen and height 1/3 of screen height
+                    .into(galleryItemHolder.imageViewThumbnail);
+        }
+
         //set name of Image
         galleryItemHolder.textViewImageName.setText(currentItem.imageName);
         //set on click listener on imageViewThumbnail

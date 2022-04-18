@@ -5,6 +5,7 @@ import android.app.Activity;
 import android.content.ContentValues;
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.content.res.Configuration;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Color;
@@ -23,9 +24,11 @@ import android.renderscript.RenderScript;
 import android.renderscript.ScriptIntrinsicYuvToRGB;
 import android.util.DisplayMetrics;
 import android.util.Log;
+import android.util.Rational;
 import android.util.Size;
 import android.view.MotionEvent;
 import android.view.OrientationEventListener;
+import android.view.Surface;
 import android.view.View;
 import android.view.WindowManager;
 import android.widget.ImageView;
@@ -53,7 +56,6 @@ import androidx.lifecycle.LifecycleOwner;
 import com.google.common.util.concurrent.ListenableFuture;
 import com.squareup.picasso.Picasso;
 import com.squareup.picasso.Target;
-import com.vyw.rephotoandroid.model.Configuration;
 
 import org.opencv.android.BaseLoaderCallback;
 import org.opencv.android.LoaderCallbackInterface;
@@ -101,6 +103,7 @@ public class SimpleNavigation extends AppCompatActivity implements Parcelable {
     private float origCrop = 0;
     private ImageCapture imageCapture;
     private String source = "";
+    private String image_id;
 
     private BaseLoaderCallback mOpenCVCallBack = new BaseLoaderCallback(this) {
         @Override
@@ -130,6 +133,7 @@ public class SimpleNavigation extends AppCompatActivity implements Parcelable {
         previewView = findViewById(R.id.previewView);
         Intent intent = getIntent();
         path_ref_image = intent.getStringExtra("PATH_REF_IMAGE");
+        image_id = intent.getStringExtra("IMAGE_ID");
         source = intent.getStringExtra("SOURCE");
         if (source.equals("ONLINE")) {
             Target target = new Target() {
@@ -206,7 +210,7 @@ public class SimpleNavigation extends AppCompatActivity implements Parcelable {
         CameraSelector cameraSelector = new CameraSelector.Builder()
                 .requireLensFacing(CameraSelector.LENS_FACING_BACK).build();
         preview.setSurfaceProvider(previewView.getSurfaceProvider());
-        previewView.setScaleType(PreviewView.ScaleType.FIT_CENTER);
+        previewView.setScaleType(PreviewView.ScaleType.FILL_CENTER);
 
         ImageCapture.Builder builder = new ImageCapture.Builder();
 
@@ -362,6 +366,15 @@ public class SimpleNavigation extends AppCompatActivity implements Parcelable {
                 contentValues
         ).build();
         SimpleNavigation thisCopy = this;
+        Rational aspect_ratio;
+        int orientation = this.getResources().getConfiguration().orientation;
+        if (orientation == Configuration.ORIENTATION_LANDSCAPE) {
+            aspect_ratio = new Rational(GalleryScreenUtils.getScreenWidth(this), GalleryScreenUtils.getScreenHeight(this));
+            imageCapture.setTargetRotation(this.getWindowManager().getDefaultDisplay().getRotation());
+        } else {
+            aspect_ratio = new Rational(GalleryScreenUtils.getScreenWidth(this), GalleryScreenUtils.getScreenHeight(this));
+        }
+        imageCapture.setCropAspectRatio(aspect_ratio);
         imageCapture.takePicture(outputFileOptions, executor, new ImageCapture.OnImageSavedCallback() {
             @Override
             public void onImageSaved(@NonNull ImageCapture.OutputFileResults outputFileResults) {
@@ -373,6 +386,7 @@ public class SimpleNavigation extends AppCompatActivity implements Parcelable {
                         String savedImage = outputFileResults.getSavedUri().toString();
                         Intent intent = new Intent(thisCopy, UploadPhoto.class);
                         intent.putExtra("PATH_REF_IMAGE", path_ref_image);
+                        intent.putExtra("IMAGE_ID", image_id);
                         intent.putExtra("PATH_NEW_IMAGE", savedImage);
                         intent.putExtra("SOURCE", source);
 
@@ -399,6 +413,10 @@ public class SimpleNavigation extends AppCompatActivity implements Parcelable {
                         // There are no request codes
                         Intent data = result.getData();
                         if (data != null && data.getBooleanExtra("CLOSE", false)) {
+                            Intent intent = new Intent();
+                            intent.putExtra("IMAGE_ID", image_id);
+                            intent.putExtra("REFRESH", true);
+                            setResult(Activity.RESULT_OK, intent);
                             finish();
                         }
                     }

@@ -2,6 +2,7 @@ package com.vyw.rephotoandroid;
 // Code inpired by https://www.loopwiki.com/application/create-gallery-android-application/
 
 import android.Manifest;
+import android.app.Activity;
 import android.app.Dialog;
 import android.content.Context;
 import android.content.Intent;
@@ -9,8 +10,12 @@ import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.database.Cursor;
 import android.graphics.Color;
+import android.net.ConnectivityManager;
+import android.net.Network;
+import android.net.NetworkRequest;
 import android.net.Uri;
 import android.os.Bundle;
+import android.os.Handler;
 import android.os.Parcelable;
 import android.provider.MediaStore;
 import android.util.Log;
@@ -21,9 +26,14 @@ import android.view.ViewGroup;
 import android.view.Window;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import androidx.activity.result.ActivityResult;
+import androidx.activity.result.ActivityResultCallback;
+import androidx.activity.result.ActivityResultLauncher;
+import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.ActionBarDrawerToggle;
 import androidx.appcompat.app.AppCompatActivity;
@@ -33,6 +43,7 @@ import androidx.drawerlayout.widget.DrawerLayout;
 import androidx.fragment.app.DialogFragment;
 import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
+import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 
 import com.google.android.material.navigation.NavigationView;
 import com.vyw.rephotoandroid.model.Configuration;
@@ -69,6 +80,12 @@ public class GalleryMainActivity extends AppCompatActivity implements GalleryAda
     private static final int REQUEST_CHOOSER = 1234;
     private int id_entered_button;
     private String path_ref_image = "";
+    private ImageView loading_image_view = null;
+    private Button choose_photo_button = null;
+    private Bundle savedInstanceState;
+    private SwipeRefreshLayout swipeRefreshLayout;
+    private GallerySlideShowFragment slideShowFragment = null;
+    private int last_position = 0;
 
     static {
         System.loadLibrary("native-lib");
@@ -76,11 +93,14 @@ public class GalleryMainActivity extends AppCompatActivity implements GalleryAda
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+        this.savedInstanceState = savedInstanceState;
         super.onCreate(savedInstanceState);
         setContentView(R.layout.gallery_activity_main);
         // drawer layout instance to toggle the menu icon to open
         // drawer and back button to close drawer
         drawerLayout = findViewById(R.id.my_drawer_layout);
+        loading_image_view = findViewById(R.id.loading);
+        choose_photo_button = findViewById(R.id.choose_photo_gallery);
         actionBarDrawerToggle = new ActionBarDrawerToggle(this, drawerLayout, R.string.nav_open, R.string.nav_close);
 
         // pass the Open and Close toggle for the drawer layout listener
@@ -119,6 +139,32 @@ public class GalleryMainActivity extends AppCompatActivity implements GalleryAda
             //request permission
             ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.READ_EXTERNAL_STORAGE}, RC_READ_STORAGE);
         }
+
+        swipeRefreshLayout = findViewById(R.id.swipe_layout);
+        initializeRefreshListener();
+    }
+
+    public void initializeRefreshListener() {
+        swipeRefreshLayout.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
+            @Override
+            public void onRefresh() {
+//                TODO refresh images
+                loadImagesFromAPIAsynchronously();
+
+                // This method gets called when user pull for refresh,
+                // You can make your API call here,
+                // We are using adding a delay for the moment
+                final Handler handler = new Handler();
+                handler.postDelayed(new Runnable() {
+                    @Override
+                    public void run() {
+                        if (swipeRefreshLayout.isRefreshing()) {
+                            swipeRefreshLayout.setRefreshing(false);
+                        }
+                    }
+                }, 3000);
+            }
+        });
     }
 
     public void Logout() {
@@ -260,7 +306,10 @@ public class GalleryMainActivity extends AppCompatActivity implements GalleryAda
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
-        if (resultCode == RESULT_OK) {
+        if (data != null && data.getBooleanExtra("REFRESH", false)) {
+            loadImagesFromAPIAsynchronously();
+            onItemSelected(last_position);
+        } else if (resultCode == RESULT_OK) {
             final Uri uri = data.getData();
             String path = uri.toString();
 
@@ -283,45 +332,45 @@ public class GalleryMainActivity extends AppCompatActivity implements GalleryAda
         startActivityForResult(intent, REQUEST_CHOOSER);
     }
 
-    public void UploadPhoto(View view) {
-        Toast.makeText(getApplicationContext(),
-                "Begin Upload", Toast.LENGTH_LONG).show();
-//        File path = Environment.getExternalStoragePublicDirectory(
-//                Environment.DIRECTORY_PICTURES);
-//        File file = new File(path, "DemoPicture.jpg");
-        String path_new_image = "content://media/external/images/media/67";
-        Uri file_uri = Uri.parse(path_new_image);
-        String absolute_path = getPath(file_uri);
-        File file = new File(absolute_path);
-        RequestBody requestFile = RequestBody.create(MediaType.parse("image/*"), file);
-        MultipartBody.Part multipartBodyPart = MultipartBody.Part.createFormData("file", file.getName(), requestFile);
-
-        ApiInterface apiInterface = RetrofitClient.getRetrofitInstance().create(ApiInterface.class);
-        Call<Status> call = apiInterface.addPhoto(Configuration.getAccessToken(this), 6, multipartBodyPart);
-
-        AppCompatActivity copyThis = this;
-        call.enqueue(new Callback<Status>() {
-            @Override
-            public void onResponse(Call<Status> call, Response<Status> response) {
-//                LoginResponse status = response.body().getLoginResponse();
-                if (response.code() == 200) {
-                    Toast.makeText(
-                            copyThis,
-                            "Uploaded",
-                            Toast.LENGTH_SHORT
-                    ).show();
-                } else {
-                    Log.e(TAG, "onResponse: " + response.code());
-                }
-            }
-
-            @Override
-            public void onFailure(Call<Status> call, Throwable t) {
-                Log.e(TAG, "onFailure: " + call.toString());
-                Log.e(TAG, "onFailure: " + t.getMessage());
-            }
-        });
-    }
+//    public void UploadPhoto(View view) {
+//        Toast.makeText(getApplicationContext(),
+//                "Begin Upload", Toast.LENGTH_LONG).show();
+////        File path = Environment.getExternalStoragePublicDirectory(
+////                Environment.DIRECTORY_PICTURES);
+////        File file = new File(path, "DemoPicture.jpg");
+//        String path_new_image = "content://media/external/images/media/67";
+//        Uri file_uri = Uri.parse(path_new_image);
+//        String absolute_path = getPath(file_uri);
+//        File file = new File(absolute_path);
+//        RequestBody requestFile = RequestBody.create(MediaType.parse("image/*"), file);
+//        MultipartBody.Part multipartBodyPart = MultipartBody.Part.createFormData("file", file.getName(), requestFile);
+//
+//        ApiInterface apiInterface = RetrofitClient.getRetrofitInstance().create(ApiInterface.class);
+//        Call<Status> call = apiInterface.addPhoto(Configuration.getAccessToken(this), 6, multipartBodyPart);
+//
+//        AppCompatActivity copyThis = this;
+//        call.enqueue(new Callback<Status>() {
+//            @Override
+//            public void onResponse(Call<Status> call, Response<Status> response) {
+////                LoginResponse status = response.body().getLoginResponse();
+//                if (response.code() == 200) {
+//                    Toast.makeText(
+//                            copyThis,
+//                            "Uploaded",
+//                            Toast.LENGTH_SHORT
+//                    ).show();
+//                } else {
+//                    Log.e(TAG, "onResponse: " + response.code());
+//                }
+//            }
+//
+//            @Override
+//            public void onFailure(Call<Status> call, Throwable t) {
+//                Log.e(TAG, "onFailure: " + call.toString());
+//                Log.e(TAG, "onFailure: " + t.getMessage());
+//            }
+//        });
+//    }
 
     public void setVariablesNotLogged(AppCompatActivity view) {
         SharedPreferences sharedPref = view.getPreferences(Context.MODE_PRIVATE);
@@ -362,6 +411,7 @@ public class GalleryMainActivity extends AppCompatActivity implements GalleryAda
     public void Login(MenuItem item) {
         Login();
     }
+
     public void Logout(MenuItem item) {
         Logout();
     }
@@ -409,6 +459,12 @@ public class GalleryMainActivity extends AppCompatActivity implements GalleryAda
         startActivity(i);
     }
 
+    public void openTermsAndConditions(MenuItem item) {
+        // opening a new intent to open settings activity.
+        Intent i = new Intent(GalleryMainActivity.this, TermsAndConditions.class);
+        startActivity(i);
+    }
+
     public String getPath(Uri contentUri) {
         String res = null;
         String[] proj = {MediaStore.Images.Media.DATA};
@@ -441,21 +497,75 @@ public class GalleryMainActivity extends AppCompatActivity implements GalleryAda
                         // add images to gallery recyclerview using adapter
                         if (galleryItems == null) {
                             Toast.makeText(thisCopy, "Images cannot be fetched, check your internet connection.", Toast.LENGTH_LONG).show();
+                            connectionLost();
+                        } else {
+                            loading_image_view.setVisibility(View.INVISIBLE);
                         }
-                        mGalleryAdapter.addGalleryItems(galleryItems);
+                        mGalleryAdapter.addOnlyNewGalleryItems(galleryItems);
                     }
                 });
             }
         }).start();
     }
 
+
+    // Network Check
+    public void registerNetworkCallback() {
+        try {
+            ConnectivityManager connectivityManager = (ConnectivityManager) this.getSystemService(Context.CONNECTIVITY_SERVICE);
+            NetworkRequest.Builder builder = new NetworkRequest.Builder();
+
+            connectivityManager.registerDefaultNetworkCallback(
+                    new ConnectivityManager.NetworkCallback() {
+                        @Override
+                        public void onAvailable(Network network) {
+                            connectionLost();
+                        }
+
+                        @Override
+                        public void onLost(Network network) {
+                            connectionGained();
+                        }
+                    }
+            );
+            connectionLost();
+        } catch (Exception e) {
+            connectionLost();
+        }
+    }
+
+    public void connectionLost() {
+        loading_image_view.setVisibility(View.VISIBLE);
+        loading_image_view.setImageResource(R.drawable.baseline_sync_problem_black_24dp);
+        choose_photo_button.setVisibility(View.VISIBLE);
+    }
+
+    public void connectionGained() {
+        loading_image_view.setImageResource(R.drawable.baseline_cloud_sync_black_24dp);
+        choose_photo_button.setVisibility(View.INVISIBLE);
+    }
+
     public void takeRephoto(View view) {
         Log.d(TAG, "takeRephoto");
         Intent intent = new Intent(this, SimpleNavigation.class);
         intent.putExtra("PATH_REF_IMAGE", selectedPicture.imageUri);
+        int id = selectedPicture.place.getId();
+        intent.putExtra("IMAGE_ID", String.valueOf(id));
         intent.putExtra("SOURCE", "ONLINE");
-        startActivity(intent);
+        SimpleNavigationActivityResultLauncher.launch(intent);
+//        startActivity(intent);
     }
+
+    ActivityResultLauncher<Intent> SimpleNavigationActivityResultLauncher = registerForActivityResult(
+            new ActivityResultContracts.StartActivityForResult(),
+            new ActivityResultCallback<ActivityResult>() {
+                @Override
+                public void onActivityResult(ActivityResult result) {
+//                    if (result.getResultCode() == Activity.RESULT_OK) {
+//                        loadImagesFromAPIAsynchronously();
+//                    }
+                }
+            });
 
     public void openNavigation(View view) {
         Log.d(TAG, "getDirection");
@@ -467,8 +577,13 @@ public class GalleryMainActivity extends AppCompatActivity implements GalleryAda
 
     @Override
     public void onItemSelected(int position) {
+        int orientation = getResources().getConfiguration().orientation;
+        if (slideShowFragment != null) {
+            slideShowFragment.dismiss();
+        }
+        last_position = position;
         //create fullscreen GallerySlideShowFragment dialog
-        GallerySlideShowFragment slideShowFragment = GallerySlideShowFragment.newInstance(position, this);
+        slideShowFragment = GallerySlideShowFragment.newInstance(position, this, orientation);
         //setUp style for slide show fragment
         slideShowFragment.setStyle(DialogFragment.STYLE_NORMAL, R.style.DialogFragmentTheme);
         //finally show dialogue
@@ -480,7 +595,10 @@ public class GalleryMainActivity extends AppCompatActivity implements GalleryAda
         }
     }
 
-    public void setSelectedPicture(GalleryItem picture) { selectedPicture = picture; }
+    public void setSelectedPicture(GalleryItem picture, int index) {
+        selectedPicture = picture;
+        onItemSelected(index);
+    }
 
     @Override
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {

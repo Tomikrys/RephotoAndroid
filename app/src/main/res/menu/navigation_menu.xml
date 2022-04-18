@@ -14,7 +14,8 @@
         android:id="@+id/settings"
         android:icon="@drawable/baseline_settings_black_24dp"
         android:onClick="openSettings"
-        android:title="@string/settings" />
+        android:title="@string/settings"
+        android:visible="false" />
 
     <item
         android:id="@+id/login"

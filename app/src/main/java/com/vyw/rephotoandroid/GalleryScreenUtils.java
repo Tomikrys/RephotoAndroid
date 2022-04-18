@@ -3,6 +3,7 @@ package com.vyw.rephotoandroid;
 
 import android.app.Activity;
 import android.content.Context;
+import android.content.res.Resources;
 import android.database.Cursor;
 import android.net.Uri;
 import android.provider.MediaStore;
@@ -17,14 +18,14 @@ public class GalleryScreenUtils {
     //static method to get screen width
     public static int getScreenWidth(Context context) {
         DisplayMetrics displayMetrics = new DisplayMetrics();
-        ((Activity) context).getWindowManager().getDefaultDisplay().getMetrics(displayMetrics);
+        ((Activity) context).getWindowManager().getDefaultDisplay().getRealMetrics(displayMetrics);
         return displayMetrics.widthPixels;
     }
 
     //static method to get screen height
     public static int getScreenHeight(Context context) {
         DisplayMetrics displayMetrics = new DisplayMetrics();
-        ((Activity) context).getWindowManager().getDefaultDisplay().getMetrics(displayMetrics);
+        ((Activity) context).getWindowManager().getDefaultDisplay().getRealMetrics(displayMetrics);
         return displayMetrics.heightPixels;
     }
 }

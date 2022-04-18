@@ -22,7 +22,7 @@
     <string name="ref_frame">ref_frame</string>
     <string name="change_view">Změnit fotografii</string>
     <string name="selected_all">Označeno vše</string>
-    <string name="exit">Ukončit</string>
+    <string name="exit">Exit</string>
     <string name="zadejte_kalibra_n_parametry_pro_fotoapar_t">Zadejte kalibrační parametry pro fotoaparát</string>
     <string name="zadejte_kalibracni_parametry_pro_kameru">Zadejte kalibracni parametry pro kameru</string>
     <string name="cx">cx</string>
@@ -78,4 +78,5 @@
     <string name="first_name">first_name</string>
     <string name="last_name">last_name</string>
     <string name="logged">logged</string>
+    <string name="terms_and_conditions">Terms and Conditions</string>
 </resources>

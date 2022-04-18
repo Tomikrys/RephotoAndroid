@@ -13,11 +13,14 @@ import java.util.List;
  * Created by amardeep on 11/3/2017.
  */
 //This class represents single gallery item
-public class GalleryItem {
+public class GalleryItem implements Comparable<GalleryItem> {
     public String imageUri;
     public List<GalleryItem> placePhotos;
     public String imageName;
     public String year = null;
+//    public String latitude = null;
+//    public String longtitude = null;
+//    public String distance = null;
     public boolean isSelected = false;
     public String TAG = "GalleryItem";
     public Place place;
@@ -47,5 +50,40 @@ public class GalleryItem {
 
     public void addPlacePhoto(GalleryItem photo) {
         this.placePhotos.add(photo);
+    }
+
+    public List<GalleryItem> getPlacePhotos() {
+        return this.placePhotos;
+    }
+
+    public GalleryItem getPlacePhoto(int id) {
+        return this.placePhotos.get(id);
+    }
+
+    @Override
+    public int compareTo(GalleryItem o) {
+//        return distance(this.latitude, this.longtitude, o.latitude, o.longtitude);
+        return 0;
+    }
+
+    private double distance(double lat1, double lon1, double lat2, double lon2) {
+        double theta = lon1 - lon2;
+        double dist = Math.sin(deg2rad(lat1))
+                * Math.sin(deg2rad(lat2))
+                + Math.cos(deg2rad(lat1))
+                * Math.cos(deg2rad(lat2))
+                * Math.cos(deg2rad(theta));
+        dist = Math.acos(dist);
+        dist = rad2deg(dist);
+        dist = dist * 60 * 1.1515;
+        return (dist);
+    }
+
+    private double deg2rad(double deg) {
+        return (deg * Math.PI / 180.0);
+    }
+
+    private double rad2deg(double rad) {
+        return (rad * 180.0 / Math.PI);
     }
 }

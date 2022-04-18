@@ -16,14 +16,6 @@
             android:layout_width="match_parent"
             android:layout_height="match_parent">
 
-            <com.google.android.material.floatingactionbutton.FloatingActionButton
-                android:id="@+id/retake"
-                android:layout_width="162dp"
-                android:layout_height="wrap_content"
-                android:clickable="true"
-                android:focusable="true"
-                android:onClick="Retake"
-                app:srcCompat="@drawable/baseline_arrow_back_black_24dp" />
         </androidx.camera.view.PreviewView>
     </FrameLayout>
 
@@ -36,7 +28,7 @@
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:layout_weight="1"
-            app:srcCompat="@android:drawable/ic_popup_sync" />
+            app:srcCompat="@drawable/baseline_sync_black_24dp" />
 
     </LinearLayout>
 
@@ -49,7 +41,7 @@
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:layout_weight="1"
-            app:srcCompat="@android:drawable/ic_popup_sync" />
+            app:srcCompat="@drawable/baseline_sync_black_24dp" />
 
     </LinearLayout>
 
@@ -65,28 +57,42 @@
         android:layout_height="match_parent">
 
         <com.google.android.material.floatingactionbutton.FloatingActionButton
+            android:id="@+id/retake"
+            android:layout_width="162dp"
+            android:layout_height="wrap_content"
+            android:layout_margin="16dp"
+            android:clickable="true"
+            android:focusable="true"
+            android:onClick="Retake"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            app:srcCompat="@drawable/baseline_arrow_back_black_24dp" />
+
+        <com.google.android.material.floatingactionbutton.FloatingActionButton
             android:id="@+id/upload_photo"
             android:layout_width="162dp"
             android:layout_height="wrap_content"
+            android:layout_margin="16dp"
             android:clickable="true"
+            android:focusable="true"
             android:onClick="UploadPhoto"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:srcCompat="@android:drawable/ic_menu_upload"
-            android:focusable="true" />
+            app:srcCompat="@android:drawable/ic_menu_upload" />
 
         <com.google.android.material.floatingactionbutton.FloatingActionButton
             android:id="@+id/save_photo"
             android:layout_width="162dp"
             android:layout_height="wrap_content"
+            android:layout_margin="16dp"
             android:clickable="true"
+            android:focusable="true"
             android:onClick="SavePhoto"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:srcCompat="@android:drawable/ic_menu_save"
-            android:focusable="true" />
+            app:srcCompat="@android:drawable/ic_menu_save" />
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 

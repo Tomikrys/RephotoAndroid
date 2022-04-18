@@ -2,6 +2,10 @@ package com.vyw.rephotoandroid;
 // Code inpired by https://www.loopwiki.com/application/create-gallery-android-application/
 
 
+import static android.provider.MediaStore.MediaColumns.ORIENTATION;
+
+import android.content.Context;
+import android.content.res.Configuration;
 import android.os.Bundle;
 import android.os.Parcelable;
 import android.util.Log;
@@ -41,6 +45,8 @@ public class GallerySlideShowFragment extends DialogFragment implements GalleryS
     TextView textViewImageName;
     TextView textViewImageTitle;
     RecyclerView recyclerViewGalleryStrip;
+    Context context;
+    int orientation;
 
     private int mCurrentPosition;
     //set bottom to visible of first load
@@ -55,7 +61,7 @@ public class GallerySlideShowFragment extends DialogFragment implements GalleryS
     }
 
     //This method will create new instance of GallerySlideShowFragment
-    public static GallerySlideShowFragment newInstance(int position, GalleryMainActivity galleryMainActivity) {
+    public static GallerySlideShowFragment newInstance(int position, GalleryMainActivity galleryMainActivity, int orientation) {
         GallerySlideShowFragment fragment = new GallerySlideShowFragment();
         //Create bundle
         Bundle args = new Bundle();
@@ -63,6 +69,7 @@ public class GallerySlideShowFragment extends DialogFragment implements GalleryS
         args.putInt(ARG_CURRENT_POSITION, position);
         ListGalleryItems listGalleryItems = new ListGalleryItems(galleryMainActivity.galleryItems);
         args.putParcelable(GALLERY_ITEMS, (Parcelable) listGalleryItems);
+        args.putInt(ORIENTATION, orientation);
         //set arguments of GallerySlideShowFragment
         fragment.setArguments(args);
         //return fragment instance
@@ -77,16 +84,16 @@ public class GallerySlideShowFragment extends DialogFragment implements GalleryS
         if (getArguments() != null) {
             //get Current selected position from arguments
             mCurrentPosition = getArguments().getInt(ARG_CURRENT_POSITION);
+            orientation = getArguments().getInt(ORIENTATION);
             //get GalleryItems from activity
             galleryItems = ((ListGalleryItems) getArguments().getParcelable(GALLERY_ITEMS)).getListGalleryItem();
-            Log.e("KURVA UŽ ", "onCreate: " + mCurrentPosition + " " + galleryItems);
             if (galleryItems != null) {
                 GalleryItem galleryPhotos = galleryItems.get(mCurrentPosition);
 
                 //Initialise View Pager Adapter
                 mSlideShowPagerAdapter = new GallerySlideShowPagerAdapter(getContext(), galleryPhotos.placePhotos);
                 int firstIndex = 0;
-                ((GalleryMainActivity) getActivity()).setSelectedPicture(mSlideShowPagerAdapter.getPicture(firstIndex));
+                ((GalleryMainActivity) getActivity()).setSelectedPicture(mSlideShowPagerAdapter.getPicture(firstIndex), firstIndex);
             }
         }
     }
@@ -139,8 +146,10 @@ public class GallerySlideShowFragment extends DialogFragment implements GalleryS
 
                 @Override
                 public void onPageSelected(int position) {
+                    // mCurrentPosition is place id
+                    // position is photo id
                     //set image name textview's text on any page selected
-                    textViewImageName.setText(galleryItems.get(position).year);
+                    textViewImageName.setText(galleryItems.get(mCurrentPosition).getPlacePhoto(position).year);
                 }
 
                 @Override
@@ -165,7 +174,7 @@ public class GallerySlideShowFragment extends DialogFragment implements GalleryS
     public void onGalleryStripItemSelected(int position) {
         //set current item of viewpager
         mViewPagerGallery.setCurrentItem(position);
-        ((GalleryMainActivity) getActivity()).setSelectedPicture(mSlideShowPagerAdapter.getPicture(position));
+        ((GalleryMainActivity) getActivity()).setSelectedPicture(mSlideShowPagerAdapter.getPicture(position), position);
     }
 
     @Override
@@ -182,7 +191,7 @@ public class GallerySlideShowFragment extends DialogFragment implements GalleryS
         //define alpha animation
         AlphaAnimation fadeIn = new AlphaAnimation(0.0f, 1.0f);
         //set duration
-        fadeIn.setDuration(1200);
+        fadeIn.setDuration(100);
         //set animation listener
         fadeIn.setAnimationListener(new Animation.AnimationListener() {
             @Override
@@ -193,6 +202,9 @@ public class GallerySlideShowFragment extends DialogFragment implements GalleryS
             public void onAnimationEnd(Animation animation) {
                 //set textview visible on animation ends
                 textViewImageName.setVisibility(View.VISIBLE);
+//                if (orientation == Configuration.ORIENTATION_LANDSCAPE) {
+//                    recyclerViewGalleryStrip.setVisibility(View.VISIBLE);
+//                }
             }
 
             @Override
@@ -201,6 +213,9 @@ public class GallerySlideShowFragment extends DialogFragment implements GalleryS
         });
         //start animation
         textViewImageName.startAnimation(fadeIn);
+//        if (orientation == Configuration.ORIENTATION_LANDSCAPE) {
+//            recyclerViewGalleryStrip.startAnimation(fadeIn);
+//        }
         isBottomBarVisible = true;
     }
 
@@ -208,7 +223,7 @@ public class GallerySlideShowFragment extends DialogFragment implements GalleryS
         //define alpha animation
         AlphaAnimation fadeOut = new AlphaAnimation(1.0f, 0.0f);
         //set duration
-        fadeOut.setDuration(1200);
+        fadeOut.setDuration(100);
         //set animation listener
         fadeOut.setAnimationListener(new Animation.AnimationListener() {
             @Override
@@ -219,6 +234,10 @@ public class GallerySlideShowFragment extends DialogFragment implements GalleryS
             public void onAnimationEnd(Animation animation) {
                 //set textview Visibility gone on animation ends
                 textViewImageName.setVisibility(View.GONE);
+
+//                if (orientation == Configuration.ORIENTATION_LANDSCAPE) {
+//                    recyclerViewGalleryStrip.setVisibility(View.GONE);
+//                }
             }
 
             @Override
@@ -227,6 +246,9 @@ public class GallerySlideShowFragment extends DialogFragment implements GalleryS
         });
         //start animation
         textViewImageName.startAnimation(fadeOut);
+//        if (orientation == Configuration.ORIENTATION_LANDSCAPE) {
+//            recyclerViewGalleryStrip.startAnimation(fadeOut);
+//        }
         isBottomBarVisible = false;
     }
 }

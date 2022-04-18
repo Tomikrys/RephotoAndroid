@@ -6,6 +6,7 @@ public class UserLogin {
 
     public UserLogin(String email, String password) {
         this.email = email;
+//        todo hash
         this.password = password;
     }
 
