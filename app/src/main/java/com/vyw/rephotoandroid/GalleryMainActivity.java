@@ -458,7 +458,6 @@ public class GalleryMainActivity extends AppCompatActivity implements GalleryAda
     // drawer when the icon is clicked
     @Override
     public boolean onOptionsItemSelected(@NonNull MenuItem item) {
-
         if (actionBarDrawerToggle.onOptionsItemSelected(item)) {
             return true;
         }
@@ -507,6 +506,7 @@ public class GalleryMainActivity extends AppCompatActivity implements GalleryAda
                     connectionLost();
                 } else {
                     loading_image_view.setVisibility(View.INVISIBLE);
+                    choose_photo_button.setVisibility(View.INVISIBLE);
                 }
                 mGalleryAdapter.addGalleryItems(galleryItems);
             });
@@ -602,7 +602,8 @@ public class GalleryMainActivity extends AppCompatActivity implements GalleryAda
 
     public void setSelectedPicture(GalleryItem picture, int index) {
         selectedPicture = picture;
-        onItemSelected(index);
+        last_position = index;
+//        onItemSelected(index);
     }
 
     @Override

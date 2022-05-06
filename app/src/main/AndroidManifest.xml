@@ -20,8 +20,8 @@
         android:supportsRtl="true"
         android:theme="@style/AppTheme"
         android:usesCleartextTraffic="true"
-        android:versionCode="1"
-        android:versionName="alpha">
+        android:versionCode="3"
+        android:versionName="beta3">
         <activity
             android:name=".GalleryMainActivity"
             android:exported="true">

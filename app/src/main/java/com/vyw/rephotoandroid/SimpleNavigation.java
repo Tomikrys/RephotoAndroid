@@ -7,16 +7,10 @@ import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.content.res.Configuration;
 import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
-import android.graphics.Color;
-import android.graphics.Matrix;
 import android.graphics.drawable.Drawable;
-import android.media.ExifInterface;
-import android.media.Image;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Parcel;
-import android.os.ParcelFileDescriptor;
 import android.os.Parcelable;
 import android.provider.MediaStore;
 import android.renderscript.Element;
@@ -28,7 +22,6 @@ import android.util.Rational;
 import android.util.Size;
 import android.view.MotionEvent;
 import android.view.OrientationEventListener;
-import android.view.Surface;
 import android.view.View;
 import android.view.WindowManager;
 import android.widget.ImageView;
@@ -41,6 +34,7 @@ import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.camera.core.CameraInfoUnavailableException;
 import androidx.camera.core.CameraSelector;
 import androidx.camera.core.ImageAnalysis;
 import androidx.camera.core.ImageCapture;
@@ -60,17 +54,8 @@ import com.squareup.picasso.Target;
 import org.opencv.android.BaseLoaderCallback;
 import org.opencv.android.LoaderCallbackInterface;
 import org.opencv.android.OpenCVLoader;
-import org.opencv.android.Utils;
-import org.opencv.core.Core;
-import org.opencv.core.CvType;
-import org.opencv.core.Mat;
-import org.opencv.imgproc.Imgproc;
 
-import java.io.FileDescriptor;
 import java.io.IOException;
-import java.io.InputStream;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
@@ -201,6 +186,9 @@ public class SimpleNavigation extends AppCompatActivity implements Parcelable {
             }
         }, ContextCompat.getMainExecutor(this));
 
+
+
+
         rs = RenderScript.create(this);
         yuvToRgbIntrinsic = ScriptIntrinsicYuvToRGB.create(rs, Element.U8_4(rs));
     }
@@ -260,7 +248,6 @@ public class SimpleNavigation extends AppCompatActivity implements Parcelable {
                 .setTargetRotation(this.getWindowManager().getDefaultDisplay().getRotation())
                 .build();
 //        preview.setSurfaceProvider(mPreviewView.createSurfaceProvider());
-
         cameraProvider.bindToLifecycle((LifecycleOwner) this, cameraSelector,
                 imageAnalysis, preview, imageCapture);
     }

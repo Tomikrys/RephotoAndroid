@@ -20,7 +20,7 @@
         android:hint="@string/email"
         android:imeOptions="actionNext"
         android:inputType="textEmailAddress"
-        android:text="admin@admin.cz" />
+        android:text="" />
 
     <EditText
         android:id="@+id/password_et"
@@ -29,7 +29,7 @@
         android:hint="@string/password"
         android:imeOptions="actionNext"
         android:inputType="textPassword"
-        android:text="admin" />
+        android:text="" />
 
     <Button
         android:id="@+id/submit_button"
