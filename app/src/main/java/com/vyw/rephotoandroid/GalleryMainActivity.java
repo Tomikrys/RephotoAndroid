@@ -1,8 +1,7 @@
 package com.vyw.rephotoandroid;
-// Code inpired by https://www.loopwiki.com/application/create-gallery-android-application/
+// Code inspired by https://www.loopwiki.com/application/create-gallery-android-application/
 
 import android.Manifest;
-import android.app.Activity;
 import android.app.Dialog;
 import android.content.Context;
 import android.content.Intent;
@@ -10,13 +9,15 @@ import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.database.Cursor;
 import android.graphics.Color;
+import android.location.Location;
+import android.location.LocationListener;
+import android.location.LocationManager;
 import android.net.ConnectivityManager;
 import android.net.Network;
 import android.net.NetworkRequest;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
-import android.os.Parcelable;
 import android.provider.MediaStore;
 import android.util.Log;
 import android.view.Menu;
@@ -56,23 +57,20 @@ import com.vyw.rephotoandroid.model.api.UserLogout;
 
 import net.steamcrafted.materialiconlib.MaterialMenuInflater;
 
-import java.io.File;
-import java.io.Serializable;
 import java.util.List;
 
-import okhttp3.MediaType;
-import okhttp3.MultipartBody;
-import okhttp3.RequestBody;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
 
 //Remember to implement  GalleryAdapter.GalleryAdapterCallBacks to activity  for communication of Activity and Gallery Adapter
-public class GalleryMainActivity extends AppCompatActivity implements GalleryAdapter.GalleryAdapterCallBacks {
+public class GalleryMainActivity extends AppCompatActivity implements GalleryAdapter.GalleryAdapterCallBacks, LocationListener {
     private static final String TAG = "GalleryMainActivity";
     public List<GalleryItem> galleryItems;
     //Read storage permission request code
     private static final int RC_READ_STORAGE = 5;
+    private static final int RC_ACCESS_COARSE_LOCATION = 6;
+    private static final int RC_ACCESS_FINE_LOCATION = 7;
     GalleryAdapter mGalleryAdapter;
     private GalleryItem selectedPicture = null;
     public DrawerLayout drawerLayout;
@@ -86,6 +84,8 @@ public class GalleryMainActivity extends AppCompatActivity implements GalleryAda
     private SwipeRefreshLayout swipeRefreshLayout;
     private GallerySlideShowFragment slideShowFragment = null;
     private int last_position = 0;
+    private LocationManager locationManager;
+    private Location location;
 
     static {
         System.loadLibrary("native-lib");
@@ -124,6 +124,15 @@ public class GalleryMainActivity extends AppCompatActivity implements GalleryAda
             testAccessTokenAndSetDrawer(access_token);
         }
 
+        // get location
+        if (ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+            //request permission
+            ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.ACCESS_FINE_LOCATION}, RC_ACCESS_FINE_LOCATION);
+        }
+        locationManager = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
+        locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 0, 0, this);
+        this.location = locationManager.getLastKnownLocation(LocationManager.GPS_PROVIDER);
+
         //setup RecyclerView
         RecyclerView recyclerViewGallery = (RecyclerView) findViewById(R.id.recyclerViewGallery);
         recyclerViewGallery.setLayoutManager(new GridLayoutManager(this, 2));
@@ -134,7 +143,7 @@ public class GalleryMainActivity extends AppCompatActivity implements GalleryAda
         //check for read storage permission
         if (ContextCompat.checkSelfPermission(this, Manifest.permission.READ_EXTERNAL_STORAGE) == PackageManager.PERMISSION_GRANTED) {
             //Get images
-            loadImagesFromAPIAsynchronously();
+            loadImagesFromAPIAsynchronously(location);
         } else {
             //request permission
             ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.READ_EXTERNAL_STORAGE}, RC_READ_STORAGE);
@@ -142,28 +151,35 @@ public class GalleryMainActivity extends AppCompatActivity implements GalleryAda
 
         swipeRefreshLayout = findViewById(R.id.swipe_layout);
         initializeRefreshListener();
+
+
+        //check for read storage permission
+//        if (ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+//            //request permission
+//            ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.ACCESS_COARSE_LOCATION}, RC_ACCESS_COARSE_LOCATION);
+//        }
+    }
+
+    @Override
+    public void onLocationChanged(@NonNull Location location) {
+        this.location = location;
+        Log.d(TAG,"Latitude:" + location.getLatitude() + ", Longitude:" + location.getLongitude());
     }
 
     public void initializeRefreshListener() {
-        swipeRefreshLayout.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
-            @Override
-            public void onRefresh() {
+        swipeRefreshLayout.setOnRefreshListener(() -> {
 //                TODO refresh images
-                loadImagesFromAPIAsynchronously();
+            loadImagesFromAPIAsynchronously(location);
 
-                // This method gets called when user pull for refresh,
-                // You can make your API call here,
-                // We are using adding a delay for the moment
-                final Handler handler = new Handler();
-                handler.postDelayed(new Runnable() {
-                    @Override
-                    public void run() {
-                        if (swipeRefreshLayout.isRefreshing()) {
-                            swipeRefreshLayout.setRefreshing(false);
-                        }
-                    }
-                }, 3000);
-            }
+            // This method gets called when user pull for refresh,
+            // You can make your API call here,
+            // We are using adding a delay for the moment
+            final Handler handler = new Handler();
+            handler.postDelayed(() -> {
+                if (swipeRefreshLayout.isRefreshing()) {
+                    swipeRefreshLayout.setRefreshing(false);
+                }
+            }, 3000);
         });
     }
 
@@ -174,7 +190,7 @@ public class GalleryMainActivity extends AppCompatActivity implements GalleryAda
         AppCompatActivity copyThis = this;
         call.enqueue(new Callback<Status>() {
             @Override
-            public void onResponse(Call<Status> call, Response<Status> response) {
+            public void onResponse(@NonNull Call<Status> call, @NonNull Response<Status> response) {
                 if (response.code() == 200) {
                     Toast.makeText(
                             copyThis,
@@ -190,8 +206,8 @@ public class GalleryMainActivity extends AppCompatActivity implements GalleryAda
             }
 
             @Override
-            public void onFailure(Call<Status> call, Throwable t) {
-                Log.e(TAG, "onFailure: " + call.toString());
+            public void onFailure(@NonNull Call<Status> call, @NonNull Throwable t) {
+                Log.e(TAG, "onFailure: " + call);
                 Log.e(TAG, "onFailure: " + t.getMessage());
             }
         });
@@ -213,18 +229,13 @@ public class GalleryMainActivity extends AppCompatActivity implements GalleryAda
         Button submitButton = dialog.findViewById(R.id.submit_button);
 
 
-        submitButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                String email = emailET.getText().toString();
-                String password = passwordET.getText().toString();
-                Login(email, password);
-                dialog.dismiss();
-            }
+        submitButton.setOnClickListener(v -> {
+            String email = emailET.getText().toString();
+            String password = passwordET.getText().toString();
+            Login(email, password);
+            dialog.dismiss();
         });
-        if (dialog != null) {
-            dialog.getWindow().setLayout((int) (ViewGroup.LayoutParams.MATCH_PARENT), ViewGroup.LayoutParams.WRAP_CONTENT);
-        }
+        dialog.getWindow().setLayout((int) (ViewGroup.LayoutParams.MATCH_PARENT), ViewGroup.LayoutParams.WRAP_CONTENT);
         dialog.show();
 
     }
@@ -265,20 +276,20 @@ public class GalleryMainActivity extends AppCompatActivity implements GalleryAda
 
             @Override
             public void onFailure(@NonNull Call<OneLoginResponse> call, @NonNull Throwable t) {
-                Log.e(TAG, "onFailure: " + call.toString());
+                Log.e(TAG, "onFailure: " + call);
                 Log.e(TAG, "onFailure: " + t.getMessage());
             }
         });
     }
 
     private void testAccessTokenAndSetDrawer(String access_token) {
-        UserLogout accesToken = new UserLogout(access_token);
+        UserLogout accessToken = new UserLogout(access_token);
         ApiInterface apiInterface = RetrofitClient.getRetrofitInstance().create(ApiInterface.class);
-        Call<OneLoginResponse> call = apiInterface.checkLogin(accesToken);
+        Call<OneLoginResponse> call = apiInterface.checkLogin(accessToken);
         AppCompatActivity copyThis = this;
         call.enqueue(new Callback<OneLoginResponse>() {
             @Override
-            public void onResponse(Call<OneLoginResponse> call, Response<OneLoginResponse> response) {
+            public void onResponse(@NonNull Call<OneLoginResponse> call, @NonNull Response<OneLoginResponse> response) {
                 if (response.code() == 200) {
                     assert response.body() != null;
                     LoginResponse status = response.body().getLoginResponse();
@@ -296,8 +307,8 @@ public class GalleryMainActivity extends AppCompatActivity implements GalleryAda
             }
 
             @Override
-            public void onFailure(Call<OneLoginResponse> call, Throwable t) {
-                Log.e(TAG, "onFailure: " + call.toString());
+            public void onFailure(@NonNull Call<OneLoginResponse> call, @NonNull Throwable t) {
+                Log.e(TAG, "onFailure: " + call);
                 Log.e(TAG, "onFailure: " + t.getMessage());
             }
         });
@@ -307,9 +318,10 @@ public class GalleryMainActivity extends AppCompatActivity implements GalleryAda
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
         if (data != null && data.getBooleanExtra("REFRESH", false)) {
-            loadImagesFromAPIAsynchronously();
+            loadImagesFromAPIAsynchronously(location);
             onItemSelected(last_position);
         } else if (resultCode == RESULT_OK) {
+            assert data != null;
             final Uri uri = data.getData();
             String path = uri.toString();
 
@@ -470,7 +482,6 @@ public class GalleryMainActivity extends AppCompatActivity implements GalleryAda
         String[] proj = {MediaStore.Images.Media.DATA};
         Cursor cursor = getContentResolver().query(contentUri, proj, null, null, null);
         if (cursor.moveToFirst()) {
-            ;
             int column_index = cursor.getColumnIndexOrThrow(MediaStore.Images.Media.DATA);
             res = cursor.getString(column_index);
         }
@@ -479,32 +490,26 @@ public class GalleryMainActivity extends AppCompatActivity implements GalleryAda
     }
 
 
-    private void loadImagesFromAPIAsynchronously() {
+    private void loadImagesFromAPIAsynchronously(Location location) {
         // do
         GalleryMainActivity thisCopy = this;
-        new Thread(new Runnable() {
-            @Override
-            public void run() {
-                // Run async
+        new Thread(() -> {
+            // Run async
 //                TODO local
 //                galleryItems = GalleryUtils.getLocalImages(thisCopy);
-                galleryItems = GalleryUtils.getImagesFromAPI();
+            galleryItems = GalleryUtils.getImagesFromAPI(location);
 
-                runOnUiThread(new Runnable() {
-                    @Override
-                    public void run() {
-                        // do after
-                        // add images to gallery recyclerview using adapter
-                        if (galleryItems == null) {
-                            Toast.makeText(thisCopy, "Images cannot be fetched, check your internet connection.", Toast.LENGTH_LONG).show();
-                            connectionLost();
-                        } else {
-                            loading_image_view.setVisibility(View.INVISIBLE);
-                        }
-                        mGalleryAdapter.addOnlyNewGalleryItems(galleryItems);
-                    }
-                });
-            }
+            runOnUiThread(() -> {
+                // do after
+                // add images to gallery recyclerview using adapter
+                if (galleryItems == null) {
+                    Toast.makeText(thisCopy, "Images cannot be fetched, check your internet connection.", Toast.LENGTH_LONG).show();
+                    connectionLost();
+                } else {
+                    loading_image_view.setVisibility(View.INVISIBLE);
+                }
+                mGalleryAdapter.addGalleryItems(galleryItems);
+            });
         }).start();
     }
 
@@ -605,7 +610,7 @@ public class GalleryMainActivity extends AppCompatActivity implements GalleryAda
         super.onRequestPermissionsResult(requestCode, permissions, grantResults);
         if (requestCode == RC_READ_STORAGE) {
             if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-                loadImagesFromAPIAsynchronously();
+                loadImagesFromAPIAsynchronously(location);
             } else {
                 Toast.makeText(this, "Storage Permission denied", Toast.LENGTH_SHORT).show();
             }

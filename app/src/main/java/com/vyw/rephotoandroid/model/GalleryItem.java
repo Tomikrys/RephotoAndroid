@@ -20,7 +20,7 @@ public class GalleryItem implements Comparable<GalleryItem> {
     public String year = null;
 //    public String latitude = null;
 //    public String longtitude = null;
-//    public String distance = null;
+    public Float distance = Float.valueOf("0");  ;
     public boolean isSelected = false;
     public String TAG = "GalleryItem";
     public Place place;
@@ -30,7 +30,7 @@ public class GalleryItem implements Comparable<GalleryItem> {
         this.imageName = imageName;
     }
 
-    public GalleryItem(String imageUri, String imageName, String strDate, Place place) {
+    public GalleryItem(String imageUri, String imageName, String strDate, Place place, Float distance) {
         this.imageUri = imageUri;
         this.imageName = imageName;
         String year = null;
@@ -44,6 +44,7 @@ public class GalleryItem implements Comparable<GalleryItem> {
             Log.e(TAG, "GalleryItem: " + e.toString() );
         }
         this.year = year;
+        this.distance = distance;
         this.placePhotos = new ArrayList<>();
         this.place = place;
     }

@@ -16,6 +16,7 @@ import com.squareup.picasso.Picasso;
 import com.vyw.rephotoandroid.model.GalleryItem;
 
 import java.io.File;
+import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -41,9 +42,9 @@ public class GalleryAdapter extends RecyclerView.Adapter {
     //This method will take care of adding new Gallery items to RecyclerView
     public void addGalleryItems(List<GalleryItem> galleryItems) {
         if (galleryItems != null) {
-            int previousSize = this.galleryItems.size();
+            this.galleryItems.removeAll(this.galleryItems);
             this.galleryItems.addAll(galleryItems);
-            notifyItemRangeInserted(previousSize, galleryItems.size());
+            notifyDataSetChanged();
         }
     }
     //This method will take care of adding new Gallery items to RecyclerView
@@ -89,6 +90,7 @@ public class GalleryAdapter extends RecyclerView.Adapter {
 
         //set name of Image
         galleryItemHolder.textViewImageName.setText(currentItem.imageName);
+        galleryItemHolder.distance.setText(getDistanceString(currentItem.distance));
         //set on click listener on imageViewThumbnail
         galleryItemHolder.imageViewThumbnail.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -100,6 +102,17 @@ public class GalleryAdapter extends RecyclerView.Adapter {
 
     }
 
+    private String getDistanceString(Float distance) {
+        if (distance > 10000) {
+            return (distance.intValue() / 1000) + " km";
+        }
+        if (distance > 999) {
+            DecimalFormat df = new DecimalFormat("#.##");
+            return df.format(distance / 1000)  + " km";
+        }
+        return distance.intValue() + " m";
+    }
+
     @Override
     public int getItemCount() {
         return galleryItems.size();
@@ -108,11 +121,13 @@ public class GalleryAdapter extends RecyclerView.Adapter {
     public class GalleryItemHolder extends RecyclerView.ViewHolder {
         ImageView imageViewThumbnail;
         TextView textViewImageName;
+        TextView distance;
 
         public GalleryItemHolder(View itemView) {
             super(itemView);
             imageViewThumbnail = itemView.findViewById(R.id.imageViewThumbnail);
             textViewImageName = itemView.findViewById(R.id.textViewImageName);
+            distance = itemView.findViewById(R.id.distance);
         }
     }
 

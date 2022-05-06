@@ -3,6 +3,8 @@ package com.vyw.rephotoandroid;
 
 import android.content.Context;
 import android.database.Cursor;
+import android.location.Location;
+import java.lang.Float;
 import android.os.Environment;
 import android.provider.MediaStore;
 import android.util.Log;
@@ -13,6 +15,8 @@ import com.vyw.rephotoandroid.model.Photo;
 import com.vyw.rephotoandroid.model.Place;
 
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 
 import retrofit2.Call;
@@ -57,7 +61,7 @@ public class GalleryUtils {
         return result;
     }
 
-    public static List<GalleryItem> getImagesFromAPI() {
+    public static List<GalleryItem> getImagesFromAPI(Location location) {
         ApiInterface apiInterface = RetrofitClient.getRetrofitInstance().create(ApiInterface.class);
         Call<ListPlace> call = apiInterface.getPlaces();
 
@@ -72,24 +76,45 @@ public class GalleryUtils {
                         for (int i = 0; i < places.size(); i++) {
                             Place place = places.get(i);
                             Log.d(TAG, "onResponse: [" + i + "] name : " + place.getName());
+                            Location placeLocation = new Location("providername");
+                            placeLocation.setLatitude(Double.parseDouble(place.getLatitude()));
+                            placeLocation.setLongitude(Double.parseDouble(place.getLongitude()));
                             GalleryItem galleryItem = new GalleryItem(
                                     place.getPhotos().get(0).getPhotoUri(),
                                     place.getName(),
                                     place.getPhotos().get(0).getCaptured_at(),
-                                    place
+                                    place,
+                                    placeLocation.distanceTo(location)
                             );
                             for (Photo photo : place.getPhotos()) {
                                 GalleryItem photoItem = new GalleryItem(
                                         photo.getPhotoUri(),
                                         "photoItem",
                                         photo.getCaptured_at(),
-                                        place
+                                        place,
+                                        placeLocation.distanceTo(location)
                                 );
                                 galleryItem.addPlacePhoto(photoItem);
                             }
                             results.add(galleryItem);
                         }
-//                        TODO SORT PLACES
+                        if (location != null) {
+                            ((List) results).sort(new Comparator<GalleryItem>() {
+                                @Override
+                                public int compare(GalleryItem o1, GalleryItem o2) {
+//                                    Location location1 = new Location("providername");
+//                                    location1.setLatitude(Double.parseDouble(o1.place.getLatitude()));
+//                                    location1.setLongitude(Double.parseDouble(o1.place.getLongitude()));
+//                                    Location location2 = new Location("providername");
+//                                    location2.setLatitude(Double.parseDouble(o2.place.getLatitude()));
+//                                    location2.setLongitude(Double.parseDouble(o2.place.getLongitude()));
+//                                    Float dist1 = location1.distanceTo(location);
+//                                    Float dist2 = location2.distanceTo(location);
+//                                    return dist1.compareTo(dist2);
+                                    return o1.distance.compareTo(o2.distance);
+                                }
+                            });
+                        }
                         return results;
                     } else {
                         Log.e(TAG, "onResponse: empty places");
