@@ -211,6 +211,7 @@ public class CameraPreview extends AppCompatActivity {
 
         try {
 //            OPENCVNATIVECALL
+            countFrames = 1; // for no multithreading
             direction = OpenCVNative.processNavigation(currentFrames.getNativeObjAddr(), countFrames);
             Log.d(TAG, "Value of direction is: " + direction);
         } catch (java.lang.IllegalArgumentException e) {
