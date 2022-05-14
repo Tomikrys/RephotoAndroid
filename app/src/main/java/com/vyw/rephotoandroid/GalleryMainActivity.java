@@ -1,6 +1,8 @@
 package com.vyw.rephotoandroid;
 // Code inspired by https://www.loopwiki.com/application/create-gallery-android-application/
 
+import static java.lang.Integer.parseInt;
+
 import android.Manifest;
 import android.app.Dialog;
 import android.content.Context;
@@ -163,7 +165,7 @@ public class GalleryMainActivity extends AppCompatActivity implements GalleryAda
     @Override
     public void onLocationChanged(@NonNull Location location) {
         this.location = location;
-        Log.d(TAG,"Latitude:" + location.getLatitude() + ", Longitude:" + location.getLongitude());
+        Log.d(TAG, "Latitude:" + location.getLatitude() + ", Longitude:" + location.getLongitude());
     }
 
     public void initializeRefreshListener() {
@@ -267,10 +269,20 @@ public class GalleryMainActivity extends AppCompatActivity implements GalleryAda
                     ).show();
 
                     setDrawerLogged();
-
-//                    TODO update menu
+                } else if (response.code() == 401) {
+                    Log.e(TAG, "onResponse: " + response.code());
+                    Toast.makeText(
+                            copyThis,
+                            "Login failed, wrong email or password.",
+                            Toast.LENGTH_SHORT
+                    ).show();
                 } else {
                     Log.e(TAG, "onResponse: " + response.code());
+                    Toast.makeText(
+                            copyThis,
+                            "Login failed, check your internet connection.",
+                            Toast.LENGTH_SHORT
+                    ).show();
                 }
             }
 
@@ -310,6 +322,8 @@ public class GalleryMainActivity extends AppCompatActivity implements GalleryAda
             public void onFailure(@NonNull Call<OneLoginResponse> call, @NonNull Throwable t) {
                 Log.e(TAG, "onFailure: " + call);
                 Log.e(TAG, "onFailure: " + t.getMessage());
+                setDrawerNotLogged();
+                setVariablesNotLogged(copyThis);
             }
         });
     }
@@ -318,6 +332,7 @@ public class GalleryMainActivity extends AppCompatActivity implements GalleryAda
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
         if (data != null && data.getBooleanExtra("REFRESH", false)) {
+            int position = parseInt(data.getStringExtra("IMAGE_ID"));
             loadImagesFromAPIAsynchronously(location);
             onItemSelected(last_position);
         } else if (resultCode == RESULT_OK) {
@@ -602,7 +617,7 @@ public class GalleryMainActivity extends AppCompatActivity implements GalleryAda
 
     public void setSelectedPicture(GalleryItem picture, int index) {
         selectedPicture = picture;
-        last_position = index;
+//        last_position = index;
 //        onItemSelected(index);
     }
 

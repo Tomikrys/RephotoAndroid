@@ -202,9 +202,10 @@ public class GallerySlideShowFragment extends DialogFragment implements GalleryS
             public void onAnimationEnd(Animation animation) {
                 //set textview visible on animation ends
                 textViewImageName.setVisibility(View.VISIBLE);
-//                if (orientation == Configuration.ORIENTATION_LANDSCAPE) {
+                if (getResources().getConfiguration().orientation == Configuration.ORIENTATION_LANDSCAPE) {
+                    textViewImageTitle.setVisibility(View.VISIBLE);
 //                    recyclerViewGalleryStrip.setVisibility(View.VISIBLE);
-//                }
+                }
             }
 
             @Override
@@ -213,9 +214,10 @@ public class GallerySlideShowFragment extends DialogFragment implements GalleryS
         });
         //start animation
         textViewImageName.startAnimation(fadeIn);
-//        if (orientation == Configuration.ORIENTATION_LANDSCAPE) {
+        if (getResources().getConfiguration().orientation == Configuration.ORIENTATION_LANDSCAPE) {
+            textViewImageTitle.startAnimation(fadeIn);
 //            recyclerViewGalleryStrip.startAnimation(fadeIn);
-//        }
+        }
         isBottomBarVisible = true;
     }
 
@@ -235,9 +237,10 @@ public class GallerySlideShowFragment extends DialogFragment implements GalleryS
                 //set textview Visibility gone on animation ends
                 textViewImageName.setVisibility(View.GONE);
 
-//                if (orientation == Configuration.ORIENTATION_LANDSCAPE) {
+                if (getResources().getConfiguration().orientation == Configuration.ORIENTATION_LANDSCAPE) {
+                    textViewImageTitle.setVisibility(View.GONE);
 //                    recyclerViewGalleryStrip.setVisibility(View.GONE);
-//                }
+                }
             }
 
             @Override
@@ -246,9 +249,10 @@ public class GallerySlideShowFragment extends DialogFragment implements GalleryS
         });
         //start animation
         textViewImageName.startAnimation(fadeOut);
-//        if (orientation == Configuration.ORIENTATION_LANDSCAPE) {
+        if (getResources().getConfiguration().orientation == Configuration.ORIENTATION_LANDSCAPE) {
+            textViewImageTitle.startAnimation(fadeOut);
 //            recyclerViewGalleryStrip.startAnimation(fadeOut);
-//        }
+        }
         isBottomBarVisible = false;
     }
 }

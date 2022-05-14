@@ -30,4 +30,8 @@ public class Configuration {
     public static String getLastName(AppCompatActivity context) {
         return getSharedValue(context, context.getString(R.string.last_name));
     }
+
+    public static String getEmail(AppCompatActivity context) {
+        return getSharedValue(context, context.getString(R.string.email));
+    }
 }

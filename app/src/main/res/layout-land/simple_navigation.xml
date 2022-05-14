@@ -52,7 +52,7 @@
             android:focusable="true"
             android:onClick="toggleEdges"
             app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
             app:srcCompat="@android:drawable/ic_popup_sync" />
 
         <com.google.android.material.floatingactionbutton.FloatingActionButton
@@ -65,7 +65,7 @@
             android:onClick="capturePhoto"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
             app:srcCompat="@android:drawable/ic_menu_camera" />
 
     </androidx.constraintlayout.widget.ConstraintLayout>
