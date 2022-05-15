@@ -102,6 +102,7 @@ public class GallerySlideShowFragment extends DialogFragment implements GalleryS
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         final View view = inflater.inflate(R.layout.gallery_fragment_slide_show, container, false);
         mViewPagerGallery = view.findViewById(R.id.viewPagerGallery);
+        mViewPagerGallery.setPageTransformer(true, new DepthPageTransformer());
         // set On Touch Listener on mViewPagerGallery to hide show bottom bar
         mViewPagerGallery.setOnTouchListener(new View.OnTouchListener() {
             @Override
@@ -134,7 +135,7 @@ public class GallerySlideShowFragment extends DialogFragment implements GalleryS
             //set Adapter of GalleryStripRecyclerView
             recyclerViewGalleryStrip.setAdapter(mGalleryStripAdapter);
             //tell viewpager to open currently selected item and pass position of current item
-            mViewPagerGallery.setCurrentItem(mCurrentPosition);
+            mViewPagerGallery.setCurrentItem(0);
             //set image name textview's text according to position
             textViewImageName.setText(galleryItems.get(mCurrentPosition).year);
             textViewImageTitle.setText(galleryItems.get(mCurrentPosition).imageName);
@@ -254,5 +255,35 @@ public class GallerySlideShowFragment extends DialogFragment implements GalleryS
 //            recyclerViewGalleryStrip.startAnimation(fadeOut);
         }
         isBottomBarVisible = false;
+    }
+}
+
+
+class DepthPageTransformer implements ViewPager.PageTransformer {
+    private static final float MIN_SCALE = 0.75f;
+
+    public void transformPage(View view, float position) {
+        int pageWidth = view.getWidth();
+
+        if (position < -1) { // [-Infinity,-1)
+            // This page is way off-screen to the left.
+            view.setAlpha(0f);
+
+        } else if (position <= 0) { // [-1,0]
+            // Counteract the default slide transition
+            view.setTranslationX(pageWidth * -position);
+            // Fade the page out.
+            view.setAlpha(position+1);
+
+        } else if (position <= 1) { // (0,1]
+            // Counteract the default slide transition
+            view.setTranslationX(pageWidth * -position);
+            // Fade the page out.
+            view.setAlpha(1-position);
+
+        } else { // (1,+Infinity]
+            // This page is way off-screen to the right.
+            view.setAlpha(0f);
+        }
     }
 }

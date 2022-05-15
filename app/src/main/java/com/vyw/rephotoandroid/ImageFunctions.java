@@ -260,12 +260,17 @@ public class ImageFunctions {
         float srcAspectRatio = (float) srcWidth / srcHeight;
         float refCoefRatio = (float) Math.min(refWidth, refHeight) / Math.max(refWidth, refHeight);
         if ((srcAspectRatio > 0 && refAspectRatio > 0 && srcAspectRatio < refAspectRatio) ||
-            (srcAspectRatio > 0 && refAspectRatio < 0 && srcAspectRatio > refAspectRatio) ||
-            (srcAspectRatio < 0 && refAspectRatio > 0 && srcAspectRatio < refAspectRatio) ||
-            (srcAspectRatio < 0 && refAspectRatio < 0 && srcAspectRatio > refAspectRatio)
+                (srcAspectRatio > 0 && refAspectRatio < 0 && srcAspectRatio > refAspectRatio) ||
+                (srcAspectRatio < 0 && refAspectRatio > 0 && srcAspectRatio < refAspectRatio) ||
+                (srcAspectRatio < 0 && refAspectRatio < 0 && srcAspectRatio > refAspectRatio)
         ) {
-//            crop height
-            int newHeight = Math.round(srcWidth * refCoefRatio);
+//          crop height
+            int newHeight;
+            if (refHeight > refWidth && srcHeight > srcWidth) {
+                newHeight = Math.round(srcWidth / refCoefRatio);
+            } else {
+                newHeight = Math.round(srcWidth * refCoefRatio);
+            }
             return Bitmap.createBitmap(
                     srcBmp,
                     0,
@@ -273,11 +278,10 @@ public class ImageFunctions {
                     srcWidth,
                     newHeight
             );
-
         } else if ((srcAspectRatio > 0 && refAspectRatio > 0 && srcAspectRatio > refAspectRatio) ||
-                   (srcAspectRatio > 0 && refAspectRatio < 0 && srcAspectRatio < refAspectRatio) ||
-                   (srcAspectRatio < 0 && refAspectRatio > 0 && srcAspectRatio > refAspectRatio) ||
-                   (srcAspectRatio < 0 && refAspectRatio < 0 && srcAspectRatio < refAspectRatio)
+                (srcAspectRatio > 0 && refAspectRatio < 0 && srcAspectRatio < refAspectRatio) ||
+                (srcAspectRatio < 0 && refAspectRatio > 0 && srcAspectRatio > refAspectRatio) ||
+                (srcAspectRatio < 0 && refAspectRatio < 0 && srcAspectRatio < refAspectRatio)
         ) {
 //            crop width
             int newWidth = Math.round(srcHeight * refAspectRatio);

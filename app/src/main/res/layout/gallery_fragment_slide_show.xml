@@ -87,7 +87,7 @@
                 android:clickable="true"
                 android:focusable="true"
                 android:onClick="takeRephoto"
-                app:srcCompat="@android:drawable/ic_menu_camera" />
+                app:srcCompat="@drawable/ic_menu_camera" />
 
         </LinearLayout>
 

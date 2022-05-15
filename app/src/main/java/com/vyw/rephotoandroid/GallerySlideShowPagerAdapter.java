@@ -17,9 +17,6 @@ import com.vyw.rephotoandroid.model.GalleryItem;
 import java.io.File;
 import java.util.List;
 
-/**
- * Created by amardeep on 11/3/2017.
- */
 
 public class GallerySlideShowPagerAdapter extends PagerAdapter {
 

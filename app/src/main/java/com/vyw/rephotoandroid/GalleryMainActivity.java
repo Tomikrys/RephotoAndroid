@@ -618,7 +618,7 @@ public class GalleryMainActivity extends AppCompatActivity implements GalleryAda
     public void setSelectedPicture(GalleryItem picture, int index) {
         selectedPicture = picture;
 //        last_position = index;
-//        onItemSelected(index);
+//        onItemSelected(index); // cyclic
     }
 
     @Override
