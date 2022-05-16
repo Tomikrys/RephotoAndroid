@@ -1,4 +1,5 @@
 # Mobilní aplikace Rephoto pro android
+https://github.com/Tomikrys/RephotoAndroid
 ## Postup zprovoznění
 
 Nainstalovat Android studio, při vývoji byla využita verze 2021.1.1 spolu s~Android SDK verze 31
