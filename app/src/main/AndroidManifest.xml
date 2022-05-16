@@ -53,9 +53,7 @@
         <activity android:name=".RefotografieActivity" />
         <activity android:name=".SettingActivity" />
         <activity android:name=".CameraPreview" />
-        <activity android:name=".MainActivityDemoJava" />
         <activity android:name=".SimpleNavigation" />
-        <activity android:name=".Rephotos_API" />
         <activity android:name=".UploadPhoto" />
         <activity android:name=".PreferenceActivity" />
         <activity android:name=".TermsAndConditions" />

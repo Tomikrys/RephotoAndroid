@@ -62,14 +62,6 @@ public class MainActivity extends AppCompatActivity {
         System.exit(0);
     }
 
-    public void cameraTest(View view) {
-//        ActivityCompat.finishAffinity(this);
-        Intent intent = new Intent(this, MainActivityDemoJava.class);
-        startActivity(intent);
-//        finish();
-    }
-
-
 //    public void simpleNavigation(View view, Bitmap ref_image) {
 //        Intent intent = new Intent(this, SimpleNavigation.class);
 //        intent.putExtra("REF_IMAGE", ref_image);

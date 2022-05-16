@@ -43,8 +43,6 @@ public class NavigationProcesing extends Activity
 
 
 //        ActivityCompat.finishAffinity(this);
-        Intent intent = new Intent(this, MainActivityDemoJava.class);
-        startActivity(intent);
 //        finish();
 //        camHolder.addCallback((SurfaceHolder.Callback) camPreview);
 //
