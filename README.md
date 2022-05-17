@@ -2,16 +2,17 @@
 https://github.com/Tomikrys/RephotoAndroid
 ## Postup zprovoznění
 
-Nainstalovat Android studio, při vývoji byla využita verze 2021.1.1 spolu s~Android SDK verze 31
+Nainstalovat Android studio, při vývoji byla využita verze 2021.1.1 spolu s~Android SDK verze 31.
 
-Vytvořit Emulátor
+Vytvořit Emulátor.
 
 
-Přidat do proměnných prostředí systému windows proměnnou OPENCV_ANDROID s cestou ke složce RephotoAndroid\OpenCV-android-sdk-4.5.3
+Přidat do proměnných prostředí systému windows proměnnou OPENCV_ANDROID s cestou ke složce RephotoAndroid\OpenCV-android-sdk-4.5.3.
 
     OPENCV_ANDROID = C:\folder_structure\RephotoAndroid\OpenCV-android-sdk-4.5.3 
 
-Synchronizovat projket Gradle
+Importovat aplikaci do vývojového prostředí Android Studio.
+Synchronizovat projket Gradle.
 
 ## Struktura projektu
 Pro přehlednost jsou vypsány pouze důležité soubory a složky. Nejdůležitější položky jsou popsány tučně.
