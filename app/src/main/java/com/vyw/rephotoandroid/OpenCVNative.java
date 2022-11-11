@@ -15,6 +15,8 @@ public class OpenCVNative {
 
     public static native float[] processReconstruction();
 
+    public static native int fakemain();
+
     public static native float[] nextPoint();
 
     public static native float[] registrationPoints(double x, double y);

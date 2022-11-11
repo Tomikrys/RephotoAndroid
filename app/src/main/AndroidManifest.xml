@@ -1,6 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    package="com.vyw.rephotoandroid">
+<manifest xmlns:android="http://schemas.android.com/apk/res/android">
 
     <uses-feature android:name="android.hardware.camera.any" /> <!-- Camera permission -->
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
@@ -22,31 +21,23 @@
         android:usesCleartextTraffic="true"
         android:versionCode="3"
         android:versionName="beta2">
+<!--        <activity-->
+<!--            android:name=".GalleryMainActivity"-->
+<!--            android:exported="true">-->
+<!--            &lt;!&ndash;            android:screenOrientation="userPortrait">&ndash;&gt;-->
+<!--            <intent-filter>-->
+<!--                <action android:name="android.intent.action.MAIN" />-->
+<!--                <category android:name="android.intent.category.LAUNCHER" />-->
+<!--            </intent-filter>-->
+<!--        </activity> -->
         <activity
-            android:name=".GalleryMainActivity"
+            android:name=".MainActivity"
             android:exported="true">
-            <!--            android:screenOrientation="userPortrait">-->
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
-
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
-        </activity> <!-- <activity -->
-        <!-- android:name="com.vyw.rephotoandroid.MainActivityDemo" -->
-        <!-- android:exported="true"> -->
-        <!-- <intent-filter> -->
-        <!-- <action android:name="android.intent.action.MAIN" /> -->
-        <!-- <category android:name="android.intent.category.LAUNCHER" /> -->
-        <!-- </intent-filter> -->
-        <!-- &lt;!&ndash;        </activity>&ndash;&gt; -->
-        <!-- <activity -->
-        <!-- android:name="com.vyw.rephotoandroid.MainActivityDemoJava" -->
-        <!-- android:exported="true"> -->
-        <!-- <intent-filter> -->
-        <!-- <action android:name="android.intent.action.MAIN" /> -->
-        <!-- <category android:name="android.intent.category.LAUNCHER" /> -->
-        <!-- </intent-filter> -->
-        <!-- </activity> -->
+        </activity>
         <activity android:name=".CameraActivity" />
         <activity android:name=".NavigationProcesing" />
         <activity android:name=".SelectPointsActivity" />

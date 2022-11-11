@@ -57,7 +57,8 @@ import com.vyw.rephotoandroid.model.api.Status;
 import com.vyw.rephotoandroid.model.api.UserLogin;
 import com.vyw.rephotoandroid.model.api.UserLogout;
 
-import net.steamcrafted.materialiconlib.MaterialMenuInflater;
+// TODO removed
+//import net.steamcrafted.materialiconlib.MaterialMenuInflater;
 
 import java.util.List;
 
@@ -457,12 +458,13 @@ public class GalleryMainActivity extends AppCompatActivity implements GalleryAda
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
-        MaterialMenuInflater
-                .with(this) // Provide the activity context
-                // Set the fall-back color for all the icons. Colors set inside the XML will always have higher priority
-                .setDefaultColor(Color.RED)
-                // Inflate the menu
-                .inflate(R.menu.menu_main, menu);
+// TODO removed
+//        MaterialMenuInflater
+//                .with(this) // Provide the activity context
+//                // Set the fall-back color for all the icons. Colors set inside the XML will always have higher priority
+//                .setDefaultColor(Color.RED)
+//                // Inflate the menu
+//                .inflate(R.menu.menu_main, menu);
         return true;
     }
 
