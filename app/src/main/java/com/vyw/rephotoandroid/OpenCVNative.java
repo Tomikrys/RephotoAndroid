@@ -15,7 +15,7 @@ public class OpenCVNative {
 
     public static native float[] processReconstruction();
 
-    public static native int fakemain();
+    public static native int fakemain(long bt_first_frame, long bt_second_frame, long bt_ref_frame);
 
     public static native float[] nextPoint();
 

@@ -109,17 +109,17 @@ void PnPProblem::estimatePoseRANSAC(const std::vector<cv::Point3f> &list_3d_poin
     this->setProjectionMatrix(_rotation_matrix, _translation_matrix);
 }
 
-void PnPProblem::setOpticalCenter(double cx, double cy)
+void PnPProblem::setOpticalCenter(double center_x, double center_y)
 {
-    _camera_matrix.at<double>(0, 2) = cx;
-    _camera_matrix.at<double>(1, 2) = cy;
+    _camera_matrix.at<double>(0, 2) = center_x;
+    _camera_matrix.at<double>(1, 2) = center_y;
 }
 
-void PnPProblem::setCameraParameter(double cx, double cy, double fx, double fy)
+void PnPProblem::setCameraParameter(double center_x, double center_y, double focal_x, double focal_y)
 {
-    _camera_matrix.at<double>(0, 2) = cx;
-    _camera_matrix.at<double>(1, 2) = cy;
-    _camera_matrix.at<double>(0, 0) = fx;
-    _camera_matrix.at<double>(1, 1) = fy;
+    _camera_matrix.at<double>(0, 2) = center_x;
+    _camera_matrix.at<double>(1, 2) = center_y;
+    _camera_matrix.at<double>(0, 0) = focal_x;
+    _camera_matrix.at<double>(1, 1) = focal_y;
     _camera_matrix.at<double>(2, 2) = 1; // TODO neni v originale
 }

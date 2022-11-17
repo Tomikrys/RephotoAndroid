@@ -4,7 +4,7 @@
     android:paddingRight="@dimen/activity_horizontal_margin"
     android:paddingTop="@dimen/activity_vertical_margin"
     android:orientation="vertical"
-    android:paddingBottom="@dimen/activity_vertical_margin" tools:context=".MainActivity">
+    android:paddingBottom="@dimen/activity_vertical_margin" tools:context=".testCpp.TestCpp">
 
 
     <TextView
@@ -12,8 +12,6 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_alignParentEnd="true"
-        android:layout_alignParentLeft="true"
-        android:layout_alignParentRight="true"
         android:layout_alignParentStart="true"
         android:text="@string/re_fotografie"
         android:textAppearance="@style/TextAppearance.AppCompat.Headline"
@@ -27,41 +25,18 @@
         android:orientation="vertical">
 
         <Button
-            android:id="@+id/button_play"
-            android:layout_width="200dp"
-            android:layout_height="wrap_content"
-            android:onClick="playApplication"
-            android:text="@string/play" />
-
-        <Button
             android:id="@+id/button_play2"
             android:layout_width="202dp"
             android:layout_height="60dp"
-            android:onClick="startCpp"
+            android:onClick="initializeCpp"
             android:text="Start C++" />
 
         <Button
             android:id="@+id/button_play3"
             android:layout_width="202dp"
             android:layout_height="60dp"
-            android:onClick="startSimple"
-            android:text="Simple Navigation" />
-
-
-        <Button
-            android:id="@+id/simple_navigation"
-            android:layout_width="200dp"
-            android:layout_height="wrap_content"
-            android:onClick="choosePhoto"
-            android:text="Simple Navigation" />
-
-        <Button
-            android:id="@+id/button_end"
-            android:layout_width="200dp"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="200dp"
-            android:onClick="endApplication"
-            android:text="@string/end" />
+            android:onClick="cameraTest"
+            android:text="Camera Test" />
 
     </LinearLayout>
 

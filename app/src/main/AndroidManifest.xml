@@ -31,14 +31,16 @@
 <!--            </intent-filter>-->
 <!--        </activity> -->
         <activity
-            android:name=".MainActivity"
+            android:name=".testCpp.TestCpp"
             android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+        <activity android:name=".testCpp.CameraTest" />
         <activity android:name=".CameraActivity" />
+        <activity android:name=".GalleryMainActivity" />
         <activity android:name=".NavigationProcesing" />
         <activity android:name=".SelectPointsActivity" />
         <activity android:name=".RefotografieActivity" />
