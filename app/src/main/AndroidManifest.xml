@@ -50,6 +50,8 @@
         <activity android:name=".UploadPhoto" />
         <activity android:name=".PreferenceActivity" />
         <activity android:name=".TermsAndConditions" />
+        <activity android:name=".testCpp.RegisterPoints" />
+        <activity android:name=".testCpp.NavigationTest" />
     </application>
 
 </manifest>

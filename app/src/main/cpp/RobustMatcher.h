@@ -26,6 +26,8 @@ private:
 
     cv::Mat descriptors;
 
+    std::vector<std::vector<cv::DMatch>> symMatchesFromTriangulation;
+
     float ratio;
 
     double distance;

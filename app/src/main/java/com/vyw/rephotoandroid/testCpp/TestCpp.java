@@ -11,9 +11,7 @@ import android.view.View;
 
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
-import androidx.core.content.ContextCompat;
 
-import com.vyw.rephotoandroid.GalleryMainActivity;
 import com.vyw.rephotoandroid.ImageFunctions;
 import com.vyw.rephotoandroid.OpenCVNative;
 import com.vyw.rephotoandroid.R;
@@ -91,12 +89,27 @@ public class TestCpp extends AppCompatActivity {
         showFileDialog(view);
     }
 
+    public void registration(View view) {
+        Intent intent = new Intent(this, RegisterPoints.class);
+        intent.putExtra("first_image", mat_first_image.getNativeObjAddr());
+        intent.putExtra("ref_image", mat_ref_image.getNativeObjAddr());
+        startActivity(intent);
+    }
+
+    public void robust(View view) {
+        Intent intent = new Intent(this, NavigationTest.class);
+        startActivity(intent);
+    }
+
     public void cameraTest(View view) {
         showFileDialog(view);
         Intent intent = new Intent(this, CameraTest.class);
         startActivity(intent);
     }
 
+    Mat mat_first_image;
+    Mat mat_second_image;
+    Mat mat_ref_image;
     public void startCpp() {
         if (ActivityCompat.checkSelfPermission(this,
                 Manifest.permission.READ_EXTERNAL_STORAGE)
@@ -108,8 +121,8 @@ public class TestCpp extends AppCompatActivity {
         Uri uri_second_image = Uri.parse(path_second_image);
         Uri uri_ref_image = Uri.parse(path_ref_image);
         Bitmap bt_first_frame = null;
-        Bitmap bt_second_frame = null;
         Bitmap bt_ref_frame = null;
+        Bitmap bt_second_frame = null;
         try {
             bt_first_frame = ImageFunctions.getBitmapFromUri(uri_first_image, this);
             bt_second_frame = ImageFunctions.getBitmapFromUri(uri_second_image, this);
@@ -118,15 +131,14 @@ public class TestCpp extends AppCompatActivity {
             e.printStackTrace();
         }
 
-        Mat mat_first_frame = new Mat();
-        Mat mat_second_frame = new Mat();
-        Mat mat_ref_frame = new Mat();
+        mat_first_image = new Mat();
+        mat_second_image = new Mat();
+        mat_ref_image = new Mat();
+        Utils.bitmapToMat(bt_first_frame, mat_first_image);
+        Utils.bitmapToMat(bt_second_frame, mat_second_image);
+        Utils.bitmapToMat(bt_ref_frame, mat_ref_image);
 
-        Utils.bitmapToMat(bt_first_frame, mat_first_frame);
-        Utils.bitmapToMat(bt_second_frame, mat_second_frame);
-        Utils.bitmapToMat(bt_ref_frame, mat_ref_frame);
-
-        OpenCVNative.fakemain(mat_first_frame.getNativeObjAddr(), mat_second_frame.getNativeObjAddr(), mat_ref_frame.getNativeObjAddr());
+        OpenCVNative.triangulation(mat_first_image.getNativeObjAddr(), mat_second_image.getNativeObjAddr(), mat_ref_image.getNativeObjAddr());
     }
 
     public void showFileDialog(View view) {

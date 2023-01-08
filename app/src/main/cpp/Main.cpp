@@ -415,9 +415,9 @@ bool getRobustEstimation(cv::Mat current_frame_vis, std::vector <cv::Point3f> li
         list_points2d_scene_match.push_back(point2d_scene);
     }
 
-
-    draw2DPoints(current_frame_vis, list_points2d_scene_match, blue);
-    saveMatToJpeg(current_frame_vis, "getRobustEstimation", true);
+    cv::Mat image = current_frame_vis.clone();
+    draw2DPoints(image, list_points2d_scene_match, blue);
+    saveMatToJpeg(image, "getRobustEstimation", true);
 
     bool good_measurement = false;
 
@@ -432,9 +432,12 @@ bool getRobustEstimation(cv::Mat current_frame_vis, std::vector <cv::Point3f> li
 //        todo false pnp_detection.getInliersPoints().size() == 0
         if (pnp_detection.getInliersPoints().size() > minInliersKalman) {
 
+            cv::Mat image = current_frame_vis.clone();
+            draw2DPoints(image, list_points2d_scene_match, red);
+            saveMatToJpeg(image, "getRobustEstimation2", true);
 
-            draw2DPoints(current_frame_vis, list_points2d_scene_match, red);
-            saveMatToJpeg(current_frame_vis, "getRobustEstimation2", true);
+            cv::Mat image = current_frame_vis.clone();
+
             cv::Mat T = pnp_detection.getProjectionMatrix();
             cv::Mat refT = pnp_registration.getProjectionMatrix();
 

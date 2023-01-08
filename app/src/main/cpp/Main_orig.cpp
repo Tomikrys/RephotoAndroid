@@ -25,7 +25,6 @@ int indexFrame = 0;
 
 int getDirectory(int x, int y);
 
-
 void saveMatToJpeg(cv::Mat img, std::string filename, bool RGBA2BGRA = false) {
     if (RGBA2BGRA) {
         cv::cvtColor(img, img, cv::COLOR_RGBA2BGRA);
@@ -38,8 +37,27 @@ std::string generate_csv_from_Mat(cv::Mat list_3D_points) {
     std::string csv = "x,y,z,\n";
     for (int i = 0; i < list_3D_points.rows; i++) {
         csv += std::to_string(list_3D_points.at<float>(i, 0)) + ","
-            + std::to_string(list_3D_points.at<float>(i, 1)) + ","
-            + std::to_string(list_3D_points.at<float>(i, 2)) + ",\n";
+               + std::to_string(list_3D_points.at<float>(i, 1)) + ","
+               + std::to_string(list_3D_points.at<float>(i, 2)) + ",\n";
+    }
+    return csv;
+}
+
+std::string generate_csv_from_Point3f(std::vector<cv::Point3f> list_3D_points) {
+    std::string csv = "x,y,z,\n";
+    for (int i = 0; i < list_3D_points.size(); i++) {
+        csv += std::to_string(list_3D_points[i].x) + ","
+               + std::to_string(list_3D_points[i].y) + ","
+               + std::to_string(list_3D_points[i].z) + ",\n";
+    }
+    return csv;
+}
+
+std::string generate_csv_from_Point2f(std::vector<cv::Point2f> list_2D_points) {
+    std::string csv = "x,y,z,\n";
+    for (int i = 0; i < list_2D_points.size(); i++) {
+        csv += std::to_string(list_2D_points[i].x) + ","
+               + std::to_string(list_2D_points[i].y) + ",0,\n";
     }
     return csv;
 }
@@ -53,10 +71,19 @@ cv::Mat drawPoint(cv::Mat image, int x, int y) {
     return image;
 }
 
-int test_main(jlong bt_first_frame, jlong bt_second_frame, jlong bt_ref_frame) {
-    cv::Mat &first_image = *(cv::Mat *) bt_first_frame;
-    cv::Mat &second_image = *(cv::Mat *) bt_second_frame;
-    cv::Mat &ref_image = *(cv::Mat *) bt_ref_frame;
+std::vector<cv::Point3f> list_3D_points_after_triangulation;
+std::vector<cv::Point2f> list_2D_points_after_triangulation;
+std::vector<cv::Point2f> detection_points_first_image, detection_points_second_image;
+std::vector<int> key_points_first_image_convert_table_to_3d_points;
+cv::Mat first_image;
+cv::Mat second_image;
+cv::Mat ref_image;
+std::vector<int> index_points;
+
+int triangulation(jlong bt_first_frame, jlong bt_second_frame, jlong bt_ref_frame) {
+    first_image = *(cv::Mat *) bt_first_frame;
+    second_image = *(cv::Mat *) bt_second_frame;
+    ref_image = *(cv::Mat *) bt_ref_frame;
 
 //    cv::Mat first_image = loadImage(path_to_first_image);
 //    cv::Mat second_image = loadImage(path_to_second_image);
@@ -81,7 +108,6 @@ int test_main(jlong bt_first_frame, jlong bt_second_frame, jlong bt_ref_frame) {
 
 //    cv::Mat camera_matrix = cameraCalibrator.getCameraMatrix();
 
-//    todo hardcoded
 
     int image_x = first_image.cols;
     int image_y = first_image.rows;
@@ -90,6 +116,7 @@ int test_main(jlong bt_first_frame, jlong bt_second_frame, jlong bt_ref_frame) {
     double center_y = image_y / 2;
     pnp_registration.setOpticalCenter(center_x, center_y);
 
+//    todo hardcoded
 //  focal_pixel = (focal_mm / sensor_width_mm) * image_width_in_pixels                              F(mm) = F(pixels) * SensorWidth(mm) / ImageWidth (pixel)
     double sensor_x = 8.16;
     double sensor_y = 6.12;
@@ -107,6 +134,7 @@ int test_main(jlong bt_first_frame, jlong bt_second_frame, jlong bt_ref_frame) {
     camera_matrix.at<double>(2, 2) = 1;
 
     pnp_registration.setCameraMatrix(camera_matrix);
+    pnp_detection.setCameraMatrix(camera_matrix);
 
 //    pnp_registration.setCameraParameter(center_x, center_y, focal_x, focal_y);
 
@@ -117,7 +145,7 @@ int test_main(jlong bt_first_frame, jlong bt_second_frame, jlong bt_ref_frame) {
 //     * Dle tutorialu dostupneho na http://docs.opencv.org/3.1.0/dc/d2c/tutorial_real_time_pose.html
 //     */
 //
-////    todo doplnit xfeatures!!
+////    todo doplnit xfeatures abych mohl použít SURF
 //    cv::Ptr<int> featureDetector = NULL;
 //    cv::Ptr<int> featureExtractor = NULL;
 //    cv::Ptr<cv::xfeatures2d::SurfFeatureDetector> featureDetector = cv::xfeatures2d::SurfFeatureDetector::create(
@@ -126,7 +154,6 @@ int test_main(jlong bt_first_frame, jlong bt_second_frame, jlong bt_ref_frame) {
     cv::Ptr<cv::SIFT> featureDetector = cv::SIFT::create(numKeyPoints);
     cv::Ptr<cv::SIFT> featureExtractor = cv::SIFT::create();
     std::vector<cv::KeyPoint> key_points_first_image, key_points_second_image;
-    std::vector<cv::Point2f> detection_points_first_image, detection_points_second_image;
     std::vector<cv::DMatch> matches;
 
     robustMatcher.setConfidenceLevel(confidenceLevel);
@@ -153,6 +180,7 @@ int test_main(jlong bt_first_frame, jlong bt_second_frame, jlong bt_ref_frame) {
         float x = key_points_first_image[it->queryIdx].pt.x;
         float y = key_points_first_image[it->queryIdx].pt.y;
         detection_points_first_image.push_back(cv::Point2f(x, y));
+        key_points_first_image_convert_table_to_3d_points.push_back(it->queryIdx);
         drawPoint(m1, x, y);
 
         x = key_points_second_image[it->trainIdx].pt.x;
@@ -191,8 +219,6 @@ int test_main(jlong bt_first_frame, jlong bt_second_frame, jlong bt_ref_frame) {
     transpose(found_3D_points, triangulation_3D_points);
     convertPointsFromHomogeneous(triangulation_3D_points, triangulation_3D_points);
 
-    std::vector<cv::Point3f> list_3D_points_after_triangulation;
-    std::vector<cv::Point2f> list_2D_points_after_triangulation;
     for (int i = 0; i < triangulation_3D_points.rows; i++) {
         list_3D_points_after_triangulation.push_back(
                 cv::Point3f(triangulation_3D_points.at<float>(i, 0),
@@ -202,172 +228,233 @@ int test_main(jlong bt_first_frame, jlong bt_second_frame, jlong bt_ref_frame) {
 
 //    https://chart-studio.plotly.com/create
     std::string csv = generate_csv_from_Mat(triangulation_3D_points);
+    std::string csv3D = generate_csv_from_Point3f(list_3D_points_after_triangulation);
+    std::string csv2D_first = generate_csv_from_Point2f(detection_points_first_image);
+    std::string csv2D_second = generate_csv_from_Point2f(detection_points_second_image);
+    return 0;
+}
+
+cv::Point2f registration_init() {
+    //**
+    // * Registrace korespondencnich bodu
+    // * Dle tutorialu dostupneho na http://docs.opencv.org/3.1.0/dc/d2c/tutorial_real_time_pose.html
+    // */
+    for (int i = 0; i < list_3D_points_after_triangulation.size(); i++) {
+        std::cout << list_3D_points_after_triangulation[i] << std::endl;
+    }
+    registration.setRegistrationMax(number_registration);
+
+    float pos_x = detection_points_first_image[0].x;
+    float pos_y = detection_points_first_image[0].y;
+
+    cv::Point2f point = cv::Point2f(pos_x, pos_y);
+
+    return point;
+}
+
+cv::Point2f registration_next_point() {
+
+    registration.incRegistrationIndex();
+
+    cv::Mat clone_frame_with_triangulation = first_image.clone();
+    int index = registration.getIndexRegistration();
+
+    float x = detection_points_first_image[index].x;
+    float y = detection_points_first_image[index].y;
+
+    cv::Point2f point = cv::Point2f(x, y);
+
+    return point;
+}
+
+cv::Point2f registration_register_point(float x, float y) {
+    cv::Point2f point_2d = cv::Point2f(x, y);
+    bool is_registrable = registration.isRegistration();
+    int index = registration.getIndexRegistration();
+
+    if (is_registrable) {
+        registration.register2DPoint(point_2d);
+        cv::Point3f point3f = list_3D_points_after_triangulation[index];
+        registration.register3DPoint(point3f);
+        index_points.push_back(index);
+        index++;
+    }
+
+    cv::Mat clone_frame_with_triangulation = first_image.clone();
+    registration.setIndexRegistration(index);
+
+    float pos_x = detection_points_first_image[index].x;
+    float pos_y = detection_points_first_image[index].y;
+
+    cv::Point2f point = cv::Point2f(pos_x, pos_y);
+
+    return point;
+}
+
+cv::Mat measurements;
+robust_matcher_struct robust_matcher_arg_struct;
+
+fast_robust_matcher_struct fast_robust_matcher_arg_struct;
+
+int navigation_init() {
+    std::vector<cv::Point3f> list_3D_points = registration.getList3DPoints();
+    std::vector<cv::Point2f> list_2D_points = registration.getList2DPoints();
+
+
+    std::string csv_3D = generate_csv_from_Point3f(list_3D_points);
+    std::string csv_2D = generate_csv_from_Point2f(list_2D_points);
+
+    /**
+     * Vypocet optickeho stredu
+     */
+
+    std::vector<cv::Mat> vanish_point;
+    cv::Mat output_ref_image, gray_ref_image;
+    cv::Size size_ref_image;
+    double cx, cy;
+
+    size_ref_image = cv::Size(ref_image.cols, ref_image.rows);
+
+    msac.init(mode, size_ref_image, verbose);
+    resize(ref_image, ref_image, size_ref_image);
+
+    if (ref_image.channels() == 4) {
+        cv::cvtColor(ref_image, gray_ref_image, CV_BGRA2GRAY);
+        ref_image.copyTo(output_ref_image);
+    } else if (ref_image.channels() == 3) {
+        cv::cvtColor(ref_image, gray_ref_image, CV_BGR2GRAY);
+        ref_image.copyTo(output_ref_image);
+    } else {
+        ref_image.copyTo(gray_ref_image);
+        cv::cvtColor(ref_image, output_ref_image, CV_GRAY2BGR);
+    }
+
+    cv::Mat output_ref_image_points, first_image_points;
+    output_ref_image.copyTo(output_ref_image_points);
+    first_image.copyTo(first_image_points);
+    draw2DPoints(output_ref_image_points, list_2D_points, blue);
+    saveMatToJpeg(output_ref_image_points, "output_ref_image_points", true);
+
+    vanish_point = processImage(msac, numVps, gray_ref_image, output_ref_image);
+
+    std::vector<cv::Point2f> list_vanish_points;
+    cv::Point2f center;
+    for (int i = 0; i < vanish_point.size(); i++) {
+        double x = vanish_point[i].at<float>(0, 0);
+        double y = vanish_point[i].at<float>(1, 0);
+        if (x < ref_image.cols && y < ref_image.rows)
+            list_vanish_points.push_back(
+                    cv::Point2f(vanish_point[i].at<float>(0, 0), vanish_point[i].at<float>(1, 0)));
+    }
+
+
+    if (list_vanish_points.size() == 3) {
+        cv::Point2f A = list_vanish_points[0];
+        cv::Point2f B = list_vanish_points[1];
+        cv::Point2f C = list_vanish_points[2];
+
+        cv::Point2f tmp;
+        center.x = (A.x + B.x) / 2;
+        center.y = (A.y + B.y) / 2;
+        tmp.x = C.x;
+        tmp.y = C.y;
+        Line primka1(center.x, center.y, tmp.x, tmp.y);
+
+        center.x = (A.x + C.x) / 2;
+        center.y = (A.y + C.y) / 2;
+        tmp.x = B.x;
+        tmp.y = B.y;
+        Line primka2(center.x, center.y, tmp.x, tmp.y);
+
+        primka1.getIntersection(primka2, cy, cx);
+    } else {
+        cx = ref_image.cols / 2 - 0.5;
+        cy = ref_image.rows / 2 - 0.5;
+    }
+
+    cx = abs((int) cx);
+    cy = abs((int) cy);
+
+    pnp_registration.setOpticalCenter(cx, cy);
+
+    /**
+     * Pozice historicke kamery
+     */
+    cv::Mat inliers_ref_frame;
+    std::vector<cv::Point2f> list_points2d_scene_match;
+
+    pnp_registration.estimatePoseRANSAC(list_3D_points, list_2D_points, pnp_method,
+                                        useExtrinsicGuess, iterationsCount,
+                                        reprojectionError, confidence);
+
+    std::cout << "Historicka kamera: " << std::endl;
+    std::cout << pnp_registration.getProjectionMatrix() << std::endl;
+
+    std::string my_str = "my mat :";
+    my_str << pnp_registration.getProjectionMatrix();
+
+
+    /**
+     * Robust matcher
+     */
+
+    cv::Mat current_frame, current_frame_vis, last_current_frame_vis;
+
+
+    cv::Ptr<cv::DescriptorMatcher> descriptorMatcher = cv::makePtr<cv::FlannBasedMatcher>();
+    robustMatcher.setDescriptorMatcher(descriptorMatcher);
+    robustMatcher.setRatio(ratioTest);
+
+    /**
+     * Real-time Camera Pose Estimation
+     */
+
+    measurements = cv::Mat(nMeasurements, 1, CV_64F);
+    measurements.setTo(cv::Scalar(0));
+
+    initKalmanFilter(kalmanFilter, nStates, nMeasurements, nInputs, dt);
+
+    robust_matcher_arg_struct.list_3D_points = list_3D_points;
+    robust_matcher_arg_struct.measurements = measurements;
+
+    fast_robust_matcher_arg_struct.list_3D_points = list_3D_points;
+//    std::cout << "list_3D_points" << std::endl;
+//    std::cout << list_3D_points << std::endl;
+
+//    https://chart-studio.plotly.com/create
+    std::string csv = generate_csv_from_Point3f(list_3D_points);
+
+    return 0;
+}
+
+int processNavigation(long mat_current_frame, int count_frames) {
+    cv::Mat current_frame = *(cv::Mat *) mat_current_frame;
+
+    cv::Mat last_current_frame_vis = current_frame.clone();
+    cv::Mat current_frame_vis = current_frame.clone();
+
+    int directory = 0;
+    try {
+//        getRobustEstimation(current_frame_vis, registration.getList3DPoints(), measurements,
+//                            directory);
+//todo semka dát 3d points z prvního zaměření, mělo by jich být 1000
+        getRobustEstimation(current_frame_vis, list_3D_points_after_triangulation, measurements,
+                            directory);
+    } catch (cv::Exception e) {
+        std::cout << e.msg << std::endl;
+    }
+    return directory;
+}
+
+
+
+
 
 //
-//    /**
-//     * Registrace korespondencnich bodu
-//     * Dle tutorialu dostupneho na http://docs.opencv.org/3.1.0/dc/d2c/tutorial_real_time_pose.html
-//     */
-//
-//    cv::namedWindow(WIN_REF_IMAGE_FOR_USER);
-//    cv::namedWindow(WIN_USER_SELECT_POINT);
-//
-//    cv::setMouseCallback(WIN_USER_SELECT_POINT, onMouseModelRegistration, 0);
-//
-//    cv::Mat ref_image = loadImage(path_to_ref_image);
 
-//    registration.setRegistrationMax(number_registration);
-//    std::vector<cv::Point2f> list_points2d;
-//    std::vector<cv::Point3f> list_points3d;
-//
-//    int previousNumRegistration = registration.getRegistrationCount();
-//    std::vector<int> index_of_points;
 //
 //
-//    while (cv::waitKey(30) < 0) {
-//
-//        cv::Mat clone_of_ref_image = ref_image.clone();
-//        cv::Mat clone_frame_with_triangulation = first_image.clone();
-//        list_points2d = registration.getList2DPoints();
-//        list_points3d = registration.getList3DPoints();
-//        if (!end_registration) {
-//
-//            draw2DPoint(clone_frame_with_triangulation,
-//                        detection_points_first_image[index_of_registration], green);
-//            cv::Point3f point3f = list_3D_points_after_triangulation[index_of_registration];
-//
-//            if (previousNumRegistration != registration.getRegistrationCount()) {
-//                index_of_points.push_back(index_of_registration);
-//                registration.register3DPoint(point3f);
-//                index_of_registration++;
-//                previousNumRegistration = registration.getRegistrationCount();
-//            }
-//
-//        } else {
-//            cv::Point3f point3f = list_3D_points_after_triangulation[index_of_registration];
-//            registration.register3DPoint(point3f);
-//            index_of_points.push_back(index_of_registration);
-//            break;
-//        }
-//
-//        draw2DPoints(clone_of_ref_image, list_points2d, blue);
-//        cv::imshow(WIN_USER_SELECT_POINT, clone_of_ref_image);
-//        cv::imshow(WIN_REF_IMAGE_FOR_USER, clone_frame_with_triangulation);
-//    }
 
-//    cv::destroyWindow(WIN_USER_SELECT_POINT);
-//    cv::destroyWindow(WIN_REF_IMAGE_FOR_USER);
-
-//    std::vector<cv::Point3f> list_3D_points = registration.getList3DPoints();
-//    std::vector<cv::Point2f> list_2D_points = registration.getList2DPoints();
-//    std::vector<cv::Point2f> list_2D_points_first_frama;
-//    std::vector<cv::Point2f> list_2D_points_second_frame;
-//    for (int i = 0; i < index_of_points.size(); i++) {
-//        list_2D_points_first_frama.push_back(detection_points_first_image[index_of_points[i]]);
-//        list_2D_points_second_frame.push_back(detection_points_second_image[index_of_points[i]]);
-//    }
-//
-//    /**
-//     * Vypocet optickeho stredu
-//     */
-//
-//    std::vector<cv::Mat> vanish_point;
-//    cv::Mat output_ref_image, gray_ref_image;
-//    cv::Size size_ref_image;
-//    double cx, cy;
-//
-//    size_ref_image = cv::Size(ref_image.cols, ref_image.rows);
-//
-//    msac.init(mode, size_ref_image, verbose);
-//    resize(ref_image, ref_image, size_ref_image);
-//
-//    if (ref_image.channels() == 3) {
-//        cv::cvtColor(ref_image, gray_ref_image, CV_BGR2GRAY);
-//        ref_image.copyTo(output_ref_image);
-//    } else {
-//        ref_image.copyTo(gray_ref_image);
-//        cv::cvtColor(ref_image, output_ref_image, CV_GRAY2BGR);
-//    }
-//
-//    vanish_point = processImage(msac, numVps, gray_ref_image, output_ref_image);
-//
-//    std::vector<cv::Point2f> list_vanish_points;
-//    cv::Point2f center;
-//    for (int i = 0; i < vanish_point.size(); i++) {
-//        double x = vanish_point[i].at<float>(0, 0);
-//        double y = vanish_point[i].at<float>(1, 0);
-//        if (x < ref_image.cols && y < ref_image.rows)
-//            list_vanish_points.push_back(
-//                    cv::Point2f(vanish_point[i].at<float>(0, 0), vanish_point[i].at<float>(1, 0)));
-//    }
-//
-//
-//    if (list_vanish_points.size() == 3) {
-//        cv::Point2f A = list_vanish_points[0];
-//        cv::Point2f B = list_vanish_points[1];
-//        cv::Point2f C = list_vanish_points[2];
-//
-//        cv::Point2f tmp;
-//        center.x = (A.x + B.x) / 2;
-//        center.y = (A.y + B.y) / 2;
-//        tmp.x = C.x;
-//        tmp.y = C.y;
-//        Line primka1(center.x, center.y, tmp.x, tmp.y);
-//
-//        center.x = (A.x + C.x) / 2;
-//        center.y = (A.y + C.y) / 2;
-//        tmp.x = B.x;
-//        tmp.y = B.y;
-//        Line primka2(center.x, center.y, tmp.x, tmp.y);
-//
-//        primka1.getIntersection(primka2, cy, cx);
-//    } else {
-//        cx = ref_image.cols / 2 - 0.5;
-//        cy = ref_image.rows / 2 - 0.5;
-//    }
-//
-//    cx = abs((int) cx);
-//    cy = abs((int) cy);
-//
-//    cv::waitKey(0);
-//
-//    /**
-//     * Pozice historicke kamery
-//     */
-//    cv::Mat inliers_ref_frame;
-//    std::vector<cv::Point2f> list_points2d_scene_match;
-//
-//    pnp_registration.estimatePoseRANSAC(list_3D_points, list_2D_points, pnp_method,
-//                                        useExtrinsicGuess, iterationsCount,
-//                                        reprojectionError, confidence);
-//
-//    std::cout << "Historicka kamera: " << std::endl;
-//    std::cout << pnp_registration.getProjectionMatrix() << std::endl;
-//    std::cout << "Prvni snimek" << std::endl;
-//    pnp_registration.estimatePoseRANSAC(list_3D_points, list_2D_points_first_frama, pnp_method,
-//                                        useExtrinsicGuess,
-//                                        iterationsCount,
-//                                        reprojectionError, confidence);
-//    std::cout << pnp_registration.getProjectionMatrix() << std::endl;
-//
-//    std::cout << "Druhy snimek" << std::endl;
-//    pnp_registration.estimatePoseRANSAC(list_3D_points, list_2D_points_second_frame, pnp_method,
-//                                        useExtrinsicGuess,
-//                                        iterationsCount,
-//                                        reprojectionError, confidence);
-//    std::cout << pnp_registration.getProjectionMatrix() << std::endl;
-//
-//
-//    /**
-//     * Robust matcher
-//     */
-//
-//    cv::Mat current_frame, current_frame_vis, last_current_frame_vis;
-//
-//
-//    cv::Ptr<cv::DescriptorMatcher> descriptorMatcher = cv::makePtr<cv::FlannBasedMatcher>();
-//    robustMatcher.setDescriptorMatcher(descriptorMatcher);
-//    robustMatcher.setRatio(ratioTest);
 //
 ////    pthread_t fast_robust_matcher_t, robust_matcher_t = ptw32_handle_t();
 //    pthread_t fast_robust_matcher_t, robust_matcher_t = pthread_t();
@@ -461,16 +548,70 @@ int test_main(jlong bt_first_frame, jlong bt_second_frame, jlong bt_ref_frame) {
 //    cv::imshow("Test", frames[min]);
 //
 //    cv::waitKey(0);
-    return 0;
+//    return 0;
+//}
+
+extern "C"
+JNIEXPORT jint JNICALL
+Java_com_vyw_rephotoandroid_OpenCVNative_triangulation(JNIEnv *env, jclass clazz,
+                                                       jlong bt_first_frame,
+                                                       jlong bt_second_frame,
+                                                       jlong bt_ref_frame) {
+    return triangulation(bt_first_frame, bt_second_frame, bt_ref_frame);
+}
+
+
+extern "C"
+JNIEXPORT jfloatArray JNICALL
+Java_com_vyw_rephotoandroid_OpenCVNative_registration_1init(JNIEnv *env, jclass clazz) {
+    jfloatArray params = (*env).NewFloatArray(2);
+    cv::Point2f point = registration_init();
+    jfloat position[2];
+    position[0] = point.x;
+    position[1] = point.y;
+    env->SetFloatArrayRegion(params, 0, 2, position);
+    return params;
+}
+
+extern "C"
+JNIEXPORT jfloatArray JNICALL
+Java_com_vyw_rephotoandroid_OpenCVNative_registration_1register_1point(JNIEnv *env, jclass clazz,
+                                                                       jdouble x,
+                                                                       jdouble y) {
+    jfloatArray params = (*env).NewFloatArray(2);
+    cv::Point2f point = registration_register_point(x, y);
+    jfloat position[2];
+    position[0] = point.x;
+    position[1] = point.y;
+    env->SetFloatArrayRegion(params, 0, 2, position);
+    return params;
+}
+
+extern "C"
+JNIEXPORT jfloatArray JNICALL
+Java_com_vyw_rephotoandroid_OpenCVNative_registration_1next_1point(JNIEnv *env, jclass clazz) {
+    jfloatArray params = (*env).NewFloatArray(2);
+    cv::Point2f point = registration_next_point();
+    jfloat position[2];
+    position[0] = point.x;
+    position[1] = point.y;
+    env->SetFloatArrayRegion(params, 0, 2, position);
+    return params;
+}
+
+
+extern "C"
+JNIEXPORT jint JNICALL
+Java_com_vyw_rephotoandroid_OpenCVNative_navigation_1init(JNIEnv *env, jclass clazz) {
+    return navigation_init();
 }
 
 extern "C"
 JNIEXPORT jint JNICALL
-Java_com_vyw_rephotoandroid_OpenCVNative_fakemain(JNIEnv *env, jclass clazz,
-                                                  jlong bt_first_frame,
-                                                  jlong bt_second_frame,
-                                                  jlong bt_ref_frame) {
-    return test_main(bt_first_frame, bt_second_frame, bt_ref_frame);
+Java_com_vyw_rephotoandroid_OpenCVNative_process_1navigation(JNIEnv *env, jclass clazz,
+                                                             jlong mat_current_frame,
+                                                             jint count_frames) {
+    return processNavigation(mat_current_frame, count_frames);
 }
 
 
@@ -486,73 +627,144 @@ cv::Mat loadImage(const std::string path_to_ref_image) {
 }
 
 bool getRobustEstimation(cv::Mat current_frame_vis, std::vector<cv::Point3f> list_3D_points,
-                         cv::Mat measurements) {
+                         cv::Mat measurements, int &directory) {
+
+//    TODO patřičné nalezení optickýho centeru
+    double cx = current_frame_vis.cols / 2 - 0.5;
+    double cy = current_frame_vis.rows / 2 - 0.5;
+
+    cx = abs((int) cx);
+    cy = abs((int) cy);
+
+    pnp_detection.setOpticalCenter(cx, cy);
+//     TODO end
 
     std::vector<cv::DMatch> good_matches;
     std::vector<cv::KeyPoint> key_points_current_frame;
     std::vector<cv::Point3f> list_points3d_model_match;
     std::vector<cv::Point2f> list_points2d_scene_match;
 
-    cv::Mat revT = cv::Mat(4, 4, CV_64F);
+    cv::Mat relative_T = cv::Mat(4, 4, CV_64F);
+//    todo co to tam dělá, je tam nastavený správně 3d body?
     robustMatcher.robustMatch(current_frame_vis, good_matches, key_points_current_frame);
-    for (unsigned int i = 0; i < good_matches.size(); ++i) {
-        cv::Point3f point3d_model = list_3D_points[good_matches[i].trainIdx];
-        cv::Point2f point2d_scene = key_points_current_frame[good_matches[i].queryIdx].pt;
+
+    std::string gm = "train, query\n";
+
+    for (unsigned int i = 0;
+         i < good_matches.size();
+         ++i) { // todo list_3D_points je menší než dává good_matchees
+
+        // trainIdx patří k key_points_first_image proto převod pomocí tabulky vytvořené při triangulaci
+        int index_in_3D_points = -1;
+        auto it = find(key_points_first_image_convert_table_to_3d_points.begin(),
+                       key_points_first_image_convert_table_to_3d_points.end(),
+                       good_matches[i].queryIdx);
+        if (it != key_points_first_image_convert_table_to_3d_points.end()) { // If element was found
+            // calculating the index_in_3D_points of good_matches[i].trainIdx
+            index_in_3D_points = it - key_points_first_image_convert_table_to_3d_points.begin();
+        } else {
+            continue; // If the element is not present in the vector
+        }
+
+//    for (unsigned int i = 0;
+//         i < good_matches.size() &
+//         good_matches[i].trainIdx < index_in_3D_points &
+//         good_matches[i].queryIdx < key_points_current_frame.size();
+//         ++i) {
+        gm += std::to_string(index_in_3D_points) + "," +
+              std::to_string(good_matches[i].trainIdx) + ",\n";
+
+//    todo v tomhle bylo špatné pole
+//      cv::Point3f point3d_model = list_3D_points[good_matches[i].trainIdx];
+        cv::Point3f point3d_model = list_3D_points[index_in_3D_points];
+        cv::Point2f point2d_scene = key_points_current_frame[good_matches[i].trainIdx].pt;
         list_points3d_model_match.push_back(point3d_model);
         list_points2d_scene_match.push_back(point2d_scene);
     }
 
+    std::string csv_list_3D_points = generate_csv_from_Point3f(list_points3d_model_match);
 
-    draw2DPoints(current_frame_vis, list_points2d_scene_match, blue);
+    cv::Mat image = current_frame_vis.clone();
+    draw2DPoints(image, list_points2d_scene_match, blue);
+    saveMatToJpeg(image, "current_frame_vis", true);
+
+    cv::Mat undistorted;
+    cv::Mat dist_coeffs = cv::Mat::zeros(4, 1, CV_64FC1);
+    cv::undistort(current_frame_vis, undistorted, pnp_detection.getCameraMatrix(), dist_coeffs);
+    saveMatToJpeg(current_frame_vis, "current_frame_vis_undistorted", true);
 
 
     bool good_measurement = false;
 
     if (good_matches.size() > 0) {
 
+//    https://chart-studio.plotly.com/create
+        std::string csv_3D = generate_csv_from_Point3f(list_points3d_model_match);
+        std::string csv_2D = generate_csv_from_Point2f(list_points2d_scene_match);
+
+//        list_points3d_model_match.resize(15);
+//        list_points2d_scene_match.resize(15);
+
         pnp_detection.estimatePoseRANSAC(list_points3d_model_match, list_points2d_scene_match,
                                          pnp_method,
                                          useExtrinsicGuess, iterationsCount, reprojectionError,
                                          confidence);
 
-        if (pnp_detection.getInliersPoints().size() > minInliersKalman) {
+        int inliers_size = pnp_detection.getInliersPoints().size();
+        if (inliers_size > minInliersKalman) {
+
+            cv::Mat image2 = current_frame_vis.clone();
+            draw2DPoints(image2, list_points2d_scene_match, red);
+            saveMatToJpeg(image2, "current_frame_vis_list_points2d_scene_match", true);
 
 
-            draw2DPoints(current_frame_vis, list_points2d_scene_match, red);
+            cv::Mat image3 = current_frame_vis.clone();
+            cv::perspectiveTransform(image3, image3, pnp_detection.getProjectionMatrix());
+            saveMatToJpeg(image3, "current_warped_to_ref", true);
+
+            cv::Mat image4 = ref_image.clone();
+            cv::perspectiveTransform(image4, image4, pnp_registration.getProjectionMatrix());
+            saveMatToJpeg(image4, "ref_warped_to_current", true);
+
+
             cv::Mat T = pnp_detection.getProjectionMatrix();
-            cv::Mat refT = pnp_registration.getProjectionMatrix();
+            cv::Mat reference_T = pnp_registration.getProjectionMatrix();
 
-            revT = T.inv() * refT;
+            std::string csv_projection = generate_csv_from_Mat(reference_T);
 
+            relative_T = T.inv() * reference_T;
 
-            int x = (int) revT.at<float>(0, 3);
-            int y = (int) revT.at<float>(1, 3);
+            std::string csv_projection_inv = generate_csv_from_Mat(reference_T);
 
-            int directory = getDirectory(x, y);
-            std::cout << "lightweight directory" << std::endl << directory << std::endl;
+            int x = (int) relative_T.at<float>(0, 3);
+            int y = (int) relative_T.at<float>(1, 3);
+
+            directory = getDirectory(x, y);
 
             cv::Mat translation_measured(3, 1, CV_64F);
             translation_measured = pnp_detection.getTranslationMatrix();
 
+            std::string csv_translation = generate_csv_from_Mat(translation_measured);
+
             cv::Mat rotation_measured(3, 3, CV_64F);
             rotation_measured = pnp_detection.getRotationMatrix();
+
+            std::string csv_rotation = generate_csv_from_Mat(rotation_measured);
 
             good_measurement = true;
             fillMeasurements(measurements, translation_measured, rotation_measured);
 
-
-            double pos = revT.at<double>(3, 0) + revT.at<double>(3, 1);
+            double pos = relative_T.at<double>(3, 0) + relative_T.at<double>(3, 1);
             pos /= 2;
 
             position.push_back(pos);
             frames.push_back(current_frame_vis);
 
-
-            std::cout << indexFrame << " Robustni odhad: " << std::endl;
-            std::cout << pnp_detection.getProjectionMatrix() << std::endl;
+//            std::cout << indexFrame << " Robustni odhad: " << std::endl;
+//            std::cout << pnp_detection.getProjectionMatrix() << std::endl;
 
             /*std::cout << "Relativni rozdil: " << std::endl;
-             std::cout << revT << std::endl;*/
+             std::cout << relative_T << std::endl;*/
 
             indexFrame++;
         }
@@ -561,10 +773,8 @@ bool getRobustEstimation(cv::Mat current_frame_vis, std::vector<cv::Point3f> lis
     cv::Mat translation_estimated(3, 1, CV_64F);
     cv::Mat rotation_estimated(3, 3, CV_64F);
 
-
     updateKalmanFilter(kalmanFilter, measurements, translation_estimated, rotation_estimated);
     pnp_detection.setProjectionMatrix(rotation_estimated, translation_estimated);
-
 
     return good_measurement;
 }
@@ -606,7 +816,6 @@ getLightweightEstimation(cv::Mat last_current_frame_vis, std::vector<cv::Point3f
                                              useExtrinsicGuess,
                                              iterationsCount, reprojectionError, confidence);
 
-
             if (pnp_detection.getInliersPoints().size() > minInliersKalman) {
 
                 draw2DPoints(current_frame_vis, list_points2d_scene_match, red);
@@ -620,9 +829,7 @@ getLightweightEstimation(cv::Mat last_current_frame_vis, std::vector<cv::Point3f
 
                 int directory = getDirectory(x, y);
                 std::cout << "lightweight directory" << std::endl << directory << std::endl;
-
             }
-
         }
     }
     std::cout << "Lehky odhad: " << std::endl;
@@ -694,7 +901,8 @@ void *robust_matcher(void *arg) {
     cv::Mat current_frame = param->current_frame;
     std::vector<cv::Point3f> list_3D_points_after_registration = param->list_3D_points;
     cv::Mat measurements = param->measurements;
-    getRobustEstimation(current_frame, list_3D_points_after_registration, measurements);
+    int directory = 20;
+    getRobustEstimation(current_frame, list_3D_points_after_registration, measurements, directory);
     return NULL;
 }
 
@@ -748,6 +956,7 @@ std::vector<cv::Mat> processImage(MSAC &msac, int numVps, cv::Mat &imgGRAY, cv::
         pt2.x = lines[i][2];
         pt2.y = lines[i][3];
         line(outputImg, pt1, pt2, CV_RGB(0, 0, 0), 2);
+        saveMatToJpeg(outputImg, "vanish_lines", true);
 
         aux.clear();
         aux.push_back(pt1);
@@ -771,6 +980,7 @@ std::vector<cv::Mat> processImage(MSAC &msac, int numVps, cv::Mat &imgGRAY, cv::
     }
 
     msac.drawCS(outputImg, lineSegmentsClusters, vps);
+    saveMatToJpeg(outputImg, "vanish_points", true);
     return vps;
 }
 
@@ -880,4 +1090,3 @@ void fillMeasurements(cv::Mat &measurements, const cv::Mat &translation_measured
     measurements.at<double>(4) = measured_eulers.at<double>(1);      // pitch
     measurements.at<double>(5) = measured_eulers.at<double>(2);      // yaw
 }
-

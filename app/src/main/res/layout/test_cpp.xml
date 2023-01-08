@@ -32,6 +32,20 @@
             android:text="Start C++" />
 
         <Button
+            android:id="@+id/button_play4"
+            android:layout_width="202dp"
+            android:layout_height="60dp"
+            android:onClick="registration"
+            android:text="Start Registration" />
+
+        <Button
+            android:id="@+id/button_play5"
+            android:layout_width="202dp"
+            android:layout_height="60dp"
+            android:onClick="robust"
+            android:text="Robust Matcher" />
+
+        <Button
             android:id="@+id/button_play3"
             android:layout_width="202dp"
             android:layout_height="60dp"

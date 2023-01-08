@@ -41,7 +41,7 @@
 #define MAX_NUM_LINES    200
 
 bool end_registration = false;
-int const number_registration = 8;
+int const number_registration = 15;
 int index_of_registration = 0;
 
 // Color
@@ -157,7 +157,7 @@ bool useExtrinsicGuess = false;
 int iterationsCount = 10000;
 float reprojectionError = 3.0;
 double confidence = 0.999;
-int pnp_method = cv::SOLVEPNP_ITERATIVE;
+int pnp_method = cv::SOLVEPNP_EPNP;
 
 // Kalman Filter parameters
 int minInliersKalman = 10;
@@ -187,7 +187,7 @@ static void onMouseModelRegistration(int event, int x, int y, int, void *);
 
 std::vector<cv::Mat> processImage(MSAC &msac, int numVps, cv::Mat &imgGRAY, cv::Mat &outputImg);
 
-bool getRobustEstimation(cv::Mat current_frame_vis, std::vector<cv::Point3f> list_3D_points, cv::Mat measurements);
+bool getRobustEstimation(cv::Mat current_frame_vis, std::vector<cv::Point3f> list_3D_points, cv::Mat measurements, int &directory);
 
 bool getLightweightEstimation(cv::Mat last_current_frame_vis, std::vector<cv::Point3f> list_3D_points,
                               cv::Mat current_frame_vis);
