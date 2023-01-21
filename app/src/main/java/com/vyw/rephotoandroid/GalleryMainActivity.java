@@ -56,6 +56,7 @@ import com.vyw.rephotoandroid.model.api.OneLoginResponse;
 import com.vyw.rephotoandroid.model.api.Status;
 import com.vyw.rephotoandroid.model.api.UserLogin;
 import com.vyw.rephotoandroid.model.api.UserLogout;
+import com.vyw.rephotoandroid.smartNavigation.SmartNavigation;
 
 // TODO removed
 //import net.steamcrafted.materialiconlib.MaterialMenuInflater;
@@ -341,14 +342,26 @@ public class GalleryMainActivity extends AppCompatActivity implements GalleryAda
             final Uri uri = data.getData();
             String path = uri.toString();
 
-            path_ref_image = path;
-            Intent intent = new Intent(this, SimpleNavigation.class);
-            intent.putExtra("PATH_REF_IMAGE", path_ref_image);
-            intent.putExtra("SOURCE", "LOCAL");
-            startActivity(intent);
+            Boolean simple = false;
+            if (simple) {
+                path_ref_image = path;
+                Intent intent = new Intent(this, SimpleNavigation.class);
+                intent.putExtra("PATH_REF_IMAGE", path_ref_image);
+                intent.putExtra("SOURCE", "LOCAL");
+                startActivity(intent);
 
-            Log.d(TAG, path);
-            Log.d(TAG, String.valueOf(id_entered_button));
+                Log.d(TAG, path);
+                Log.d(TAG, String.valueOf(id_entered_button));
+            } else {
+                path_ref_image = path;
+                Intent intent = new Intent(this, SmartNavigation.class);
+                intent.putExtra("PATH_REF_IMAGE", path_ref_image);
+                intent.putExtra("SOURCE", "LOCAL");
+                startActivity(intent);
+
+                Log.d(TAG, path);
+                Log.d(TAG, String.valueOf(id_entered_button));
+            }
         }
     }
 
@@ -578,6 +591,7 @@ public class GalleryMainActivity extends AppCompatActivity implements GalleryAda
 //        startActivity(intent);
     }
 
+    //    TODO změnit na smart navigaci
     ActivityResultLauncher<Intent> SimpleNavigationActivityResultLauncher = registerForActivityResult(
             new ActivityResultContracts.StartActivityForResult(),
             new ActivityResultCallback<ActivityResult>() {

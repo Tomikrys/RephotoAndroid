@@ -162,6 +162,9 @@ int triangulation(jlong bt_first_frame, jlong bt_second_frame, jlong bt_ref_fram
     robustMatcher.setFeatureDetector(featureDetector);
     robustMatcher.setDescriptorExtractor(featureExtractor);
 
+    cv::Ptr<cv::DescriptorMatcher> descriptorMatcher = cv::makePtr<cv::FlannBasedMatcher>();
+    robustMatcher.setDescriptorMatcher(descriptorMatcher);
+
     camera_matrix = pnp_registration.getCameraMatrix();
 
     cv::Mat essential_matrix = robustMatcher.robustMatchRANSAC(first_image, second_image, matches,
@@ -231,6 +234,51 @@ int triangulation(jlong bt_first_frame, jlong bt_second_frame, jlong bt_ref_fram
     std::string csv3D = generate_csv_from_Point3f(list_3D_points_after_triangulation);
     std::string csv2D_first = generate_csv_from_Point2f(detection_points_first_image);
     std::string csv2D_second = generate_csv_from_Point2f(detection_points_second_image);
+
+//  testif we can use SIFT to determine projection matrix from reference photo
+    std::vector<cv::DMatch> good_matches;
+    std::vector<cv::KeyPoint> key_points_current_frame;
+    robustMatcher.robustMatch(ref_image, good_matches, key_points_current_frame);
+
+    std::vector<cv::Point3f> list_points3d_model_match;
+    std::vector<cv::Point2f> list_points2d_scene_match;
+    for (unsigned int i = 0;
+         i < good_matches.size();
+         ++i) { // todo list_3D_points je menší než dává good_matchees
+
+        // trainIdx patří k key_points_first_image proto převod pomocí tabulky vytvořené při triangulaci
+        int index_in_3D_points = -1;
+        auto it = find(key_points_first_image_convert_table_to_3d_points.begin(),
+                       key_points_first_image_convert_table_to_3d_points.end(),
+                       good_matches[i].queryIdx);
+        if (it != key_points_first_image_convert_table_to_3d_points.end()) { // If element was found
+            // calculating the index_in_3D_points of good_matches[i].trainIdx
+            index_in_3D_points = it - key_points_first_image_convert_table_to_3d_points.begin();
+        } else {
+            continue; // If the element is not present in the vector
+        }
+
+        cv::Point3f point3d_model = list_3D_points_after_triangulation[index_in_3D_points];
+        cv::Point2f point2d_scene = key_points_current_frame[good_matches[i].trainIdx].pt;
+        list_points3d_model_match.push_back(point3d_model);
+        list_points2d_scene_match.push_back(point2d_scene);
+    }
+    bool good_measurement = false;
+
+    if (good_matches.size() > 0) {
+        pnp_registration.estimatePoseRANSAC(list_points3d_model_match, list_points2d_scene_match,
+                                            pnp_method,
+                                            useExtrinsicGuess, iterationsCount,
+                                            reprojectionError, confidence);
+        int inliers_size = pnp_registration.getInliersPoints().size();
+//        TODO rovnou to poslat tam, a+t se to ned2l8 znova ten v7sledek estimate pose.
+        if (inliers_size > minInliersKalman) {
+            registration.setList2DPoints(list_points2d_scene_match);
+            registration.setList3DPoints(list_points3d_model_match);
+            return 1;
+        }
+    }
+
     return 0;
 }
 
@@ -344,7 +392,8 @@ int navigation_init() {
         double y = vanish_point[i].at<float>(1, 0);
         if (x < ref_image.cols && y < ref_image.rows)
             list_vanish_points.push_back(
-                    cv::Point2f(vanish_point[i].at<float>(0, 0), vanish_point[i].at<float>(1, 0)));
+                    cv::Point2f(vanish_point[i].at<float>(0, 0),
+                                vanish_point[i].at<float>(1, 0)));
     }
 
 
@@ -400,11 +449,6 @@ int navigation_init() {
 
     cv::Mat current_frame, current_frame_vis, last_current_frame_vis;
 
-
-    cv::Ptr<cv::DescriptorMatcher> descriptorMatcher = cv::makePtr<cv::FlannBasedMatcher>();
-    robustMatcher.setDescriptorMatcher(descriptorMatcher);
-    robustMatcher.setRatio(ratioTest);
-
     /**
      * Real-time Camera Pose Estimation
      */
@@ -435,10 +479,8 @@ int processNavigation(long mat_current_frame, int count_frames) {
 
     int directory = 0;
     try {
-//        getRobustEstimation(current_frame_vis, registration.getList3DPoints(), measurements,
-//                            directory);
-//todo semka dát 3d points z prvního zaměření, mělo by jich být 1000
-        getRobustEstimation(current_frame_vis, list_3D_points_after_triangulation, measurements,
+        getRobustEstimation(current_frame_vis, list_3D_points_after_triangulation,
+                            measurements,
                             directory);
     } catch (cv::Exception e) {
         std::cout << e.msg << std::endl;
@@ -575,7 +617,8 @@ Java_com_vyw_rephotoandroid_OpenCVNative_registration_1init(JNIEnv *env, jclass 
 
 extern "C"
 JNIEXPORT jfloatArray JNICALL
-Java_com_vyw_rephotoandroid_OpenCVNative_registration_1register_1point(JNIEnv *env, jclass clazz,
+Java_com_vyw_rephotoandroid_OpenCVNative_registration_1register_1point(JNIEnv *env,
+                                                                       jclass clazz,
                                                                        jdouble x,
                                                                        jdouble y) {
     jfloatArray params = (*env).NewFloatArray(2);
@@ -589,7 +632,8 @@ Java_com_vyw_rephotoandroid_OpenCVNative_registration_1register_1point(JNIEnv *e
 
 extern "C"
 JNIEXPORT jfloatArray JNICALL
-Java_com_vyw_rephotoandroid_OpenCVNative_registration_1next_1point(JNIEnv *env, jclass clazz) {
+Java_com_vyw_rephotoandroid_OpenCVNative_registration_1next_1point(JNIEnv *env,
+                                                                   jclass clazz) {
     jfloatArray params = (*env).NewFloatArray(2);
     cv::Point2f point = registration_next_point();
     jfloat position[2];
@@ -659,9 +703,11 @@ bool getRobustEstimation(cv::Mat current_frame_vis, std::vector<cv::Point3f> lis
         auto it = find(key_points_first_image_convert_table_to_3d_points.begin(),
                        key_points_first_image_convert_table_to_3d_points.end(),
                        good_matches[i].queryIdx);
-        if (it != key_points_first_image_convert_table_to_3d_points.end()) { // If element was found
+        if (it !=
+            key_points_first_image_convert_table_to_3d_points.end()) { // If element was found
             // calculating the index_in_3D_points of good_matches[i].trainIdx
-            index_in_3D_points = it - key_points_first_image_convert_table_to_3d_points.begin();
+            index_in_3D_points =
+                    it - key_points_first_image_convert_table_to_3d_points.begin();
         } else {
             continue; // If the element is not present in the vector
         }
@@ -690,7 +736,8 @@ bool getRobustEstimation(cv::Mat current_frame_vis, std::vector<cv::Point3f> lis
 
     cv::Mat undistorted;
     cv::Mat dist_coeffs = cv::Mat::zeros(4, 1, CV_64FC1);
-    cv::undistort(current_frame_vis, undistorted, pnp_detection.getCameraMatrix(), dist_coeffs);
+    cv::undistort(current_frame_vis, undistorted, pnp_detection.getCameraMatrix(),
+                  dist_coeffs);
     saveMatToJpeg(current_frame_vis, "current_frame_vis_undistorted", true);
 
 
@@ -705,9 +752,11 @@ bool getRobustEstimation(cv::Mat current_frame_vis, std::vector<cv::Point3f> lis
 //        list_points3d_model_match.resize(15);
 //        list_points2d_scene_match.resize(15);
 
-        pnp_detection.estimatePoseRANSAC(list_points3d_model_match, list_points2d_scene_match,
+        pnp_detection.estimatePoseRANSAC(list_points3d_model_match,
+                                         list_points2d_scene_match,
                                          pnp_method,
-                                         useExtrinsicGuess, iterationsCount, reprojectionError,
+                                         useExtrinsicGuess, iterationsCount,
+                                         reprojectionError,
                                          confidence);
 
         int inliers_size = pnp_detection.getInliersPoints().size();
@@ -718,13 +767,14 @@ bool getRobustEstimation(cv::Mat current_frame_vis, std::vector<cv::Point3f> lis
             saveMatToJpeg(image2, "current_frame_vis_list_points2d_scene_match", true);
 
 
-            cv::Mat image3 = current_frame_vis.clone();
-            cv::perspectiveTransform(image3, image3, pnp_detection.getProjectionMatrix());
-            saveMatToJpeg(image3, "current_warped_to_ref", true);
-
-            cv::Mat image4 = ref_image.clone();
-            cv::perspectiveTransform(image4, image4, pnp_registration.getProjectionMatrix());
-            saveMatToJpeg(image4, "ref_warped_to_current", true);
+//            cv::Mat image3 = current_frame_vis.clone();
+//            cv::perspectiveTransform(image3, image3, pnp_detection.getProjectionMatrix());
+//            saveMatToJpeg(image3, "current_warped_to_ref", true);
+//
+//            cv::Mat image4 = ref_image.clone();
+//            cv::perspectiveTransform(image4, image4,
+//                                     pnp_registration.getProjectionMatrix());
+//            saveMatToJpeg(image4, "ref_warped_to_current", true);
 
 
             cv::Mat T = pnp_detection.getProjectionMatrix();
@@ -773,14 +823,16 @@ bool getRobustEstimation(cv::Mat current_frame_vis, std::vector<cv::Point3f> lis
     cv::Mat translation_estimated(3, 1, CV_64F);
     cv::Mat rotation_estimated(3, 3, CV_64F);
 
-    updateKalmanFilter(kalmanFilter, measurements, translation_estimated, rotation_estimated);
+    updateKalmanFilter(kalmanFilter, measurements, translation_estimated,
+                       rotation_estimated);
     pnp_detection.setProjectionMatrix(rotation_estimated, translation_estimated);
 
     return good_measurement;
 }
 
 bool
-getLightweightEstimation(cv::Mat last_current_frame_vis, std::vector<cv::Point3f> list_3D_points,
+getLightweightEstimation(cv::Mat last_current_frame_vis,
+                         std::vector<cv::Point3f> list_3D_points,
                          cv::Mat current_frame_vis) {
 
     std::vector<cv::Point2f> list_points2d_scene_match;
@@ -804,7 +856,8 @@ getLightweightEstimation(cv::Mat last_current_frame_vis, std::vector<cv::Point3f
     if (!featuresPrevious.empty()) {
         goodFeaturesToTrack(current_frame_vis, featuresCurrent, 30, 0.01, 30);
 
-        calcOpticalFlowPyrLK(last, current, featuresPrevious, featuresNextPos, featuresFound, err);
+        calcOpticalFlowPyrLK(last, current, featuresPrevious, featuresNextPos,
+                             featuresFound, err);
 
         for (size_t i = 0; i < featuresNextPos.size(); i++) {
             if (featuresFound[i]) {
@@ -812,9 +865,11 @@ getLightweightEstimation(cv::Mat last_current_frame_vis, std::vector<cv::Point3f
             }
         }
         if (list_3D_points.size() == list_points2d_scene_match.size()) {
-            pnp_detection.estimatePoseRANSAC(list_3D_points, list_points2d_scene_match, pnp_method,
+            pnp_detection.estimatePoseRANSAC(list_3D_points, list_points2d_scene_match,
+                                             pnp_method,
                                              useExtrinsicGuess,
-                                             iterationsCount, reprojectionError, confidence);
+                                             iterationsCount, reprojectionError,
+                                             confidence);
 
             if (pnp_detection.getInliersPoints().size() > minInliersKalman) {
 
@@ -902,11 +957,13 @@ void *robust_matcher(void *arg) {
     std::vector<cv::Point3f> list_3D_points_after_registration = param->list_3D_points;
     cv::Mat measurements = param->measurements;
     int directory = 20;
-    getRobustEstimation(current_frame, list_3D_points_after_registration, measurements, directory);
+    getRobustEstimation(current_frame, list_3D_points_after_registration, measurements,
+                        directory);
     return NULL;
 }
 
-std::vector<cv::Mat> processImage(MSAC &msac, int numVps, cv::Mat &imgGRAY, cv::Mat &outputImg) {
+std::vector<cv::Mat>
+processImage(MSAC &msac, int numVps, cv::Mat &imgGRAY, cv::Mat &outputImg) {
     cv::Mat imgCanny;
     cv::Canny(imgGRAY, imgCanny, 180, 120, 3);
     std::vector<std::vector<cv::Point> > lineSegments;
@@ -987,7 +1044,8 @@ std::vector<cv::Mat> processImage(MSAC &msac, int numVps, cv::Mat &imgGRAY, cv::
 
 /**********************************************************************************************************/
 void
-initKalmanFilter(cv::KalmanFilter &KF, int nStates, int nMeasurements, int nInputs, double dt) {
+initKalmanFilter(cv::KalmanFilter &KF, int nStates, int nMeasurements, int nInputs,
+                 double dt) {
 
     KF.init(nStates, nMeasurements, nInputs, CV_64F);
     setIdentity(KF.processNoiseCov, cv::Scalar::all(1e-5));
@@ -1056,7 +1114,8 @@ initKalmanFilter(cv::KalmanFilter &KF, int nStates, int nMeasurements, int nInpu
 
 }
 
-void updateKalmanFilter(cv::KalmanFilter &KF, cv::Mat &measurement, cv::Mat &translation_estimated,
+void updateKalmanFilter(cv::KalmanFilter &KF, cv::Mat &measurement,
+                        cv::Mat &translation_estimated,
                         cv::Mat &rotation_estimated) {
 
     cv::Mat prediction = KF.predict();

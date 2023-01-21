@@ -72,22 +72,10 @@ void RobustMatcher::robustMatch(const cv::Mat &image2, std::vector<cv::DMatch> &
     cv::Mat descriptors2;
     extractor->compute(image2, key_points2, descriptors2);
 
-
-    //    todo, nejsou prázdný
     if (descriptors.empty())
         std::cout << "robustMatch " << "1st descriptor empty " << __FILE__ << __LINE__ << std::endl;
     if (descriptors2.empty())
         std::cout << "robustMatch " << "2st descriptor empty " << __FILE__ << __LINE__ << std::endl;
-
-    //    TODO nemělo by se
-    // descriptors.convertTo(descriptors, CV_32F);
-    // descriptors2.convertTo(descriptors2, CV_32F);
-
-    // todo error
-    // 2022-02-04 15:18:08.488 21339-21339/com.vyw.rephotoandroid E/cv::error(): OpenCV(4.5.3)
-    // Error: Unsupported format or combination of formats (> type=0 > ) in buildIndex_,
-    // file /build/master_pack-android/opencv/modules/flann/src/miniflann.cpp, line 336
-    // https://answers.opencv.org/question/11209/unsupported-format-or-combination-of-formats-in-buildindex-using-flann-algorithm/
 
     std::vector<std::vector<cv::DMatch>> matches12, matches21;
     matcher->knnMatch(descriptors, descriptors2, matches12, 2);
