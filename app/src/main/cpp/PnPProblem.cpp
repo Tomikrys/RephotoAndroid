@@ -161,13 +161,18 @@ void PnPProblem::estimatePoseRANSAC(const std::vector<cv::Point3f> &list_3d_poin
 //    std::string representative_3d_csv = generate_csv_from_Point3fa(representative3DPoints);
 //    std::string representative_2d_csv = generate_csv_from_Point2fa(representative2DPoints);
 
-    if (cv::solvePnPRansac(list_3d_points, list_2d_points, _camera_matrix,
-                           dist_coeffs, rvec, tvec, use_extrinsic_guess, iterations_count,
-                           reprojection_error, confidence, inliers_points, flags)) {
-        std::string x = "found solution";
-    } else {
-        std::string y = "didnt find solution";
+    try {
+        if (cv::solvePnPRansac(list_3d_points, list_2d_points, _camera_matrix,
+                               dist_coeffs, rvec, tvec, use_extrinsic_guess, iterations_count,
+                               reprojection_error, confidence, inliers_points, flags)) {
+            std::string x = "found solution";
+        } else {
+            std::string y = "didnt find solution";
+        }
+    } catch (cv::Exception e) {
+        std::cout << e.msg << std::endl;
     }
+
 
     Rodrigues(rvec, _rotation_matrix);
     _translation_matrix = tvec;
@@ -175,7 +180,7 @@ void PnPProblem::estimatePoseRANSAC(const std::vector<cv::Point3f> &list_3d_poin
     cv::projectPoints(list_3d_points, rvec, tvec, _camera_matrix, dist_coeffs, list_2d_points);
     std::string csv_3D_projected_to_2D = generate_csv_from_Point2fa(list_2d_points);
 
-    //        TODO empty
+    // TODO protect from data race
     if (!inliers_points.empty()) {
         _inliers_points.clear();
 

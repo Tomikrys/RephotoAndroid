@@ -167,7 +167,7 @@ public class GalleryMainActivity extends AppCompatActivity implements GalleryAda
     @Override
     public void onLocationChanged(@NonNull Location location) {
         this.location = location;
-        Log.d(TAG, "Latitude:" + location.getLatitude() + ", Longitude:" + location.getLongitude());
+//        Log.d(TAG, "Latitude:" + location.getLatitude() + ", Longitude:" + location.getLongitude());
     }
 
     public void initializeRefreshListener() {
@@ -342,26 +342,19 @@ public class GalleryMainActivity extends AppCompatActivity implements GalleryAda
             final Uri uri = data.getData();
             String path = uri.toString();
 
+            path_ref_image = path;
+            Intent intent;
             Boolean simple = false;
             if (simple) {
-                path_ref_image = path;
-                Intent intent = new Intent(this, SimpleNavigation.class);
-                intent.putExtra("PATH_REF_IMAGE", path_ref_image);
-                intent.putExtra("SOURCE", "LOCAL");
-                startActivity(intent);
-
-                Log.d(TAG, path);
-                Log.d(TAG, String.valueOf(id_entered_button));
+                intent = new Intent(this, SimpleNavigation.class);
             } else {
-                path_ref_image = path;
-                Intent intent = new Intent(this, SmartNavigation.class);
-                intent.putExtra("PATH_REF_IMAGE", path_ref_image);
-                intent.putExtra("SOURCE", "LOCAL");
-                startActivity(intent);
-
-                Log.d(TAG, path);
-                Log.d(TAG, String.valueOf(id_entered_button));
+                intent = new Intent(this, SmartNavigation.class);
             }
+            intent.putExtra("PATH_REF_IMAGE", path_ref_image);
+            intent.putExtra("SOURCE", "LOCAL");
+            startActivity(intent);
+            Log.d(TAG, path);
+            Log.d(TAG, String.valueOf(id_entered_button));
         }
     }
 

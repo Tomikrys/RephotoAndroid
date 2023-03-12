@@ -239,7 +239,7 @@ void saveMatToJpeg(cv::Mat img, std::string filename, bool RGBA2BGRA = false) {
     if (RGBA2BGRA) {
         cv::cvtColor(img, img, cv::COLOR_RGBA2BGRA);
     }
-    cv::imwrite("/storage/emulated/0/Download/" + filename + ".jpg", img,
+    cv::imwrite("/storage/emulated/0/Download/Rephoto/" + filename + ".jpg", img,
                 {cv::ImwriteFlags::IMWRITE_JPEG_QUALITY, 70});
 }
 

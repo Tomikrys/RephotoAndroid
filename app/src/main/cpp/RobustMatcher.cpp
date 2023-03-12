@@ -81,8 +81,8 @@ void RobustMatcher::robustMatch(const cv::Mat &image2, std::vector<cv::DMatch> &
     matcher->knnMatch(descriptors, descriptors2, matches12, 2);
     matcher->knnMatch(descriptors2, descriptors, matches21, 2);
 
-    ratioTest(matches12);
-    ratioTest(matches21);
+    int removed12 = ratioTest(matches12);
+    int removed21 = ratioTest(matches21);
 
     symmetryTest(matches12, matches21, good_matches);
 }

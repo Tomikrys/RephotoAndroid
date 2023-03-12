@@ -7,7 +7,10 @@ import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.content.res.Configuration;
 import android.graphics.Bitmap;
+import android.graphics.Canvas;
+import android.graphics.Color;
 import android.graphics.Matrix;
+import android.graphics.Paint;
 import android.graphics.Path;
 import android.graphics.drawable.Drawable;
 import android.hardware.camera2.CameraCharacteristics;
@@ -99,6 +102,7 @@ public class SmartNavigation extends AppCompatActivity implements Parcelable {
     private static String TAG = "SimpleNavigation";
     private float origX = 0;
     private float origY = 0;
+    Bitmap refImageForAnalysis;
 
     private float newAlpha = 1;
     private float origAlpha = 1;
@@ -107,6 +111,9 @@ public class SmartNavigation extends AppCompatActivity implements Parcelable {
     private ImageCapture imageCapture;
     private String source = "";
     private String image_id;
+
+    private int max_width_for_analysis = 1280;
+    private int max_height_for_analysis =960;
 
     private Boolean navigation_started = false;
 
@@ -149,8 +156,9 @@ public class SmartNavigation extends AppCompatActivity implements Parcelable {
                     refImage = findViewById(R.id.refImage);
                     refImage.setImageBitmap(bt_ref_frame);
 
+                    refImageForAnalysis = ImageFunctions.scaleImage(bt_ref_frame, max_width_for_analysis, max_height_for_analysis);
+                    refImageBitmap = ImageFunctions.deepCopyBitmap(bt_ref_frame);
                     refImageBitmapCopy = ImageFunctions.deepCopyBitmap(bt_ref_frame);
-                    refImageBitmap = ImageFunctions.deepCopyBitmap(refImageBitmapCopy);
                 }
 
                 @Override
@@ -176,8 +184,9 @@ public class SmartNavigation extends AppCompatActivity implements Parcelable {
             refImage = findViewById(R.id.refImage);
             refImage.setImageBitmap(bt_ref_frame);
 
+            refImageForAnalysis = ImageFunctions.scaleImage(bt_ref_frame, max_width_for_analysis, max_height_for_analysis);
+            refImageBitmap = ImageFunctions.deepCopyBitmap(bt_ref_frame);
             refImageBitmapCopy = ImageFunctions.deepCopyBitmap(bt_ref_frame);
-            refImageBitmap = ImageFunctions.deepCopyBitmap(refImageBitmapCopy);
         }
 
         if (!isOCVSetUp) { // if OCV hasn't been setup yet, init it
@@ -228,7 +237,7 @@ public class SmartNavigation extends AppCompatActivity implements Parcelable {
                 new ImageAnalysis.Builder()
                         // enable the following line if RGBA output is needed.
                         .setOutputImageFormat(ImageAnalysis.OUTPUT_IMAGE_FORMAT_RGBA_8888)
-                        .setTargetResolution(new Size(1280, 960))
+                        .setTargetResolution(new Size(max_width_for_analysis, max_height_for_analysis))
                         .setBackpressureStrategy(ImageAnalysis.STRATEGY_KEEP_ONLY_LATEST)
                         .build();
         imageAnalysis.setAnalyzer(ContextCompat.getMainExecutor(this), new ImageAnalysis.Analyzer() {
@@ -258,6 +267,17 @@ public class SmartNavigation extends AppCompatActivity implements Parcelable {
     public int countFrames = 1;
 
     public void process_navigation(Bitmap bitmap) {
+//      add countFrames to bitmap
+//        Canvas canvas = new Canvas(bitmap);
+//        canvas.drawBitmap(bitmap, 100, 200, null);
+//        Paint paint = new Paint();
+//        paint.setColor(Color.RED);
+//        paint.setTextSize(70);
+
+        // draw the text on the canvas
+//        canvas.drawText(String.valueOf(countFrames), 10, 10, paint);
+
+        Log.d(TAG, "count frames: " + countFrames);
         Mat mat_current_frame = new Mat();
         Utils.bitmapToMat(bitmap, mat_current_frame);
 
@@ -271,6 +291,7 @@ public class SmartNavigation extends AppCompatActivity implements Parcelable {
             Log.e(TAG, e.getMessage());
             direction = -1;
         }
+        countFrames += 1;
 
         //1 up, 2 down, 3 right, 4 left;
         View arrow = findViewById(R.id.navigation_arrow);
@@ -511,6 +532,7 @@ public class SmartNavigation extends AppCompatActivity implements Parcelable {
         try {
             bt_image = ImageFunctions.getBitmapFromUri(uri_new_image, this);
             bt_image = ImageFunctions.rotateImage(bt_image, ImageFunctions.getOrientation(uri_new_image, this));
+            bt_image = ImageFunctions.scaleImage(bt_image, max_width_for_analysis, max_height_for_analysis);
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -541,13 +563,10 @@ public class SmartNavigation extends AppCompatActivity implements Parcelable {
             Mat mat_ref_image = new Mat();
             Utils.bitmapToMat(bt_first_image, mat_first_image);
             Utils.bitmapToMat(bt_second_image, mat_second_image);
-            Utils.bitmapToMat(refImageBitmapCopy, mat_ref_image);
+            Utils.bitmapToMat(refImageForAnalysis, mat_ref_image);
 
             int automatic_registration = OpenCVNative.triangulation(mat_first_image.getNativeObjAddr(), mat_second_image.getNativeObjAddr(), mat_ref_image.getNativeObjAddr());
             if (automatic_registration != 1) {
-                findViewById(R.id.take_second_image).setVisibility(View.INVISIBLE);
-                findViewById(R.id.take_rephoto).setVisibility(View.VISIBLE);
-
                 Intent intent = new Intent(this, RegisterPoints.class);
                 intent.putExtra("first_image", mat_first_image.getNativeObjAddr());
                 intent.putExtra("ref_image", mat_ref_image.getNativeObjAddr());
@@ -555,6 +574,8 @@ public class SmartNavigation extends AppCompatActivity implements Parcelable {
             } else {
                 OpenCVNative.navigation_init();
             }
+            findViewById(R.id.take_second_image).setVisibility(View.INVISIBLE);
+            findViewById(R.id.take_rephoto).setVisibility(View.VISIBLE);
 
             navigation_started = true;
         }
