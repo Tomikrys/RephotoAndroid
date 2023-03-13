@@ -123,6 +123,7 @@ struct robust_matcher_struct {
     int direction;
     int count_frames;
     std::atomic<bool> robust_done;
+    cv:: Mat position_relative_T;
 };
 
 void fill_robust_matcher_arg_struct(cv::Mat current_frame_vis, int count_frames);
@@ -150,7 +151,7 @@ static void onMouseModelRegistration(int event, int x, int y, int, void *);
 std::vector<cv::Mat> processImage(MSAC &msac, int numVps, cv::Mat &imgGRAY, cv::Mat &outputImg);
 
 bool getRobustEstimation(cv::Mat current_frame_vis, std::vector<cv::Point3f> list_3D_points,
-                         cv::Mat measurements, int &directory);
+                         cv::Mat measurements, int &directory, cv::Mat &position_relative_T);
 
 bool
 getLightweightEstimation(cv::Mat last_current_frame_vis, std::vector<cv::Point3f> list_3D_points,

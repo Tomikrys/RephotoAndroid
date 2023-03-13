@@ -475,7 +475,7 @@ int navigation_init() {
     return 0;
 }
 
-int processNavigation(long mat_current_frame, int count_frames) {
+cv::Mat processNavigation(long mat_current_frame, int count_frames) {
 
     cv::Mat current_frame = *(cv::Mat *) mat_current_frame;
 
@@ -487,9 +487,10 @@ int processNavigation(long mat_current_frame, int count_frames) {
     measurements.setTo(cv::Scalar(0));
 
     int direction = 0;
+    cv::Mat position_relative_T = cv::Mat(4, 4, CV_64F);
     try {
         getRobustEstimation(current_frame_vis, list_3D_points_after_triangulation, measurements,
-                            direction);
+                            direction, position_relative_T);
 
 //        robust_matcher_arg_struct.current_frame = current_frame_vis;
 //        robust_matcher_arg_struct.list_3D_points = list_3D_points_after_triangulation;
@@ -508,7 +509,8 @@ int processNavigation(long mat_current_frame, int count_frames) {
     } catch (cv::Exception e) {
         std::cout << e.msg << std::endl;
     }
-    return direction;
+    return position_relative_T;
+//    return direction;
 
 //    if (count_frames == 1) {
 //
@@ -589,7 +591,7 @@ int processNavigation(long mat_current_frame, int count_frames) {
     //        }
     //    }
 
-    return direction;
+//    return direction;
 }
 
 void fill_robust_matcher_arg_struct(cv::Mat current_frame_vis, int count_frames) {
@@ -623,12 +625,14 @@ void *robust_matcher(void *arg) {
     printf("+ %d started", count_frames);
     std::cout << "+ " << count_frames << " started" << std::endl;
 
+    cv::Mat position_relative_T = cv::Mat(4, 4, CV_64F);
     getRobustEstimation(current_frame, list_3D_points_after_registration, measurements,
-                        direction);
+                        direction, position_relative_T);
 
     printf("+ %d ended, direction %d", count_frames, direction);
     std::cout << "+ " << count_frames << " ended" << std::endl;
     param->direction = direction;
+    param->position_relative_T = position_relative_T;
     param->robust_done = true;
     return nullptr;
 }
@@ -654,7 +658,7 @@ void *fast_robust_matcher(void *arg) {
 
 
 bool getRobustEstimation(cv::Mat current_frame_vis, std::vector<cv::Point3f> list_3D_points,
-                         cv::Mat measurements, int &directory) {
+                         cv::Mat measurements, int &directory, cv::Mat &position_relative_T) {
 
 //    TODO patřičné nalezení optickýho centeru
     double cx = current_frame_vis.cols / 2 - 0.5;
@@ -785,6 +789,7 @@ bool getRobustEstimation(cv::Mat current_frame_vis, std::vector<cv::Point3f> lis
             double z = (double) relative_T.at<double>(2, 3);
 
             directory = getDirectory(x, y);
+            position_relative_T = relative_T;
             printf("real direction: %d, x=%f, y=%f", directory, x, y);
 
             cv::Mat translation_measured(3, 1, CV_64F);
@@ -968,11 +973,17 @@ Java_com_vyw_rephotoandroid_OpenCVNative_navigation_1init(JNIEnv *env, jclass cl
 }
 
 extern "C"
-JNIEXPORT jint JNICALL
+JNIEXPORT jlong JNICALL
 Java_com_vyw_rephotoandroid_OpenCVNative_process_1navigation(JNIEnv *env, jclass clazz,
                                                              jlong mat_current_frame,
                                                              jint count_frames) {
-    return processNavigation(mat_current_frame, count_frames);
+    cv::Mat returned = processNavigation(mat_current_frame, count_frames);
+    cv::Mat *mat = new cv::Mat(returned);
+//    double x = (*mat).at<double>(3, 0);
+//    double y = (*mat).at<double>(3, 1);
+//    print_matrix("returned", returned);
+//    print_matrix("copied", (*mat));
+    return (jlong) mat;
 }
 
 cv::Mat loadImage(const std::string path_to_ref_image) {

@@ -399,7 +399,7 @@ int Main::processNavigation(cv::Mat current_frame, int count_frames) {
 }
 
 bool getRobustEstimation(cv::Mat current_frame_vis, std::vector <cv::Point3f> list_3D_points,
-                         cv::Mat measurements, int &directory) {
+                         cv::Mat measurements, int &directory, cv::Mat &position_relative_T) {
 
     std::vector <cv::DMatch> good_matches;
     std::vector <cv::KeyPoint> key_points_current_frame;

@@ -282,11 +282,19 @@ public class SmartNavigation extends AppCompatActivity implements Parcelable {
         Utils.bitmapToMat(bitmap, mat_current_frame);
 
         int direction;
-
+        Mat position;
+        double x = 0;
+        double y = 0;
+        double z = 0;
         try {
 //            OPENCVNATIVECALL
-            direction = OpenCVNative.process_navigation(mat_current_frame.getNativeObjAddr(), countFrames);
-            Log.d(TAG, "Value of direction is: " + direction);
+            long position_addr = OpenCVNative.process_navigation(mat_current_frame.getNativeObjAddr(), countFrames);
+            position = new Mat(position_addr);
+            x = position.get(0, 3)[0];
+            y = position.get(1, 3)[0];
+            z = position.get(2, 3)[0];
+            direction = getDirection(x,y);
+            Log.d(TAG, "Value of direction is: " + direction + " x=" + x + " y=" + y);
         } catch (java.lang.IllegalArgumentException e) {
             Log.e(TAG, e.getMessage());
             direction = -1;
@@ -296,53 +304,100 @@ public class SmartNavigation extends AppCompatActivity implements Parcelable {
         //1 up, 2 down, 3 right, 4 left;
         View arrow = findViewById(R.id.navigation_arrow);
         arrow.setVisibility(View.VISIBLE);
-        if (direction < 10) {
-            switch (direction) {
-                case -1:
-                    // up
-                    arrow.setRotation(15);
-                    break;
-                case 0:
-                    // optimal position
-                    arrow.setVisibility(View.INVISIBLE);
-                    break;
-                case 1:
-                    // up
-                    arrow.setRotation(90);
-                    break;
-                case 2:
-                    // down
-                    arrow.setRotation(270);
-                    break;
-                case 3:
-                    // right
-                    arrow.setRotation(180);
-                    break;
-                case 4:
-                    // left
-                    arrow.setRotation(0);
-                    break;
-            }
-        } else {
-            switch (direction) {
-                case 13:
-                    // up right
-                    arrow.setRotation(135);
-                    break;
-                case 14:
-                    // up left
-                    arrow.setRotation(45);
-                    break;
-                case 23:
-                    // down right
-                    arrow.setRotation(220);
-                    break;
-                case 24:
-                    // down left
-                    arrow.setRotation(315);
-                    break;
-            }
+
+        double angle = Math.atan2(y, x) * 180 / Math.PI; // angle in degrees
+        angle += 0;
+        if (angle < 0) {
+            angle += 360; // ensure angle is in range [0, 359]
+        } else if (angle >= 360) {
+            angle -= 360; // ensure angle is in range [0, 359]
         }
+        arrow.setRotation(Math.round(angle));
+        if (x == 0 && y == 0) {
+            arrow.setVisibility(View.INVISIBLE);
+        }
+
+        View z_arrow = findViewById(R.id.z_arrow);
+        z_arrow.setVisibility(View.VISIBLE);
+        if (z > 0) {
+            z_arrow.setRotation(90);
+        } else if (z < 0) {
+            z_arrow.setRotation(-90);
+        } else {
+            z_arrow.setVisibility(View.INVISIBLE);
+        }
+//        if (direction < 10) {
+//            switch (direction) {
+//                case -1:
+//                    arrow.setRotation(15);
+//                    break;
+//                case 0:
+//                    // optimal position
+//                    arrow.setVisibility(View.INVISIBLE);
+//                    break;
+//                case 1:
+//                    // up
+//                    arrow.setRotation(90);
+//                    break;
+//                case 2:
+//                    // down
+//                    arrow.setRotation(270);
+//                    break;
+//                case 3:
+//                    // right
+//                    arrow.setRotation(180);
+//                    break;
+//                case 4:
+//                    // left
+//                    arrow.setRotation(0);
+//                    break;
+//            }
+//        } else {
+//            switch (direction) {
+//                case 13:
+//                    // up right
+//                    arrow.setRotation(135);
+//                    break;
+//                case 14:
+//                    // up left
+//                    arrow.setRotation(45);
+//                    break;
+//                case 23:
+//                    // down right
+//                    arrow.setRotation(220);
+//                    break;
+//                case 24:
+//                    // down left
+//                    arrow.setRotation(315);
+//                    break;
+//            }
+//        }
+    }
+
+    public int getDirection(double x, double y) {
+        int direction = 0;
+        if (x == 0) {
+            if (y > 0) {
+                direction = 1;
+            } else if (y < 0) {
+                direction = 2;
+            }
+        } else if (y == 0) {
+            if (x > 0) {
+                direction = 3;
+            } else if (x < 0) {
+                direction = 4;
+            }
+        } else if (x < 0 && y < 0) {
+            direction = 14;
+        } else if (x > 0 && y < 0) {
+            direction = 13;
+        } else if (x < 0 && y > 0) {
+            direction = 24;
+        } else if (x > 0 && y > 0) {
+            direction = 23;
+        }
+        return direction;
     }
 
     @Override

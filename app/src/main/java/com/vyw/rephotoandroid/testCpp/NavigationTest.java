@@ -107,8 +107,8 @@ public class NavigationTest extends AppCompatActivity {
 
         try {
 //            OPENCVNATIVECALL
-            direction = OpenCVNative.process_navigation(mat_current_frame.getNativeObjAddr(), countFrames);
-            Log.d(TAG, "Value of direction is: " + direction);
+//            direction = OpenCVNative.process_navigation(mat_current_frame.getNativeObjAddr(), countFrames);
+//            Log.d(TAG, "Value of direction is: " + direction);
         } catch (java.lang.IllegalArgumentException e) {
             Log.e(TAG, e.getMessage());
             direction = 1;
@@ -118,95 +118,95 @@ public class NavigationTest extends AppCompatActivity {
         //1 up, 2 down, 3 right, 4 left;
         Path wallpath = new Path();
         wallpath.reset();
-        if (direction < 10) {
-            switch (direction) {
-                case 0:
-                    wallpath.moveTo(x, y + height / 8);
-                    wallpath.lineTo(x + width / 8, y);
-                    wallpath.lineTo(x + width, y + height * 7 / 8);
-                    wallpath.lineTo(x + width * 7 / 8, y + height);
-
-                    wallpath.moveTo(x + width, y + height / 8);
-                    wallpath.lineTo(x + width * 7 / 8, y);
-                    wallpath.lineTo(x, y + height * 7 / 8);
-                    wallpath.lineTo(x + width / 8, y + height);
-                    break;
-                case 1:
-                    wallpath.moveTo(x + width / 4, y + height / 2);
-                    wallpath.lineTo(x + width / 4 + width / 2, y + height / 2);
-                    wallpath.lineTo(x + width / 4 + width / 2, y + height);
-                    wallpath.lineTo(x + width / 4 - 5f, y + height);
-                    wallpath.lineTo(x + width / 4 - 5f, y + height / 2);
-                    wallpath.moveTo(x, y + height / 2);
-                    wallpath.lineTo(x + width, y + height / 2);
-                    wallpath.lineTo(x + width / 2, y);
-                    break;
-                case 2:
-                    wallpath.moveTo(x + width / 4, y);
-                    wallpath.lineTo(x + width / 4 + width / 2, y);
-                    wallpath.lineTo(x + width / 4 + width / 2, y + height / 2);
-                    wallpath.lineTo(x + width / 4 - 5f, y + height / 2);
-                    wallpath.lineTo(x + width / 4 - 5f, y);
-                    wallpath.moveTo(x, y + height / 2);
-                    wallpath.lineTo(x + width, y + height / 2);
-                    wallpath.lineTo(x + width / 2, y + height);
-                    break;
-                case 3:
-                    wallpath.moveTo(x, y + height / 4);
-                    wallpath.lineTo(x, y + height / 4 + height / 2);
-                    wallpath.lineTo(x + width / 2, y + height / 4 + height / 2);
-                    wallpath.lineTo(x + width / 2, y + height / 4 - 5f);
-                    wallpath.lineTo(x, y + height / 4 - 5f);
-                    wallpath.moveTo(x + width / 2, y);
-                    wallpath.lineTo(x + width / 2, y + height);
-                    wallpath.lineTo(x + width, y + height / 2);
-                    break;
-                case 4:
-                    wallpath.moveTo(x + width / 2, y);
-                    wallpath.lineTo(x + width / 2, y + height);
-                    wallpath.lineTo(x, y + height / 2);
-                    wallpath.moveTo(x + width / 2, y + height / 4);
-                    wallpath.lineTo(x + width / 2, y + height / 4 + height / 2);
-                    wallpath.lineTo(x + width, y + height / 4 + height / 2);
-                    wallpath.lineTo(x + width, y + height / 4 - 5f);
-                    wallpath.lineTo(x + width / 2, y + height / 4 - 5f);
-                    break;
-            }
-        } else {
-            wallpath.moveTo(x + width / 2, y + height / 8);
-            wallpath.lineTo(x + width / 8, y + height / 2);
-            wallpath.lineTo(x + width / 2, y + height * 7 / 8);
-            wallpath.lineTo(x + width * 7 / 8, y + height / 2);
-            wallpath.lineTo(x + width / 2, y + height / 8);
-            switch (direction) {
-                case 13:
-                    wallpath.moveTo(x + width * 1 / 3, y);
-                    wallpath.lineTo(x + width, y + height * 2 / 3);
-                    wallpath.lineTo(x + width, y);
-                    canvas.drawPath(wallpath, mPaint);
-                    break;
-                case 14:
-                    wallpath.moveTo(x + width * 2 / 3, y);
-                    wallpath.lineTo(x, y + height * 2 / 3);
-                    wallpath.lineTo(x, y);
-                    canvas.drawPath(wallpath, mPaint);
-                    break;
-                case 23:
-                    wallpath.moveTo(x + width * 2 / 3, y + height);
-                    wallpath.lineTo(x, y + height * 1 / 3);
-                    wallpath.lineTo(x, y + height);
-                    canvas.drawPath(wallpath, mPaint);
-                    break;
-                case 24:
-                    wallpath.moveTo(x + width * 1 / 3, y + height);
-                    wallpath.lineTo(x + width, y + height * 1 / 3);
-                    wallpath.lineTo(x + width, y + height);
-                    canvas.drawPath(wallpath, mPaint);
-                    break;
-
-            }
-        }
-        canvas.drawPath(wallpath, mPaint);
+//        if (direction < 10) {
+//            switch (direction) {
+//                case 0:
+//                    wallpath.moveTo(x, y + height / 8);
+//                    wallpath.lineTo(x + width / 8, y);
+//                    wallpath.lineTo(x + width, y + height * 7 / 8);
+//                    wallpath.lineTo(x + width * 7 / 8, y + height);
+//
+//                    wallpath.moveTo(x + width, y + height / 8);
+//                    wallpath.lineTo(x + width * 7 / 8, y);
+//                    wallpath.lineTo(x, y + height * 7 / 8);
+//                    wallpath.lineTo(x + width / 8, y + height);
+//                    break;
+//                case 1:
+//                    wallpath.moveTo(x + width / 4, y + height / 2);
+//                    wallpath.lineTo(x + width / 4 + width / 2, y + height / 2);
+//                    wallpath.lineTo(x + width / 4 + width / 2, y + height);
+//                    wallpath.lineTo(x + width / 4 - 5f, y + height);
+//                    wallpath.lineTo(x + width / 4 - 5f, y + height / 2);
+//                    wallpath.moveTo(x, y + height / 2);
+//                    wallpath.lineTo(x + width, y + height / 2);
+//                    wallpath.lineTo(x + width / 2, y);
+//                    break;
+//                case 2:
+//                    wallpath.moveTo(x + width / 4, y);
+//                    wallpath.lineTo(x + width / 4 + width / 2, y);
+//                    wallpath.lineTo(x + width / 4 + width / 2, y + height / 2);
+//                    wallpath.lineTo(x + width / 4 - 5f, y + height / 2);
+//                    wallpath.lineTo(x + width / 4 - 5f, y);
+//                    wallpath.moveTo(x, y + height / 2);
+//                    wallpath.lineTo(x + width, y + height / 2);
+//                    wallpath.lineTo(x + width / 2, y + height);
+//                    break;
+//                case 3:
+//                    wallpath.moveTo(x, y + height / 4);
+//                    wallpath.lineTo(x, y + height / 4 + height / 2);
+//                    wallpath.lineTo(x + width / 2, y + height / 4 + height / 2);
+//                    wallpath.lineTo(x + width / 2, y + height / 4 - 5f);
+//                    wallpath.lineTo(x, y + height / 4 - 5f);
+//                    wallpath.moveTo(x + width / 2, y);
+//                    wallpath.lineTo(x + width / 2, y + height);
+//                    wallpath.lineTo(x + width, y + height / 2);
+//                    break;
+//                case 4:
+//                    wallpath.moveTo(x + width / 2, y);
+//                    wallpath.lineTo(x + width / 2, y + height);
+//                    wallpath.lineTo(x, y + height / 2);
+//                    wallpath.moveTo(x + width / 2, y + height / 4);
+//                    wallpath.lineTo(x + width / 2, y + height / 4 + height / 2);
+//                    wallpath.lineTo(x + width, y + height / 4 + height / 2);
+//                    wallpath.lineTo(x + width, y + height / 4 - 5f);
+//                    wallpath.lineTo(x + width / 2, y + height / 4 - 5f);
+//                    break;
+//            }
+//        } else {
+//            wallpath.moveTo(x + width / 2, y + height / 8);
+//            wallpath.lineTo(x + width / 8, y + height / 2);
+//            wallpath.lineTo(x + width / 2, y + height * 7 / 8);
+//            wallpath.lineTo(x + width * 7 / 8, y + height / 2);
+//            wallpath.lineTo(x + width / 2, y + height / 8);
+//            switch (direction) {
+//                case 13:
+//                    wallpath.moveTo(x + width * 1 / 3, y);
+//                    wallpath.lineTo(x + width, y + height * 2 / 3);
+//                    wallpath.lineTo(x + width, y);
+//                    canvas.drawPath(wallpath, mPaint);
+//                    break;
+//                case 14:
+//                    wallpath.moveTo(x + width * 2 / 3, y);
+//                    wallpath.lineTo(x, y + height * 2 / 3);
+//                    wallpath.lineTo(x, y);
+//                    canvas.drawPath(wallpath, mPaint);
+//                    break;
+//                case 23:
+//                    wallpath.moveTo(x + width * 2 / 3, y + height);
+//                    wallpath.lineTo(x, y + height * 1 / 3);
+//                    wallpath.lineTo(x, y + height);
+//                    canvas.drawPath(wallpath, mPaint);
+//                    break;
+//                case 24:
+//                    wallpath.moveTo(x + width * 1 / 3, y + height);
+//                    wallpath.lineTo(x + width, y + height * 1 / 3);
+//                    wallpath.lineTo(x + width, y + height);
+//                    canvas.drawPath(wallpath, mPaint);
+//                    break;
+//
+//            }
+//        }
+//        canvas.drawPath(wallpath, mPaint);
 
         imageView.setImageBitmap(mutableBitmap);
         bProcessing = false;
