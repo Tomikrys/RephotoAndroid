@@ -305,6 +305,11 @@ public class ImageFunctions {
         return (pixel & 0x00ffffff) + (transparency << 24);
     }
 
+    public static Bitmap cropAndScaleImage(Bitmap image, int width, int height) {
+        Bitmap croppedImage = cropToAspectRatio(image, width, height);
+        return scaleImage(croppedImage, width, height);
+    }
+
     public static Bitmap scaleImage(Bitmap image, int maxWidth, int maxHeight) {
         if (maxHeight > 0 && maxWidth > 0) {
             int width = image.getWidth();

@@ -166,32 +166,31 @@ void PnPProblem::estimatePoseRANSAC(const std::vector<cv::Point3f> &list_3d_poin
                                dist_coeffs, rvec, tvec, use_extrinsic_guess, iterations_count,
                                reprojection_error, confidence, inliers_points, flags)) {
             std::string x = "found solution";
+
+            Rodrigues(rvec, _rotation_matrix);
+            _translation_matrix = tvec;
+
+            cv::projectPoints(list_3d_points, rvec, tvec, _camera_matrix, dist_coeffs, list_2d_points);
+            std::string csv_3D_projected_to_2D = generate_csv_from_Point2fa(list_2d_points);
+
+            // TODO protect from data race
+            if (!inliers_points.empty()) {
+                _inliers_points.clear();
+
+                for (int index = 0; index < inliers_points.rows; ++index) {
+                    int n = inliers_points.at<int>(index);
+                    cv::Point2f point2d = list_2d_points[n];
+                    _inliers_points.push_back(point2d);
+                }
+            }
+
+            this->setProjectionMatrix(_rotation_matrix, _translation_matrix);
         } else {
             std::string y = "didnt find solution";
         }
     } catch (cv::Exception e) {
         std::cout << e.msg << std::endl;
     }
-
-
-    Rodrigues(rvec, _rotation_matrix);
-    _translation_matrix = tvec;
-
-    cv::projectPoints(list_3d_points, rvec, tvec, _camera_matrix, dist_coeffs, list_2d_points);
-    std::string csv_3D_projected_to_2D = generate_csv_from_Point2fa(list_2d_points);
-
-    // TODO protect from data race
-    if (!inliers_points.empty()) {
-        _inliers_points.clear();
-
-        for (int index = 0; index < inliers_points.rows; ++index) {
-            int n = inliers_points.at<int>(index);
-            cv::Point2f point2d = list_2d_points[n];
-            _inliers_points.push_back(point2d);
-        }
-    }
-
-    this->setProjectionMatrix(_rotation_matrix, _translation_matrix);
 }
 
 void PnPProblem::setOpticalCenter(double center_x, double center_y) {

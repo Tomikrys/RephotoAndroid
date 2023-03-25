@@ -31,6 +31,7 @@ import android.view.OrientationEventListener;
 import android.view.View;
 import android.view.WindowManager;
 import android.widget.ImageView;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.activity.result.ActivityResult;
@@ -113,7 +114,10 @@ public class SmartNavigation extends AppCompatActivity implements Parcelable {
     private String image_id;
 
     private int max_width_for_analysis = 1280;
-    private int max_height_for_analysis =960;
+    private int max_height_for_analysis = 960;
+
+    private int widthForAnalysis = 1280;
+    private int heightForAnalysis = 960;
 
     private Boolean navigation_started = false;
 
@@ -152,13 +156,6 @@ public class SmartNavigation extends AppCompatActivity implements Parcelable {
                 @Override
                 public void onBitmapLoaded(Bitmap bitmap, Picasso.LoadedFrom from) {
                     bt_ref_frame = bitmap;
-
-                    refImage = findViewById(R.id.refImage);
-                    refImage.setImageBitmap(bt_ref_frame);
-
-                    refImageForAnalysis = ImageFunctions.scaleImage(bt_ref_frame, max_width_for_analysis, max_height_for_analysis);
-                    refImageBitmap = ImageFunctions.deepCopyBitmap(bt_ref_frame);
-                    refImageBitmapCopy = ImageFunctions.deepCopyBitmap(bt_ref_frame);
                 }
 
                 @Override
@@ -180,14 +177,16 @@ public class SmartNavigation extends AppCompatActivity implements Parcelable {
                 e.printStackTrace();
             }
             bt_ref_frame = ImageFunctions.rotateImage(bt_ref_frame, ImageFunctions.getOrientation(uri_ref_image, this));
-
-            refImage = findViewById(R.id.refImage);
-            refImage.setImageBitmap(bt_ref_frame);
-
-            refImageForAnalysis = ImageFunctions.scaleImage(bt_ref_frame, max_width_for_analysis, max_height_for_analysis);
-            refImageBitmap = ImageFunctions.deepCopyBitmap(bt_ref_frame);
-            refImageBitmapCopy = ImageFunctions.deepCopyBitmap(bt_ref_frame);
         }
+        refImage = findViewById(R.id.refImage);
+        refImage.setImageBitmap(bt_ref_frame);
+
+        refImageForAnalysis = ImageFunctions.scaleImage(bt_ref_frame, max_width_for_analysis, max_height_for_analysis);
+        refImageBitmap = ImageFunctions.deepCopyBitmap(bt_ref_frame);
+        refImageBitmapCopy = ImageFunctions.deepCopyBitmap(bt_ref_frame);
+
+        widthForAnalysis = refImageForAnalysis.getWidth();
+        heightForAnalysis = refImageForAnalysis.getHeight();
 
         if (!isOCVSetUp) { // if OCV hasn't been setup yet, init it
             if (!OpenCVLoader.initDebug()) {
@@ -237,7 +236,7 @@ public class SmartNavigation extends AppCompatActivity implements Parcelable {
                 new ImageAnalysis.Builder()
                         // enable the following line if RGBA output is needed.
                         .setOutputImageFormat(ImageAnalysis.OUTPUT_IMAGE_FORMAT_RGBA_8888)
-                        .setTargetResolution(new Size(max_width_for_analysis, max_height_for_analysis))
+//                        .setTargetResolution(new Size(widthForAnalysis, heightForAnalysis))
                         .setBackpressureStrategy(ImageAnalysis.STRATEGY_KEEP_ONLY_LATEST)
                         .build();
         imageAnalysis.setAnalyzer(ContextCompat.getMainExecutor(this), new ImageAnalysis.Analyzer() {
@@ -250,9 +249,10 @@ public class SmartNavigation extends AppCompatActivity implements Parcelable {
                     Bitmap bitmap = RGBA8888BitesToBitmap(bytes, imageProxy.getWidth(), imageProxy.getHeight(), rotationDegrees);
 
                     if (bitmap != null) {
+                        Bitmap scaledBitmap = ImageFunctions.cropAndScaleImage(bitmap, widthForAnalysis, heightForAnalysis);
                         Log.i(TAG, "Run analysis");
-                        get_dimensions(bitmap);
-                        process_navigation(bitmap);
+                        get_dimensions(scaledBitmap);
+                        process_navigation(scaledBitmap);
                     } else {
                         Log.d(TAG, "imageBitmap is null, cannot run analysis");
                     }
@@ -293,7 +293,7 @@ public class SmartNavigation extends AppCompatActivity implements Parcelable {
             x = position.get(0, 3)[0];
             y = position.get(1, 3)[0];
             z = position.get(2, 3)[0];
-            direction = getDirection(x,y);
+            direction = getDirection(x, y);
             Log.d(TAG, "Value of direction is: " + direction + " x=" + x + " y=" + y);
         } catch (java.lang.IllegalArgumentException e) {
             Log.e(TAG, e.getMessage());
@@ -303,6 +303,8 @@ public class SmartNavigation extends AppCompatActivity implements Parcelable {
 
         //1 up, 2 down, 3 right, 4 left;
         View arrow = findViewById(R.id.navigation_arrow);
+        TextView distance_xy = findViewById(R.id.distance_xy);
+        TextView distance_z = findViewById(R.id.distance_z);
         arrow.setVisibility(View.VISIBLE);
 
         double angle = Math.atan2(y, x) * 180 / Math.PI; // angle in degrees
@@ -313,16 +315,20 @@ public class SmartNavigation extends AppCompatActivity implements Parcelable {
             angle -= 360; // ensure angle is in range [0, 359]
         }
         arrow.setRotation(Math.round(angle));
+        distance_xy.setText(String.format("%.2f", Math.sqrt(x * x + y * y)));
+        distance_z.setText(String.format("%.2f", z));
+
         if (x == 0 && y == 0) {
             arrow.setVisibility(View.INVISIBLE);
         }
 
+
         View z_arrow = findViewById(R.id.z_arrow);
         z_arrow.setVisibility(View.VISIBLE);
         if (z > 0) {
-            z_arrow.setRotation(90);
-        } else if (z < 0) {
             z_arrow.setRotation(-90);
+        } else if (z < 0) {
+            z_arrow.setRotation(90);
         } else {
             z_arrow.setVisibility(View.INVISIBLE);
         }

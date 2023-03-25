@@ -119,22 +119,46 @@
             android:layout_width="50dp"
             android:layout_height="50dp"
             android:layout_margin="16dp"
+            android:background="#A9000000"
             android:rotation="15"
             android:rotationX="0"
-            app:layout_constraintEnd_toEndOf="@+id/z_arrow"
+            android:visibility="invisible"
+            app:layout_constraintEnd_toStartOf="@+id/distance_xy"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent"
             app:srcCompat="@drawable/baseline_arrow_back_black_24dp" />
+
+        <TextView
+            android:id="@+id/distance_xy"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:background="#A9000000"
+            app:layout_constraintEnd_toStartOf="@+id/distance_z"
+            app:layout_constraintStart_toEndOf="@+id/navigation_arrow"
+            app:layout_constraintTop_toTopOf="@+id/navigation_arrow"
+            android:text="" />
+
+        <TextView
+            android:id="@+id/distance_z"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:background="#A9000000"
+            app:layout_constraintEnd_toStartOf="@+id/z_arrow"
+            app:layout_constraintStart_toEndOf="@+id/distance_xy"
+            app:layout_constraintTop_toTopOf="@+id/navigation_arrow"
+            android:text="" />
 
         <ImageView
             android:id="@+id/z_arrow"
             android:layout_width="50dp"
             android:layout_height="50dp"
             android:layout_margin="16dp"
+            android:background="#A9000000"
             android:rotation="92"
             android:rotationX="54"
+            android:visibility="invisible"
             app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="@+id/navigation_arrow"
+            app:layout_constraintStart_toEndOf="@+id/distance_z"
             app:layout_constraintTop_toTopOf="parent"
             app:srcCompat="@drawable/baseline_arrow_back_black_24dp" />
     </androidx.constraintlayout.widget.ConstraintLayout>

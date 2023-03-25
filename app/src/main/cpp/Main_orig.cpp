@@ -9,6 +9,7 @@
 #include <opencv2/imgproc/types_c.h>
 #include <thread>
 #include <pthread.h>
+#include <utility>
 #include <opencv2/videoio.hpp>
 #include <opencv2/core/cvstd.hpp>
 
@@ -65,6 +66,15 @@ cv::Mat drawPoint(cv::Mat image, int x, int y) {
     cv::Point center(x, y);
     int radius = 10;
     cv::Scalar line_Color(0, 0, 255);
+    int thickness = 2;
+    circle(image, center, radius, line_Color, thickness);
+    return image;
+}
+
+cv::Mat drawRedPoint(cv::Mat image, int x, int y) {
+    cv::Point center(x, y);
+    int radius = 10;
+    cv::Scalar line_Color(255, 0, 0);
     int thickness = 2;
     circle(image, center, radius, line_Color, thickness);
     return image;
@@ -341,8 +351,6 @@ cv::Mat measurements;
 int navigation_init() {
     start = 4;
     end = 9;
-    robust_matcher_arg_struct.robust_done = false;
-    fast_robust_matcher_arg_struct.robust_id = -1;
 
 
     std::vector<cv::Point3f> list_3D_points = registration.getList3DPoints();
@@ -464,10 +472,17 @@ int navigation_init() {
 
     initKalmanFilter(kalmanFilter, nStates, nMeasurements, nInputs, dt);
 
-    //robust_matcher_arg_struct.list_3D_points = list_3D_points_after_triangulation;
-    //robust_matcher_arg_struct.measurements = measurements;
+//    robust_matcher_arg_struct.list_3D_points = list_3D_points_after_triangulation;
+    robust_matcher_arg_struct.measurements = measurements;
+    robust_matcher_arg_struct.position_relative_T = cv::Mat(4, 4, CV_64F);
 
-    //fast_robust_matcher_arg_struct.list_3D_points = list_3D_points_after_triangulation;
+//    fast_robust_matcher_arg_struct.list_3D_points = list_3D_points_after_triangulation;
+//    TODO zjistit proč to nezvládne přiřadit do tej struktury
+//    fast_robust_matcher_arg_struct.position_relative_T = cv::Mat(4, 4, CV_64F);
+    g_position_relative_T = cv::Mat(4, 4, CV_64F);
+    robust_matcher_arg_struct.robust_done = false;
+    fast_robust_matcher_arg_struct.robust_id = -1;
+
 
 //    https://chart-studio.plotly.com/create
     std::string csv = generate_csv_from_Point3f(list_3D_points);
@@ -476,81 +491,93 @@ int navigation_init() {
 }
 
 cv::Mat processNavigation(long mat_current_frame, int count_frames) {
-
+    printf("start processNavigation %d", count_frames);
     cv::Mat current_frame = *(cv::Mat *) mat_current_frame;
 
     cv::Mat last_current_frame_vis = current_frame.clone();
     cv::Mat current_frame_vis = current_frame.clone();
-//    current_frames.push_back(current_frame_vis);
+    current_frames.push_back(current_frame_vis);
 
     measurements = cv::Mat(nMeasurements, 1, CV_64F);
     measurements.setTo(cv::Scalar(0));
 
     int direction = 0;
     cv::Mat position_relative_T = cv::Mat(4, 4, CV_64F);
-    try {
-        getRobustEstimation(current_frame_vis, list_3D_points_after_triangulation, measurements,
-                            direction, position_relative_T);
-
+//    try {
+////        getRobustEstimation(current_frame_vis, list_3D_points_after_triangulation, measurements,
+////                            direction, position_relative_T);
+//
 //        robust_matcher_arg_struct.current_frame = current_frame_vis;
 //        robust_matcher_arg_struct.list_3D_points = list_3D_points_after_triangulation;
 //        robust_matcher_arg_struct.measurements = measurements;
 //        robust_matcher_arg_struct.direction = direction;
 //        robust_matcher_arg_struct.count_frames = count_frames;
 //        robust_matcher_arg_struct.robust_done = false;
+//        robust_matcher_arg_struct.position_relative_T = cv::Mat(4, 4, CV_64F);
 //
 //        robust_thread = std::thread(
 //                [&] { robust_matcher(&::robust_matcher_arg_struct); }
 //        );
-
+//
 //        robust_thread.join();
 //        direction = robust_matcher_arg_struct.direction;
+//        position_relative_T = robust_matcher_arg_struct.position_relative_T;
+//
+//    } catch (cv::Exception e) {
+//        std::cout << e.msg << std::endl;
+//    }
+//    return position_relative_T;
+//    return direction;
+// ####################################################
+    if (count_frames == 1) {
 
-    } catch (cv::Exception e) {
-        std::cout << e.msg << std::endl;
+        fill_robust_matcher_arg_struct(current_frame_vis, count_frames);
+        robust_thread = std::thread(
+                [&] { robust_matcher(&::robust_matcher_arg_struct); }
+        );
+        robust_thread.join();
+        direction = robust_matcher_arg_struct.direction;
+        position_relative_T = robust_matcher_arg_struct.position_relative_T.clone();
+        robust_last_current_frame = robust_matcher_arg_struct.current_frame.clone();
+        last_robust_id = robust_matcher_arg_struct.count_frames;
+
+    } else if (count_frames == 2) {
+        fill_robust_matcher_arg_struct(current_frame_vis, count_frames);
+        robust_thread = std::thread(
+                [&] { robust_matcher(&::robust_matcher_arg_struct); }
+        );
+
+        fill_fast_robust_matcher_arg_struct(current_frame_vis, direction, count_frames,
+                                            robust_matcher_arg_struct.list_3D_points_for_lightweight,
+                                            robust_matcher_arg_struct.list_2D_points_for_lightweight);
+        fast_robust_matcher(&fast_robust_matcher_arg_struct);
+
+        direction = fast_robust_matcher_arg_struct.direction;
+        position_relative_T = g_position_relative_T.clone();
+
+    } else if (robust_matcher_arg_struct.robust_done) {
+        robust_thread.join();
+
+        direction = robust_matcher_arg_struct.direction;
+        position_relative_T = robust_matcher_arg_struct.position_relative_T.clone();
+        robust_last_current_frame = robust_matcher_arg_struct.current_frame.clone();
+        last_robust_id = robust_matcher_arg_struct.count_frames;
+
+        fill_robust_matcher_arg_struct(current_frame_vis, count_frames);
+        robust_thread = std::thread(
+                [&] { robust_matcher(&::robust_matcher_arg_struct); }
+        );
+
+    } else {
+        fill_fast_robust_matcher_arg_struct(current_frame_vis, direction, count_frames,
+                                            robust_matcher_arg_struct.list_3D_points_for_lightweight,
+                                            robust_matcher_arg_struct.list_2D_points_for_lightweight);
+        fast_robust_matcher(&fast_robust_matcher_arg_struct);
+
+        direction = fast_robust_matcher_arg_struct.direction;
+        position_relative_T = g_position_relative_T;
     }
     return position_relative_T;
-//    return direction;
-
-//    if (count_frames == 1) {
-//
-//        fill_robust_matcher_arg_struct(current_frame_vis, count_frames);
-//        robust_thread = std::thread(
-//                [&] { robust_matcher(&::robust_matcher_arg_struct); }
-//        );
-//        robust_thread.join();
-//        direction = robust_matcher_arg_struct.direction;
-//        robust_last_current_frame = robust_matcher_arg_struct.current_frame.clone();
-//        last_robust_id = robust_matcher_arg_struct.count_frames;
-//
-//    } else if (count_frames == 2) {
-//        fill_robust_matcher_arg_struct(current_frame_vis, count_frames);
-//        robust_thread = std::thread(
-//                [&] { robust_matcher(&::robust_matcher_arg_struct); }
-//        );
-//
-////        fill_fast_robust_matcher_arg_struct(current_frame_vis, direction, count_frames);
-////        fast_robust_matcher(&fast_robust_matcher_arg_struct);
-//
-//        direction = fast_robust_matcher_arg_struct.direction;
-//    } else if (robust_matcher_arg_struct.robust_done) {
-//        fill_robust_matcher_arg_struct(current_frame_vis, count_frames);
-//
-//        robust_thread.join();
-//        direction = robust_matcher_arg_struct.direction;
-//        robust_last_current_frame = robust_matcher_arg_struct.current_frame.clone();
-//        last_robust_id = robust_matcher_arg_struct.count_frames;
-//
-//        robust_thread = std::thread(
-//                [&] { robust_matcher(&::robust_matcher_arg_struct); }
-//        );
-//
-//    } else {
-////        fill_fast_robust_matcher_arg_struct(current_frame_vis, direction, count_frames);
-////        fast_robust_matcher(&fast_robust_matcher_arg_struct);
-////
-////        direction = fast_robust_matcher_arg_struct.direction;
-//    }
 
 
 
@@ -595,44 +622,57 @@ cv::Mat processNavigation(long mat_current_frame, int count_frames) {
 }
 
 void fill_robust_matcher_arg_struct(cv::Mat current_frame_vis, int count_frames) {
-    robust_matcher_arg_struct.current_frame = current_frame_vis;
-//    robust_matcher_arg_struct.list_3D_points = list_3D_points_after_triangulation;
+    robust_matcher_arg_struct.current_frame = current_frame_vis.clone();
+//    std::vector<cv::Point3f> cpy_3D_points(list_3D_points_after_triangulation);
+//    robust_matcher_arg_struct.list_3D_points = cpy_3D_points;
 //    robust_matcher_arg_struct.measurements = measurements;
     robust_matcher_arg_struct.direction = 0;
     robust_matcher_arg_struct.count_frames = count_frames;
     robust_matcher_arg_struct.robust_done = false;
+//    robust_matcher_arg_struct.position_relative_T = cv::Mat(4, 4, CV_64F);
 }
 
 void
-fill_fast_robust_matcher_arg_struct(cv::Mat current_frame_vis, int direction, int count_frames) {
+fill_fast_robust_matcher_arg_struct(cv::Mat current_frame_vis, int direction, int count_frames,
+                                    std::vector<cv::Point3f> list_3D_points_from_robust,
+                                    std::vector<cv::Point2f> list_2D_points_from_robust) {
 
     fast_robust_matcher_arg_struct.last_current_frame = robust_last_current_frame;
-    fast_robust_matcher_arg_struct.current_frame = current_frame_vis;
-//    fast_robust_matcher_arg_struct.list_3D_points = list_3D_points_after_triangulation;
+    fast_robust_matcher_arg_struct.current_frame = current_frame_vis.clone();
+//    std::vector<cv::Point3f> cpy_3D_points(list_3D_points_after_triangulation);
+//    fast_robust_matcher_arg_struct.list_3D_points_from_robust = list_3D_points_from_robust;
+//    fast_robust_matcher_arg_struct.list_2D_points_from_robust = list_2D_points_from_robust;
+    g_list_3D_points_from_robust = list_3D_points_from_robust;
+    g_list_2D_points_from_robust = list_2D_points_from_robust;
     fast_robust_matcher_arg_struct.direction = direction;
     fast_robust_matcher_arg_struct.count_frames = count_frames;
     fast_robust_matcher_arg_struct.robust_id = last_robust_id;
+//    fast_robust_matcher_arg_struct.position_relative_T = cv::Mat(4, 4, CV_64F);
 }
 
 
 void *robust_matcher(void *arg) {
     struct robust_matcher_struct *param = (struct robust_matcher_struct *) arg;
     cv::Mat current_frame = param->current_frame;
-    std::vector<cv::Point3f> list_3D_points_after_registration = param->list_3D_points;
+//    std::vector<cv::Point3f> list_3D_points_after_registration = param->list_3D_points;
     cv::Mat measurements = param->measurements;
     int direction = param->direction;
     int count_frames = param->count_frames;
     printf("+ %d started", count_frames);
     std::cout << "+ " << count_frames << " started" << std::endl;
 
-    cv::Mat position_relative_T = cv::Mat(4, 4, CV_64F);
-    getRobustEstimation(current_frame, list_3D_points_after_registration, measurements,
-                        direction, position_relative_T);
+    try {
+        getRobustEstimation(current_frame, list_3D_points_after_triangulation, measurements,
+                            direction, param->position_relative_T,
+                            param->list_3D_points_for_lightweight,
+                            param->list_2D_points_for_lightweight);
+    } catch (cv::Exception e) {
+        std::cout << e.msg << std::endl;
+    }
 
     printf("+ %d ended, direction %d", count_frames, direction);
     std::cout << "+ " << count_frames << " ended" << std::endl;
     param->direction = direction;
-    param->position_relative_T = position_relative_T;
     param->robust_done = true;
     return nullptr;
 }
@@ -641,14 +681,19 @@ void *fast_robust_matcher(void *arg) {
     struct fast_robust_matcher_struct *param = (struct fast_robust_matcher_struct *) arg;
     cv::Mat last_current_frame = param->last_current_frame;
     cv::Mat current_frame = param->current_frame;
-    std::vector<cv::Point3f> list_3D_points = param->list_3D_points;
+    std::vector<cv::Point3f> list_3D_points_from_robust = g_list_3D_points_from_robust;
+    std::vector<cv::Point2f> list_2D_points_from_robust = g_list_2D_points_from_robust;
     int direction = param->direction;
     int count_frames = param->count_frames;
     int robust_id = param->robust_id;
     printf("- %d started with %d", count_frames, robust_id);
     std::cout << "- " << count_frames << " started with " << robust_id << std::endl;
 
-//    getLightweightEstimation(last_current_frame, list_3D_points, current_frame, direction);
+    getLightweightEstimation(last_current_frame,
+                             list_3D_points_from_robust,
+                             list_2D_points_from_robust,
+                             current_frame, direction,
+                             g_position_relative_T);
 
     param->direction = direction;
     printf("- %d ended with %d, direction %d", count_frames, robust_id, direction);
@@ -658,7 +703,9 @@ void *fast_robust_matcher(void *arg) {
 
 
 bool getRobustEstimation(cv::Mat current_frame_vis, std::vector<cv::Point3f> list_3D_points,
-                         cv::Mat measurements, int &directory, cv::Mat &position_relative_T) {
+                         cv::Mat measurements, int &directory, cv::Mat &position_relative_T,
+                         std::vector<cv::Point3f> &list_3D_points_for_lightweight,
+                         std::vector<cv::Point2f> &list_2D_points_for_lightweight) {
 
 //    TODO patřičné nalezení optickýho centeru
     double cx = current_frame_vis.cols / 2 - 0.5;
@@ -744,9 +791,17 @@ bool getRobustEstimation(cv::Mat current_frame_vis, std::vector<cv::Point3f> lis
                                          reprojectionError,
                                          confidence);
 
+        std::vector<cv::Point3f> v3(list_points3d_model_match.begin(),
+                                    list_points3d_model_match.end());
+        std::vector<cv::Point2f> v2(list_points2d_scene_match.begin(),
+                                    list_points2d_scene_match.end());
+        list_3D_points_for_lightweight = v3;
+        list_2D_points_for_lightweight = v2;
+
         int inliers_size = pnp_detection.getInliersPoints().size();
 //        if (inliers_size > minInliersKalman) {
-        if (inliers_size > 1) {
+        printf("inliers size: %d", inliers_size);
+        if (inliers_size > 4) {
 
             cv::Mat image2 = current_frame_vis.clone();
             draw2DPoints(image2, list_points2d_scene_match, red);
@@ -787,6 +842,24 @@ bool getRobustEstimation(cv::Mat current_frame_vis, std::vector<cv::Point3f> lis
             double x = (double) relative_T.at<double>(0, 3);
             double y = (double) relative_T.at<double>(1, 3);
             double z = (double) relative_T.at<double>(2, 3);
+
+            history_of_position_robust.emplace_back(
+                    (float) T.at<double>(0, 3),
+                    (float) T.at<double>(1, 3),
+                    (float) T.at<double>(2, 3));
+//    https://chart-studio.plotly.com/create
+            std::string history_of_position_robust_csv = generate_csv_from_Point3f(
+                    history_of_position_robust);
+            printf("robust position push")
+            std::string history_of_position_fast_csv = generate_csv_from_Point3f(
+                    history_of_position_fast);
+            std::string points_from_triangulation_csv = generate_csv_from_Point3f(list_3D_points);
+
+            std::vector<cv::Point3f> reference_position;
+            reference_position.emplace_back((float) reference_T.at<double>(0, 3),
+                                            (float) reference_T.at<double>(1, 3),
+                                            (float) reference_T.at<double>(2, 3));
+            std::string reference_position_csv = generate_csv_from_Point3f(reference_position);
 
             directory = getDirectory(x, y);
             position_relative_T = relative_T;
@@ -855,15 +928,36 @@ void print_matrix(const char *label, cv::Mat mat) {
            (double) mat.at<double>(3, 3));
 }
 
+void printOpticalFlow(cv::Mat previous_image, cv::Mat current_image,
+                      std::vector<cv::Point2f> previous_points,
+                      std::vector<cv::Point2f> current_points) {
+    cv::Mat m1 = previous_image.clone();
+    cv::Mat m2 = current_image.clone();
+    for (int i = 0; i < previous_points.size(); i++) {
+        int x = static_cast<int>(previous_points[i].x);
+        int y = static_cast<int>(previous_points[i].y);
+        drawPoint(m1, x, y);
+        drawPoint(m2, x, y);
+    }
+    for (int i = 0; i < current_points.size(); i++) {
+        int x = static_cast<int>(current_points[i].x);
+        int y = static_cast<int>(current_points[i].y);
+        drawRedPoint(m1, x, y);
+        drawRedPoint(m2, x, y);
+    }
+    saveMatToJpeg(m1, "opticalFlowPrevious", true);
+    saveMatToJpeg(m2, "opticalFlowCurrent", true);
+}
+
 bool
 getLightweightEstimation(cv::Mat last_current_frame_vis,
-                         std::vector<cv::Point3f> list_3D_points,
-                         cv::Mat current_frame_vis, int &directory) {
+                         std::vector<cv::Point3f> list_3D_points_of_last_current_frame,
+                         std::vector<cv::Point2f> list_2D_points_of_last_current_frame,
+                         cv::Mat current_frame_vis, int &directory, cv::Mat &position_relative_T) {
 
-    std::vector<cv::Point2f> list_points2d_scene_match;
 
-    std::vector<cv::Point2f> featuresPrevious = pnp_detection.getInliersPoints();
-    std::vector<cv::Point2f> featuresCurrent = pnp_detection.getInliersPoints();
+    std::vector<cv::Point2f> featuresPrevious = list_2D_points_of_last_current_frame;
+    std::vector<cv::Point2f> featuresCurrent = list_2D_points_of_last_current_frame;
     std::vector<cv::Point2f> featuresNextPos;
     std::vector<uchar> featuresFound;
 
@@ -884,13 +978,32 @@ getLightweightEstimation(cv::Mat last_current_frame_vis,
         calcOpticalFlowPyrLK(last, current, featuresPrevious, featuresNextPos,
                              featuresFound, err);
 
+        printOpticalFlow(last_current_frame_vis, current_frame_vis, featuresPrevious,
+                         featuresNextPos);
+
+        std::vector<cv::Point2f> list_points2d_scene_match;
+        std::vector<cv::Point3f> list_points3d_scene_match;
+
         for (size_t i = 0; i < featuresNextPos.size(); i++) {
             if (featuresFound[i]) {
                 list_points2d_scene_match.push_back(featuresNextPos[i]);
+
+                auto it = find(list_2D_points_of_last_current_frame.begin(),
+                               list_2D_points_of_last_current_frame.end(),
+                               featuresPrevious[i]);
+                int index_in_3D_points = -1;
+                if (it != list_2D_points_of_last_current_frame.end()) { // If element was found
+                    index_in_3D_points = it - list_2D_points_of_last_current_frame.begin();
+                } else {
+                    continue; // If the element is not present in the vector
+                }
+                list_points3d_scene_match.push_back(
+                        list_3D_points_of_last_current_frame[index_in_3D_points]);
             }
         }
-        if (list_3D_points.size() == list_points2d_scene_match.size()) {
-            pnp_detection.estimatePoseRANSAC(list_3D_points, list_points2d_scene_match,
+
+        if (list_points3d_scene_match.size() == list_points2d_scene_match.size()) {
+            pnp_detection.estimatePoseRANSAC(list_points3d_scene_match, list_points2d_scene_match,
                                              pnp_method,
                                              useExtrinsicGuess,
                                              iterationsCount, reprojectionError,
@@ -902,10 +1015,22 @@ getLightweightEstimation(cv::Mat last_current_frame_vis,
                 cv::Mat T = pnp_detection.getProjectionMatrix();
                 cv::Mat refT = pnp_registration.getProjectionMatrix();
 
+
+                history_of_position_fast.emplace_back(
+                        (float) T.at<double>(0, 3),
+                        (float) T.at<double>(1, 3),
+                        (float) T.at<double>(2, 3));
+                //    https://chart-studio.plotly.com/create
+                std::string history_of_position_fast_csv = generate_csv_from_Point3f(
+                        history_of_position_fast);
+
                 revT = T.inv() * refT;
 
-                int x = (int) revT.at<float>(0, 3);
-                int y = (int) revT.at<float>(1, 3);
+                double x = (double) revT.at<double>(0, 3);
+                double y = (double) revT.at<double>(1, 3);
+                double z = (double) revT.at<double>(2, 3);
+
+                position_relative_T = revT;
 
                 directory = getDirectory(x, y);
             }
@@ -1219,7 +1344,6 @@ void updateKalmanFilter(cv::KalmanFilter &KF, cv::Mat &measurement,
     eulers_estimated.at<double>(2) = estimated.at<double>(11);
 
     rotation_estimated = euler2rot(eulers_estimated);
-
 }
 
 void fillMeasurements(cv::Mat &measurements, const cv::Mat &translation_measured,

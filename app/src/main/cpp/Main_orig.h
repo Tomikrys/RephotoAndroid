@@ -124,6 +124,8 @@ struct robust_matcher_struct {
     int count_frames;
     std::atomic<bool> robust_done;
     cv:: Mat position_relative_T;
+    std::vector<cv::Point3f> list_3D_points_for_lightweight;
+    std::vector<cv::Point2f> list_2D_points_for_lightweight;
 };
 
 void fill_robust_matcher_arg_struct(cv::Mat current_frame_vis, int count_frames);
@@ -131,13 +133,23 @@ void fill_robust_matcher_arg_struct(cv::Mat current_frame_vis, int count_frames)
 struct fast_robust_matcher_struct {
     cv::Mat last_current_frame;
     cv::Mat current_frame;
-    std::vector<cv::Point3f> list_3D_points;
+    std::vector<cv::Point3f> list_3D_points_from_robust;
+    std::vector<cv::Point2f> list_2D_points_from_robust;
     int direction;
     int count_frames;
     int robust_id;
+    cv:: Mat position_relative_T;
 };
 
-void fill_fast_robust_matcher_arg_struct(cv::Mat current_frame_vis, int direction, int count_frames);
+std::vector<cv::Point3f> g_list_3D_points_from_robust;
+std::vector<cv::Point2f> g_list_2D_points_from_robust;
+cv:: Mat g_position_relative_T;
+std::vector<cv::Point3f> history_of_position_robust;
+std::vector<cv::Point3f> history_of_position_fast;
+
+void fill_fast_robust_matcher_arg_struct(cv::Mat current_frame_vis, int direction, int count_frames,
+                                         std::vector<cv::Point3f> list_3D_points,
+                                         std::vector<cv::Point2f> list_2D_points);
 
 robust_matcher_struct robust_matcher_arg_struct;
 fast_robust_matcher_struct fast_robust_matcher_arg_struct;
@@ -151,11 +163,15 @@ static void onMouseModelRegistration(int event, int x, int y, int, void *);
 std::vector<cv::Mat> processImage(MSAC &msac, int numVps, cv::Mat &imgGRAY, cv::Mat &outputImg);
 
 bool getRobustEstimation(cv::Mat current_frame_vis, std::vector<cv::Point3f> list_3D_points,
-                         cv::Mat measurements, int &directory, cv::Mat &position_relative_T);
+                         cv::Mat measurements, int &directory, cv::Mat &position_relative_T,
+                         std::vector<cv::Point3f> &list_3D_points_for_lightweight,
+                         std::vector<cv::Point2f> &list_2D_points_for_lightweight);
 
 bool
-getLightweightEstimation(cv::Mat last_current_frame_vis, std::vector<cv::Point3f> list_3D_points,
-                         cv::Mat current_frame_vis);
+getLightweightEstimation(cv::Mat last_current_frame_vis,
+                         std::vector<cv::Point3f> list_3D_points_of_last_current_frame,
+                         std::vector<cv::Point2f> list_2D_points_of_last_current_frame,
+                         cv::Mat current_frame_vis, int &directory, cv::Mat &position_relative_T);
 
 void initKalmanFilter(cv::KalmanFilter &KF, int nStates, int nMeasurements, int nInputs, double dt);
 
