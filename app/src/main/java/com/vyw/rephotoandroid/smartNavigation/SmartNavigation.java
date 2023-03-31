@@ -73,6 +73,8 @@ import org.opencv.android.Utils;
 import org.opencv.core.Mat;
 
 import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
@@ -146,6 +148,17 @@ public class SmartNavigation extends AppCompatActivity implements Parcelable {
         if (getSupportActionBar() != null) {
             getSupportActionBar().hide();
         }
+
+        if (!isOCVSetUp) { // if OCV hasn't been setup yet, init it
+            if (!OpenCVLoader.initDebug()) {
+                OpenCVLoader.initAsync(OpenCVLoader.OPENCV_VERSION, this, mOpenCVCallBack);
+                Log.i(TAG, "Cannot load OpenCV");
+            } else {
+                isOCVSetUp = true;
+                mOpenCVCallBack.onManagerConnected(LoaderCallbackInterface.SUCCESS);
+            }
+        }
+
         previewView = findViewById(R.id.previewView);
         Intent intent = getIntent();
         path_ref_image = intent.getStringExtra("PATH_REF_IMAGE");
@@ -185,18 +198,10 @@ public class SmartNavigation extends AppCompatActivity implements Parcelable {
         refImageBitmap = ImageFunctions.deepCopyBitmap(bt_ref_frame);
         refImageBitmapCopy = ImageFunctions.deepCopyBitmap(bt_ref_frame);
 
+        toggleEdges(refImage);
+
         widthForAnalysis = refImageForAnalysis.getWidth();
         heightForAnalysis = refImageForAnalysis.getHeight();
-
-        if (!isOCVSetUp) { // if OCV hasn't been setup yet, init it
-            if (!OpenCVLoader.initDebug()) {
-                OpenCVLoader.initAsync(OpenCVLoader.OPENCV_VERSION, this, mOpenCVCallBack);
-                Log.i(TAG, "Cannot load OpenCV");
-            } else {
-                isOCVSetUp = true;
-                mOpenCVCallBack.onManagerConnected(LoaderCallbackInterface.SUCCESS);
-            }
-        }
 
         cameraProviderFuture = ProcessCameraProvider.getInstance(this);
         if (!hasCameraPermission()) {
@@ -626,19 +631,54 @@ public class SmartNavigation extends AppCompatActivity implements Parcelable {
             Utils.bitmapToMat(bt_second_image, mat_second_image);
             Utils.bitmapToMat(refImageForAnalysis, mat_ref_image);
 
+//            TODO REISTRATION DEVELOPMENT UNCOMMENT IMIDIETLY OMG!!!!
             int automatic_registration = OpenCVNative.triangulation(mat_first_image.getNativeObjAddr(), mat_second_image.getNativeObjAddr(), mat_ref_image.getNativeObjAddr());
-            if (automatic_registration != 1) {
+//            if (automatic_registration != 1) {
+            if (true) {
                 Intent intent = new Intent(this, RegisterPoints.class);
-                intent.putExtra("first_image", mat_first_image.getNativeObjAddr());
-                intent.putExtra("ref_image", mat_ref_image.getNativeObjAddr());
+
+                File first_image_file = new File(this.getFilesDir(), "first_image.jpg");
+                FileOutputStream first_image_outputStream = null;
+                try {
+                    first_image_outputStream = new FileOutputStream(first_image_file);
+                } catch (FileNotFoundException e) {
+                    e.printStackTrace();
+                }
+                bt_first_image.compress(Bitmap.CompressFormat.PNG, 100, first_image_outputStream);
+                try {
+                    first_image_outputStream.close();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+
+                long mat_first_address = mat_first_image.getNativeObjAddr();
+                intent.putExtra("first_image", first_image_file.getAbsolutePath());
+
+
+                File ref_image_file = new File(this.getFilesDir(), "ref_image.jpg");
+                FileOutputStream ref_image_outputStream = null;
+                try {
+                    ref_image_outputStream = new FileOutputStream(ref_image_file);
+                } catch (FileNotFoundException e) {
+                    e.printStackTrace();
+                }
+                refImageForAnalysis.compress(Bitmap.CompressFormat.PNG, 100, ref_image_outputStream);
+                try {
+                    ref_image_outputStream.close();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+
+                long mat_ref_address = mat_ref_image.getNativeObjAddr();
+                intent.putExtra("ref_image", ref_image_file.getAbsolutePath());
                 startActivity(intent);
             } else {
                 OpenCVNative.navigation_init();
-            }
-            findViewById(R.id.take_second_image).setVisibility(View.INVISIBLE);
-            findViewById(R.id.take_rephoto).setVisibility(View.VISIBLE);
+                findViewById(R.id.take_second_image).setVisibility(View.INVISIBLE);
+                findViewById(R.id.take_rephoto).setVisibility(View.VISIBLE);
 
-            navigation_started = true;
+                navigation_started = true;
+            }
         }
     }
 
@@ -710,6 +750,8 @@ public class SmartNavigation extends AppCompatActivity implements Parcelable {
                             intent.putExtra("REFRESH", true);
                             setResult(Activity.RESULT_OK, intent);
                             finish();
+                        } else if (data != null && data.getBooleanExtra("NAVIGATION_CAN_START", false)) {
+                            navigation_started = true;
                         }
                     }
                 }
