@@ -24,6 +24,9 @@ private:
 
     std::vector<cv::Point3f> _list_3D_points;
 
+    std::vector<cv::Point2f> original_2D_points;
+    std::vector<cv::Point3f> original_3D_points;
+
 public:
 
     ModelRegistration();
@@ -48,12 +51,24 @@ public:
 
     std::vector<cv::Point3f> getList3DPoints() const { return _list_3D_points; }
 
+    std::vector<cv::Point2f> getOriginal2DPoints() const { return original_2D_points; }
+
+    std::vector<cv::Point3f> getOriginal3DPoints() const { return original_3D_points; }
+
     void setList2DPoints(std::vector<cv::Point2f> list_2D_points) {
         _list_2D_points = list_2D_points;
     }
 
     void setList3DPoints(std::vector<cv::Point3f> list_3D_points) {
         _list_3D_points = list_3D_points;
+    }
+
+    void setOriginal2DPoints(std::vector<cv::Point2f> list_2D_points) {
+        original_2D_points = list_2D_points;
+    }
+
+    void setOriginal3DPoints(std::vector<cv::Point3f> list_3D_points) {
+        original_3D_points = list_3D_points;
     }
 
     void setIndexRegistration(int i);

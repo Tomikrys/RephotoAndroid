@@ -7,6 +7,7 @@
 #include "Main_orig.h"
 #include <opencv2/features2d.hpp>
 #include <opencv2/imgproc/types_c.h>
+#include <random>
 #include <thread>
 #include <pthread.h>
 #include <utility>
@@ -78,6 +79,32 @@ cv::Mat drawRedPoint(cv::Mat image, int x, int y) {
     int thickness = 2;
     circle(image, center, radius, line_Color, thickness);
     return image;
+}
+
+// Convert a vector of Point3f to a Mat
+cv::Mat vectorToMat(const std::vector<cv::Point2f> &vec) {
+    // Create a new matrix with the same size as the vector
+    cv::Mat mat(vec.size(), 1, CV_32SC2);
+
+    // Copy the data from the vector into the matrix
+    for (int i = 0; i < vec.size(); i++) {
+        mat.at<cv::Point2f>(i) = vec[i];
+    }
+
+    return mat;
+}
+
+int findIndex(const std::vector<cv::Point2f> &vec, const cv::Point2f &value) {
+    // Use std::find to search for the value in the vector
+    auto it = std::find(vec.begin(), vec.end(), value);
+
+    // If the value was found, return its index
+    if (it != vec.end()) {
+        return std::distance(vec.begin(), it);
+    }
+
+    // Otherwise, return -1 to indicate that the value was not found
+    return -1;
 }
 
 int triangulation(jlong bt_first_frame, jlong bt_second_frame, jlong bt_ref_frame) {
@@ -289,18 +316,77 @@ int triangulation(jlong bt_first_frame, jlong bt_second_frame, jlong bt_ref_fram
     return 0;
 }
 
+void registration_prepare_points(void) {
+
+//    registration.setOriginal2DPoints(detection_points_first_image);
+//    registration.setOriginal3DPoints(list_3D_points_after_triangulation);
+//############### SHUFFLE POINTS FOR REGISTRATION RANDOM
+    int n = detection_points_first_image.size();
+    // sort b in the way that elements which were originally on the same positions will be again on the same positions
+    std::vector<std::pair<cv::Point2f, cv::Point3f>> pairs(n);
+    for (int i = 0; i < n; i++) {
+        pairs[i] = std::make_pair(detection_points_first_image[i], list_3D_points_after_triangulation[i]);
+    }
+    std::shuffle(pairs.begin(), pairs.end(), std::mt19937(std::random_device()()));
+
+    for (int i = 0; i < n; i++) {
+        detection_points_first_image[i] = pairs[i].first;
+        list_3D_points_after_triangulation[i] = pairs[i].second;
+    }
+//############### SHUFFLE POINTS FOR REGISTRATION KMEANS
+//    cv::Mat mat_points_first = vectorToMat(detection_points_first_image);
+//    cv::Mat labels;
+//    cv::Mat centers;
+//    int numClusters = 3;
+//
+//    kmeans(mat_points_first, numClusters, labels,
+//           cv::TermCriteria(cv::TermCriteria::EPS + cv::TermCriteria::COUNT, number_registration, 1.0),
+//           3, cv::KMEANS_PP_CENTERS, centers);
+//
+//    std::vector<cv::Point2f> representativePointsFirstImage;
+//    std::vector<cv::Point2f> representativePointsSecondImage;
+//    for (int i = 0; i < numClusters; i++) {
+//        // Find all points in the current cluster
+//        std::vector<cv::Point2f> clusterPoints;
+//        for (int j = 0; j < mat_points_first.rows; j++) {
+//            if (labels.at<int>(j) == i) {
+//                clusterPoints.push_back(mat_points_first.at<cv::Point2f>(j));
+//            }
+//        }
+//
+//        // Choose a random point from the cluster
+//        int randomIndex = rand() % clusterPoints.size();
+//
+//        // Find index of 3d point in original array
+//        int index_of_corresponding_point_first = findIndex(detection_points_first_image, clusterPoints[randomIndex]);
+//
+//        // Push both 3D point and corresponding 2d point
+//        if (index_of_corresponding_point_first >= 0) {
+//            representativePointsFirstImage.push_back(clusterPoints[randomIndex]);
+//            representativePointsSecondImage.push_back(detection_points_second_image[index_of_corresponding_point_first]);
+//        }
+//    }
+//
+//    std::string representative_3d_csv = generate_csv_from_Point2f(representativePointsFirstImage);
+//    std::string representative_2d_csv = generate_csv_from_Point2f(representativePointsSecondImage);
+
+//################################################
+    registration.setOriginal2DPoints(detection_points_first_image);
+    registration.setOriginal3DPoints(list_3D_points_after_triangulation);
+}
+
 cv::Point2f registration_init() {
     //**
     // * Registrace korespondencnich bodu
     // * Dle tutorialu dostupneho na http://docs.opencv.org/3.1.0/dc/d2c/tutorial_real_time_pose.html
     // */
-    for (int i = 0; i < list_3D_points_after_triangulation.size(); i++) {
-        std::cout << list_3D_points_after_triangulation[i] << std::endl;
-    }
+
     registration.setRegistrationMax(number_registration);
 
-    float pos_x = detection_points_first_image[0].x;
-    float pos_y = detection_points_first_image[0].y;
+    registration_prepare_points();
+
+    float pos_x = registration.getOriginal2DPoints()[0].x;
+    float pos_y = registration.getOriginal2DPoints()[0].y;
 
     cv::Point2f point = cv::Point2f(pos_x, pos_y);
 
@@ -311,11 +397,11 @@ cv::Point2f registration_next_point() {
 
     registration.incRegistrationIndex();
 
-    cv::Mat clone_frame_with_triangulation = first_image.clone();
+//    cv::Mat clone_frame_with_triangulation = first_image.clone();
     int index = registration.getIndexRegistration();
 
-    float x = detection_points_first_image[index].x;
-    float y = detection_points_first_image[index].y;
+    float x = registration.getOriginal2DPoints()[index].x;
+    float y = registration.getOriginal2DPoints()[index].y;
 
     cv::Point2f point = cv::Point2f(x, y);
 
@@ -329,17 +415,17 @@ cv::Point2f registration_register_point(float x, float y) {
 
     if (is_registrable) {
         registration.register2DPoint(point_2d);
-        cv::Point3f point3f = list_3D_points_after_triangulation[index];
+        cv::Point3f point3f = registration.getOriginal3DPoints()[index];
         registration.register3DPoint(point3f);
         index_points.push_back(index);
         index++;
     }
 
-    cv::Mat clone_frame_with_triangulation = first_image.clone();
+//    cv::Mat clone_frame_with_triangulation = first_image.clone();
     registration.setIndexRegistration(index);
 
-    float pos_x = detection_points_first_image[index].x;
-    float pos_y = detection_points_first_image[index].y;
+    float pos_x = registration.getOriginal2DPoints()[index].x;
+    float pos_y = registration.getOriginal2DPoints()[index].y;
 
     cv::Point2f point = cv::Point2f(pos_x, pos_y);
 

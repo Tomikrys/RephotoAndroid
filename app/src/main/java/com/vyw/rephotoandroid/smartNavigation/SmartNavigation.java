@@ -631,8 +631,8 @@ public class SmartNavigation extends AppCompatActivity implements Parcelable {
             Utils.bitmapToMat(bt_second_image, mat_second_image);
             Utils.bitmapToMat(refImageForAnalysis, mat_ref_image);
 
-//            TODO REISTRATION DEVELOPMENT UNCOMMENT IMIDIETLY OMG!!!!
             int automatic_registration = OpenCVNative.triangulation(mat_first_image.getNativeObjAddr(), mat_second_image.getNativeObjAddr(), mat_ref_image.getNativeObjAddr());
+//            TODO REISTRATION DEVELOPMENT UNCOMMENT IMIDIETLY OMG!!!!
 //            if (automatic_registration != 1) {
             if (true) {
                 Intent intent = new Intent(this, RegisterPoints.class);
@@ -671,7 +671,8 @@ public class SmartNavigation extends AppCompatActivity implements Parcelable {
 
                 long mat_ref_address = mat_ref_image.getNativeObjAddr();
                 intent.putExtra("ref_image", ref_image_file.getAbsolutePath());
-                startActivity(intent);
+//                startActivity(intent);
+                UploadPhotoActivityResultLauncher.launch(intent);
             } else {
                 OpenCVNative.navigation_init();
                 findViewById(R.id.take_second_image).setVisibility(View.INVISIBLE);
@@ -751,11 +752,18 @@ public class SmartNavigation extends AppCompatActivity implements Parcelable {
                             setResult(Activity.RESULT_OK, intent);
                             finish();
                         } else if (data != null && data.getBooleanExtra("NAVIGATION_CAN_START", false)) {
+                            OpenCVNative.navigation_init();
+                            findViewById(R.id.take_second_image).setVisibility(View.INVISIBLE);
+                            findViewById(R.id.take_rephoto).setVisibility(View.VISIBLE);
+
                             navigation_started = true;
                         }
                     }
                 }
+
+
             });
+
 
     public static final Creator<SmartNavigation> CREATOR = new Creator<SmartNavigation>() {
         @Override
