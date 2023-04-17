@@ -31,4 +31,6 @@ public class OpenCVNative {
     public static native void initNavigation();
 
     public static native int processNavigation(long current_frame, int count_frames);
+
+    public static native long warpPerspectiveOfRephoto(long rephoto, long reference_image);
 }

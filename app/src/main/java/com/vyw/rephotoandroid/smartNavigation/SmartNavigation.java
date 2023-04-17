@@ -631,10 +631,10 @@ public class SmartNavigation extends AppCompatActivity implements Parcelable {
             Utils.bitmapToMat(bt_second_image, mat_second_image);
             Utils.bitmapToMat(refImageForAnalysis, mat_ref_image);
 
-            int automatic_registration = OpenCVNative.triangulation(mat_first_image.getNativeObjAddr(), mat_second_image.getNativeObjAddr(), mat_ref_image.getNativeObjAddr());
+            int automatic_registration = OpenCVNative.triangulation(mat_second_image.getNativeObjAddr(), mat_first_image.getNativeObjAddr(), mat_ref_image.getNativeObjAddr());
 //            TODO REISTRATION DEVELOPMENT UNCOMMENT IMIDIETLY OMG!!!!
-//            if (automatic_registration != 1) {
-            if (true) {
+            if (automatic_registration != 1) {
+//            if (true) {
                 Intent intent = new Intent(this, RegisterPoints.class);
 
                 File first_image_file = new File(this.getFilesDir(), "first_image.jpg");
@@ -722,6 +722,7 @@ public class SmartNavigation extends AppCompatActivity implements Parcelable {
                         intent.putExtra("PATH_NEW_IMAGE", savedImage);
                         intent.putExtra("SOURCE", source);
                         intent.putExtra("DISPLAY_NAME", displayName);
+                        intent.putExtra("SMART", true);
 
 //                        intent.putExtra("SimpleNavigation", (Parcelable) thisCopy);
                         UploadPhotoActivityResultLauncher.launch(intent);

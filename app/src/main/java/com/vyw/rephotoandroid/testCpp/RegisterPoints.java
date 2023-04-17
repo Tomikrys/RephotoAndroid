@@ -483,18 +483,18 @@ public class RegisterPoints extends AppCompatActivity {
                 paint_fill);
 
 
-        Paint black_paint = new Paint();
-        paint_fill.setColor(Color.BLACK);
-        paint_fill.setStrokeWidth(1);
-        paint_fill.setStyle(Paint.Style.FILL);
+//        Paint black_paint = new Paint();
+//        paint_fill.setColor(Color.BLACK);
+//        paint_fill.setStrokeWidth(1);
+//        paint_fill.setStyle(Paint.Style.FILL);
+//
+//        cross_size += 20;
+//        center_space = 0;
 
-        cross_size += 20;
-        center_space = 0;
-
-        canvas.drawLine(pos_x - cross_size, pos_y, pos_x - center_space, pos_y, black_paint);
-        canvas.drawLine(pos_x + center_space, pos_y, pos_x + cross_size, pos_y, black_paint);
-        canvas.drawLine(pos_x, pos_y - cross_size, pos_x, pos_y - center_space, black_paint);
-        canvas.drawLine(pos_x, pos_y + center_space, pos_x, pos_y + cross_size, black_paint);
+//        canvas.drawLine(pos_x - cross_size, pos_y, pos_x - center_space, pos_y, black_paint);
+//        canvas.drawLine(pos_x + center_space, pos_y, pos_x + cross_size, pos_y, black_paint);
+//        canvas.drawLine(pos_x, pos_y - cross_size, pos_x, pos_y - center_space, black_paint);
+//        canvas.drawLine(pos_x, pos_y + center_space, pos_x, pos_y + cross_size, black_paint);
     }
 
 

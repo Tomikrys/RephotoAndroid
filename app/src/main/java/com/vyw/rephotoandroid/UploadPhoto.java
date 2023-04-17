@@ -48,6 +48,8 @@ import com.vyw.rephotoandroid.model.api.UserLogin;
 import org.opencv.android.BaseLoaderCallback;
 import org.opencv.android.LoaderCallbackInterface;
 import org.opencv.android.OpenCVLoader;
+import org.opencv.android.Utils;
+import org.opencv.core.Mat;
 
 import java.io.ByteArrayOutputStream;
 import java.io.File;
@@ -88,6 +90,7 @@ public class UploadPhoto extends AppCompatActivity {
     private String source = "";
     private String displayName = "";
     private String image_id;
+    private boolean isFromSmartNavigation;
 //    private SimpleNavigation simpleNavigationIntent = null;
 
 
@@ -124,6 +127,8 @@ public class UploadPhoto extends AppCompatActivity {
         image_id = intent.getStringExtra("IMAGE_ID");
         source = intent.getStringExtra("SOURCE");
         displayName = intent.getStringExtra("DISPLAY_NAME");
+        isFromSmartNavigation = intent.getBooleanExtra("SMART", false);
+
         if (source.equals("ONLINE")) {
             ((FloatingActionButton) findViewById(R.id.retake)).setVisibility(View.VISIBLE);
             ((FloatingActionButton) findViewById(R.id.save_photo)).setVisibility(View.GONE);
@@ -182,18 +187,12 @@ public class UploadPhoto extends AppCompatActivity {
         } catch (IOException e) {
             e.printStackTrace();
         }
-        bt_new_frame = ImageFunctions.rotateImage(bt_new_frame, ImageFunctions.getOrientation(uri_new_image, this));
-        bt_new_frame = ImageFunctions.cropToAspectRatio(bt_new_frame, bt_ref_frame.getWidth(), bt_ref_frame.getHeight());
 
         try {
             uri_new_image_cropped = saveBitmap(this, bt_new_frame, displayName + "_crop");
         } catch (IOException e) {
             e.printStackTrace();
         }
-
-        newImage = findViewById(R.id.newImage);
-        newImage.setImageBitmap(bt_new_frame);
-
 
         if (!isOCVSetUp) { // if OCV hasn't been setup yet, init it
             if (!OpenCVLoader.initDebug()) {
@@ -204,6 +203,31 @@ public class UploadPhoto extends AppCompatActivity {
                 mOpenCVCallBack.onManagerConnected(LoaderCallbackInterface.SUCCESS);
             }
         }
+
+        bt_new_frame = ImageFunctions.rotateImage(bt_new_frame, ImageFunctions.getOrientation(uri_new_image, this));
+        if (isFromSmartNavigation) {
+            Mat mat_new_frame = new Mat();
+            Utils.bitmapToMat(bt_new_frame, mat_new_frame);
+            Mat mat_ref_frame = new Mat();
+            Utils.bitmapToMat(bt_ref_frame, mat_ref_frame);
+            long new_frame_wrap_persp_addr = OpenCVNative.warpPerspectiveOfRephoto(
+                    mat_new_frame.getNativeObjAddr(),
+                    mat_ref_frame.getNativeObjAddr());
+            Mat mat_new_frame_wrap_persp = new Mat(new_frame_wrap_persp_addr);
+            Bitmap rephotoWrappedPerspective = Bitmap.createBitmap(
+                    (int) mat_new_frame_wrap_persp.cols(),
+                    (int) mat_new_frame_wrap_persp.rows(),
+                    Bitmap.Config.ARGB_8888);
+            Utils.matToBitmap(mat_new_frame_wrap_persp, rephotoWrappedPerspective);
+            Log.d(TAG, "done");
+
+            bt_new_frame = rephotoWrappedPerspective;
+        }
+
+//        bt_new_frame = ImageFunctions.cropToAspectRatio(bt_new_frame, bt_ref_frame.getWidth(), bt_ref_frame.getHeight());
+
+        newImage = findViewById(R.id.newImage);
+        newImage.setImageBitmap(bt_new_frame);
     }
 
     @NonNull
@@ -233,8 +257,7 @@ public class UploadPhoto extends AppCompatActivity {
             }
 
             return uri;
-        }
-        catch (IOException e) {
+        } catch (IOException e) {
 
             if (uri != null) {
                 // Don't leave an orphan entry in the MediaStore
@@ -257,13 +280,14 @@ public class UploadPhoto extends AppCompatActivity {
         cursor.close();
         return res;
     }
+
     public void UploadPhoto(View view) {
         UploadPhoto();
     }
 
     public String add_cropToUri(String uri) {
         int index = uri.lastIndexOf(".");
-        String uri_crop =uri.substring(0,index) + "_crop" + uri.substring(index,uri.length());
+        String uri_crop = uri.substring(0, index) + "_crop" + uri.substring(index, uri.length());
         return uri_crop;
     }
 

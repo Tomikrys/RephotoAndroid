@@ -8,11 +8,13 @@ import androidx.preference.PreferenceManager;
 
 import com.vyw.rephotoandroid.R;
 
+import java.util.Objects;
+
 public class Configuration {
     // TODO dont forget to change it in res/xml/network_security_config.xml
 //    public static String baseUrl = "http://192.168.0.15/";
 //    public static final String baseUrl = "http://10.0.2.2/";
-    public static final String baseUrl = "https://rephoto.cz/";
+    public static final String baseUrl = "http://rephoto.cz/";
 
     public static String getSharedValue(AppCompatActivity context, String key) {
         SharedPreferences sharedPreferences = context.getPreferences(Context.MODE_PRIVATE);
@@ -33,5 +35,10 @@ public class Configuration {
 
     public static String getEmail(AppCompatActivity context) {
         return getSharedValue(context, context.getString(R.string.email));
+    }
+
+    public static boolean getSmartNavigationEnabled(AppCompatActivity context) {
+        String value = getSharedValue(context, context.getString(R.string.smart_navigation_enabled));
+        return !Objects.equals(value, "false");
     }
 }

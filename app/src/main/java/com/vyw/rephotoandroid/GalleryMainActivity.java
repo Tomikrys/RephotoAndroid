@@ -23,6 +23,7 @@ import android.os.Handler;
 import android.provider.MediaStore;
 import android.util.Log;
 import android.view.Menu;
+import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
@@ -49,6 +50,7 @@ import androidx.recyclerview.widget.RecyclerView;
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 
 import com.google.android.material.navigation.NavigationView;
+import com.squareup.picasso.Picasso;
 import com.vyw.rephotoandroid.model.Configuration;
 import com.vyw.rephotoandroid.model.GalleryItem;
 import com.vyw.rephotoandroid.model.api.LoginResponse;
@@ -104,6 +106,7 @@ public class GalleryMainActivity extends AppCompatActivity implements GalleryAda
         // drawer and back button to close drawer
         drawerLayout = findViewById(R.id.my_drawer_layout);
         loading_image_view = findViewById(R.id.loading);
+
         choose_photo_button = findViewById(R.id.choose_photo_gallery);
         actionBarDrawerToggle = new ActionBarDrawerToggle(this, drawerLayout, R.string.nav_open, R.string.nav_close);
 
@@ -155,7 +158,6 @@ public class GalleryMainActivity extends AppCompatActivity implements GalleryAda
 
         swipeRefreshLayout = findViewById(R.id.swipe_layout);
         initializeRefreshListener();
-
 
         //check for read storage permission
 //        if (ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
@@ -344,11 +346,11 @@ public class GalleryMainActivity extends AppCompatActivity implements GalleryAda
 
             path_ref_image = path;
             Intent intent;
-            Boolean simple = false;
-            if (simple) {
-                intent = new Intent(this, SimpleNavigation.class);
-            } else {
+            boolean smartNavigationEnabled = Configuration.getSmartNavigationEnabled(this);
+            if (smartNavigationEnabled) {
                 intent = new Intent(this, SmartNavigation.class);
+            } else {
+                intent = new Intent(this, SimpleNavigation.class);
             }
             intent.putExtra("PATH_REF_IMAGE", path_ref_image);
             intent.putExtra("SOURCE", "LOCAL");
@@ -471,6 +473,13 @@ public class GalleryMainActivity extends AppCompatActivity implements GalleryAda
 //                .setDefaultColor(Color.RED)
 //                // Inflate the menu
 //                .inflate(R.menu.menu_main, menu);
+
+        MenuInflater inflater = getMenuInflater();
+        inflater.inflate(R.menu.menu_main, menu);
+        boolean toggleSmartNavigationCurrentValue = Configuration.getSmartNavigationEnabled(this);
+//        MenuItem toggleSmartNavigationMenuItem = findViewById(R.id.toggleSmartNavigation);
+        MenuItem toggleSmartNavigationMenuItem = menu.findItem(R.id.toggleSmartNavigation);
+        toggleSmartNavigationMenuItem.setChecked(toggleSmartNavigationCurrentValue);
         return true;
     }
 
@@ -575,7 +584,13 @@ public class GalleryMainActivity extends AppCompatActivity implements GalleryAda
 
     public void takeRephoto(View view) {
         Log.d(TAG, "takeRephoto");
-        Intent intent = new Intent(this, SimpleNavigation.class);
+        Intent intent;
+        boolean smartNavigationEnabled = Configuration.getSmartNavigationEnabled(this);
+        if (smartNavigationEnabled) {
+            intent = new Intent(this, SmartNavigation.class);
+        } else {
+            intent = new Intent(this, SimpleNavigation.class);
+        }
         intent.putExtra("PATH_REF_IMAGE", selectedPicture.imageUri);
         int id = selectedPicture.place.getId();
         intent.putExtra("IMAGE_ID", String.valueOf(id));
@@ -640,5 +655,17 @@ public class GalleryMainActivity extends AppCompatActivity implements GalleryAda
                 Toast.makeText(this, "Storage Permission denied", Toast.LENGTH_SHORT).show();
             }
         }
+    }
+
+    public void toggleSmartNavigation(MenuItem item) {
+        SharedPreferences sharedPref = this.getPreferences(Context.MODE_PRIVATE);
+        SharedPreferences.Editor editor = sharedPref.edit();
+        boolean currentValue = Configuration.getSmartNavigationEnabled(this);
+        editor.putString(getString(R.string.smart_navigation_enabled), String.valueOf(!currentValue));
+        editor.apply();
+        item.setChecked(!currentValue);
+    }
+
+    public void test(MenuItem item) {
     }
 }

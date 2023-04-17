@@ -321,18 +321,19 @@ void registration_prepare_points(void) {
 //    registration.setOriginal2DPoints(detection_points_first_image);
 //    registration.setOriginal3DPoints(list_3D_points_after_triangulation);
 //############### SHUFFLE POINTS FOR REGISTRATION RANDOM
-    int n = detection_points_first_image.size();
-    // sort b in the way that elements which were originally on the same positions will be again on the same positions
-    std::vector<std::pair<cv::Point2f, cv::Point3f>> pairs(n);
-    for (int i = 0; i < n; i++) {
-        pairs[i] = std::make_pair(detection_points_first_image[i], list_3D_points_after_triangulation[i]);
-    }
-    std::shuffle(pairs.begin(), pairs.end(), std::mt19937(std::random_device()()));
-
-    for (int i = 0; i < n; i++) {
-        detection_points_first_image[i] = pairs[i].first;
-        list_3D_points_after_triangulation[i] = pairs[i].second;
-    }
+//    int n = detection_points_first_image.size();
+//    // sort b in the way that elements which were originally on the same positions will be again on the same positions
+//    std::vector<std::pair<cv::Point2f, cv::Point3f>> pairs(n);
+//    for (int i = 0; i < n; i++) {
+//        pairs[i] = std::make_pair(detection_points_first_image[i],
+//                                  list_3D_points_after_triangulation[i]);
+//    }
+//    std::shuffle(pairs.begin(), pairs.end(), std::mt19937(std::random_device()()));
+//
+//    for (int i = 0; i < n; i++) {
+//        detection_points_first_image[i] = pairs[i].first;
+//        list_3D_points_after_triangulation[i] = pairs[i].second;
+//    }
 //############### SHUFFLE POINTS FOR REGISTRATION KMEANS
 //    cv::Mat mat_points_first = vectorToMat(detection_points_first_image);
 //    cv::Mat labels;
@@ -382,6 +383,10 @@ cv::Point2f registration_init() {
     // */
 
     registration.setRegistrationMax(number_registration);
+    std::vector<cv::Point2f> emptyVector2D{};
+    std::vector<cv::Point3f> emptyVector3D{};
+    registration.setList2DPoints(emptyVector2D);
+    registration.setList3DPoints(emptyVector3D);
 
     registration_prepare_points();
 
@@ -1194,6 +1199,71 @@ Java_com_vyw_rephotoandroid_OpenCVNative_process_1navigation(JNIEnv *env, jclass
 //    double y = (*mat).at<double>(3, 1);
 //    print_matrix("returned", returned);
 //    print_matrix("copied", (*mat));
+    return (jlong) mat;
+}
+
+extern "C"
+JNIEXPORT jlong JNICALL
+Java_com_vyw_rephotoandroid_OpenCVNative_warpPerspectiveOfRephoto(JNIEnv *env, jclass clazz,
+                                                                  jlong rephoto,
+                                                                  jlong reference_image) {
+    cv::Mat mat_rephoto = *(cv::Mat *) rephoto;
+    cv::Mat mat_ref_image = *(cv::Mat *) reference_image;
+    std::vector<cv::DMatch> matches;
+    std::vector<cv::KeyPoint> key_points_ref_image;
+    std::vector<cv::KeyPoint> key_points_rephoto;
+    cv::Mat camera_matrix = cv::Mat::zeros(3, 3, CV_64FC1);
+    camera_matrix = pnp_registration.getCameraMatrix();
+
+    robustMatcher.robustMatchRANSAC(mat_ref_image, mat_rephoto, matches,
+                                    key_points_ref_image,
+                                    key_points_rephoto,
+                                    camera_matrix);
+
+
+    std::vector<cv::Point2f> points_ref_image;
+    std::vector<cv::Point2f> points_rephoto;
+
+    cv::Mat m1 = mat_ref_image.clone();
+    cv::Mat m2 = mat_rephoto.clone();
+    for (std::vector<cv::DMatch>::const_iterator it = matches.begin(); it != matches.end(); ++it) {
+        float x = key_points_ref_image[it->queryIdx].pt.x;
+        float y = key_points_ref_image[it->queryIdx].pt.y;
+        points_ref_image.push_back(cv::Point2f(x, y));
+        drawPoint(m1, x, y);
+
+        x = key_points_rephoto[it->trainIdx].pt.x;
+        y = key_points_rephoto[it->trainIdx].pt.y;
+        points_rephoto.push_back(cv::Point2f(x, y));
+        drawPoint(m2, x, y);
+    }
+    saveMatToJpeg(m1, "upload_points_ref_image", true);
+    saveMatToJpeg(m2, "upload_points_rephoto", true);
+
+    cv::Mat homographyMatrix = cv::findHomography(points_rephoto, points_ref_image, cv::RANSAC,
+                                                  1.0);
+
+    int h1 = mat_ref_image.rows;
+    int w1 = mat_ref_image.cols;
+    int h2 = mat_rephoto.rows;
+    int w2 = mat_rephoto.cols;
+    double test = homographyMatrix.at<double>(0, 0);
+    double test2 = homographyMatrix.at<double>(1, 1);
+    if (h1 < h2 and w1 < w2) {
+//        homographyMatrix = np.multiply(homographyMatrix, [[(float(w2) / w1), 1, 1], [1, (float(h2) / h1), 1], [1, 1, 1,]]);
+        homographyMatrix.at<double>(0, 0) *= static_cast<double>(w2) / w1;
+        homographyMatrix.at<double>(1, 1) *= static_cast<double>(h2) / h1;
+    }
+    double test3 = homographyMatrix.at<double>(0, 0);
+    double test4 = homographyMatrix.at<double>(1, 1);
+
+    cv::Mat dst_mat_rephoto = mat_rephoto.clone();
+//    cv::warpPerspective(mat_rephoto, dst_mat_rephoto, homographyMatrix, cv::Size(w2 * 2, h2 * 2));
+    cv::warpPerspective(mat_rephoto, dst_mat_rephoto, homographyMatrix, mat_ref_image.size());
+
+//    cv::cvtColor(dst_mat_rephoto, dst_mat_rephoto, cv::COLOR_BGRA2RGBA);
+//    saveMatToJpeg(dst_mat_rephoto, "upload_points_warped_rephoto", false);
+    cv::Mat *mat = new cv::Mat(dst_mat_rephoto);
     return (jlong) mat;
 }
 
