@@ -5,20 +5,23 @@
  */
 
 #include <opencv2/opencv.hpp>
-#include <opencv2/calib3d/calib3d_c.h>
 #include "RobustMatcher.h"
+//#include <opencv2/xfeatures2d.hpp>
+#include <opencv2/calib3d/calib3d_c.h>
 
 RobustMatcher::RobustMatcher() {
-
+    // TODO to tady bylo, vrátil jsem na originál
     detector = cv::ORB::create();
     extractor = cv::ORB::create();
+//    detector = cv::xfeatures2d::SURF::create();
+//    extractor = cv::xfeatures2d::SURF::create();
 
     matcher = cv::makePtr<cv::BFMatcher>((int) cv::NORM_HAMMING, false);
 }
 
-int RobustMatcher::ratioTest(std::vector<std::vector<cv::DMatch> > &matches) {
+int RobustMatcher::ratioTest(std::vector<std::vector<cv::DMatch>> &matches) {
     int removed = 0;
-    for (std::vector<std::vector<cv::DMatch> >::iterator matchIterator = matches.begin();
+    for (std::vector<std::vector<cv::DMatch>>::iterator matchIterator = matches.begin();
          matchIterator != matches.end(); ++matchIterator) {
 
         if (matchIterator->size() > 1) {
@@ -34,67 +37,52 @@ int RobustMatcher::ratioTest(std::vector<std::vector<cv::DMatch> > &matches) {
     return removed;
 }
 
-void RobustMatcher::symmetryTest(const std::vector<std::vector<cv::DMatch> > &matches1,
-                                 const std::vector<std::vector<cv::DMatch> > &matches2,
+void RobustMatcher::symmetryTest(const std::vector<std::vector<cv::DMatch>> &matches1,
+                                 const std::vector<std::vector<cv::DMatch>> &matches2,
                                  std::vector<cv::DMatch> &symMatches) {
-
-    for (std::vector<std::vector<cv::DMatch> >::const_iterator
+    for (std::vector<std::vector<cv::DMatch>>::const_iterator
                  matchIterator1 = matches1.begin();
          matchIterator1 != matches1.end(); ++matchIterator1) {
 
         if (matchIterator1->empty() || matchIterator1->size() < 2)
             continue;
 
-        for (std::vector<std::vector<cv::DMatch> >::const_iterator matchIterator2 = matches2.begin();
+        for (std::vector<std::vector<cv::DMatch>>::const_iterator matchIterator2 = matches2.begin();
              matchIterator2 != matches2.end(); ++matchIterator2) {
             if (matchIterator2->empty() || matchIterator2->size() < 2)
                 continue;
-
 
             if ((*matchIterator1)[0].queryIdx == (*matchIterator2)[0].trainIdx &&
                 (*matchIterator2)[0].queryIdx == (*matchIterator1)[0].trainIdx) {
                 symMatches.push_back(
                         cv::DMatch((*matchIterator1)[0].queryIdx, (*matchIterator1)[0].trainIdx,
                                    (*matchIterator1)[0].distance));
+                symMatchesFromTriangulation.push_back(*matchIterator1);
                 break;
             }
         }
     }
-
 }
 
 void RobustMatcher::robustMatch(const cv::Mat &image2, std::vector<cv::DMatch> &good_matches,
                                 std::vector<cv::KeyPoint> &key_points2) {
-
 
     detector->detect(image2, key_points2);
 
     cv::Mat descriptors2;
     extractor->compute(image2, key_points2, descriptors2);
 
-
-    std::vector<std::vector<cv::DMatch> > matches12, matches21;
-
-//    todo, nejsou prázdný
     if (descriptors.empty())
         std::cout << "robustMatch " << "1st descriptor empty " << __FILE__ << __LINE__ << std::endl;
     if (descriptors2.empty())
         std::cout << "robustMatch " << "2st descriptor empty " << __FILE__ << __LINE__ << std::endl;
 
-//    TODO nemělo by se
-    descriptors.convertTo(descriptors, CV_32F);
-    descriptors2.convertTo(descriptors2, CV_32F);
-
-    // todo error
-    // 2022-02-04 15:18:08.488 21339-21339/com.vyw.rephotoandroid E/cv::error(): OpenCV(4.5.3)
-    // Error: Unsupported format or combination of formats (> type=0 > ) in buildIndex_,
-    // file /build/master_pack-android/opencv/modules/flann/src/miniflann.cpp, line 336
-    // https://answers.opencv.org/question/11209/unsupported-format-or-combination-of-formats-in-buildindex-using-flann-algorithm/
+    std::vector<std::vector<cv::DMatch>> matches12, matches21;
     matcher->knnMatch(descriptors, descriptors2, matches12, 2);
     matcher->knnMatch(descriptors2, descriptors, matches21, 2);
 
-    ratioTest(matches12);
-    ratioTest(matches21);
+    int removed12 = ratioTest(matches12);
+    int removed21 = ratioTest(matches21);
 
     symmetryTest(matches12, matches21, good_matches);
 }
@@ -132,7 +120,6 @@ cv::Mat RobustMatcher::ransacTest(const std::vector<cv::DMatch> &matches,
     return essential_matrix;
 }
 
-
 cv::Mat
 RobustMatcher::robustMatchRANSAC(cv::Mat &image1, cv::Mat &image2, std::vector<cv::DMatch> &matches,
                                  std::vector<cv::KeyPoint> &key_points1,
@@ -153,7 +140,7 @@ RobustMatcher::robustMatchRANSAC(cv::Mat &image1, cv::Mat &image2, std::vector<c
 
     cv::BFMatcher matcher;
 
-    std::vector<std::vector<cv::DMatch> > matches1, matches2;
+    std::vector<std::vector<cv::DMatch>> matches1, matches2;
     matcher.knnMatch(descriptors1, descriptors2, matches1, 2);
     matcher.knnMatch(descriptors2, descriptors1, matches2, 2);
 
@@ -161,6 +148,8 @@ RobustMatcher::robustMatchRANSAC(cv::Mat &image1, cv::Mat &image2, std::vector<c
     ratioTest(matches2);
 
     std::vector<cv::DMatch> symMatches;
+
+    symMatchesFromTriangulation = {};
     symmetryTest(matches1, matches2, symMatches);
 
     cv::Mat essencial_matrix = ransacTest(symMatches, key_points1, key_points2, matches,
@@ -168,8 +157,3 @@ RobustMatcher::robustMatchRANSAC(cv::Mat &image1, cv::Mat &image2, std::vector<c
 
     return essencial_matrix;
 }
-
-
-
-
-

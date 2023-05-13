@@ -158,7 +158,7 @@ public class CameraPreview extends AppCompatActivity {
     }
 
     private boolean saveBitmapToFile(Bitmap bitmap, String fileName) {
-        String filePath = "/storage/emulated/0/Download/" + fileName + ".jpg";
+        String filePath = "/storage/emulated/0/Download/Rephoto/" + fileName + ".jpg";
         try {
             File file = new File(filePath);
             FileOutputStream fOut = new FileOutputStream(file);

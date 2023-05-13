@@ -51,9 +51,9 @@
             android:clickable="true"
             android:focusable="true"
             android:onClick="toggleEdges"
-            app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintBottom_toBottomOf="parent"
-            app:srcCompat="@android:drawable/ic_popup_sync" />
+            app:layout_constraintEnd_toEndOf="parent"
+            app:srcCompat="@drawable/ic_baseline_filter_b_and_w_24" />
 
         <com.google.android.material.floatingactionbutton.FloatingActionButton
             android:id="@+id/floatingActionButton2"

@@ -15,10 +15,6 @@ import android.view.WindowInsets;
 import android.view.WindowManager;
 import android.view.WindowMetrics;
 
-/**
- * Created by amardeep on 11/3/2017.
- */
-
 public class GalleryScreenUtils {
 
     //static method to get screen width

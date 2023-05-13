@@ -63,9 +63,9 @@ public class SelectPointsActivity extends AppCompatActivity {
         bit_ref_frame = Bitmap.createBitmap(ref_frame.width(), ref_frame.height(), con_ref_frame);
         Utils.matToBitmap(ref_frame, bit_ref_frame);
 
-        imageView1 = (ImageView) findViewById(R.id.imageView1);
+        imageView1 = (ImageView) findViewById(R.id.ref_image);
         imageView1.setImageBitmap(bit_ref_frame);
-        imageView2 = (ImageView) findViewById(R.id.imageView2);
+        imageView2 = (ImageView) findViewById(R.id.first_image);
         imageView2.setImageBitmap(bit_first_frame);
 
 

@@ -20,8 +20,8 @@ Soubory označené hvězdičkou jsou pozůstatky z rozběhávání bakalářské
 Přikládám je, kdyby někdo v práci pokračoval.
 
 ```
-    RephotoWeb\
-    ├─ .git\                                                - složka s historií vývoje webové aplikace
+    RephotoAndroid\
+    ├─ .git\                                                - složka s historií vývoje aplikace
     ├─ app\src\main\                                        
     │  ├─ assets\                                           - soubory, která projekt využívá (font)
     │  ├─ cpp\                                              - nativní vrstva

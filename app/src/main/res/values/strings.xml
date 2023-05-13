@@ -79,4 +79,6 @@
     <string name="last_name">last_name</string>
     <string name="logged">logged</string>
     <string name="terms_and_conditions">Terms and Conditions</string>
+    <string name="smart_navigation_enabled">smart_navigation_enabled</string>
+    <string name="toggleSmartNavigation">Smart Navigation</string>
 </resources>

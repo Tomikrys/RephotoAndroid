@@ -1,7 +1,9 @@
 package com.vyw.rephotoandroid;
 
+import android.Manifest;
 import android.app.Dialog;
 import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.net.Uri;
 import android.os.Bundle;
@@ -9,6 +11,7 @@ import android.os.StrictMode;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.provider.MediaStore;
 import android.view.View;
 import android.widget.EditText;
 import android.widget.TextView;
@@ -16,18 +19,34 @@ import android.widget.Toast;
 
 import static android.provider.AlarmClock.EXTRA_MESSAGE;
 
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
+import androidx.core.content.ContextCompat;
+import androidx.documentfile.provider.DocumentFile;
+
+import org.opencv.android.Utils;
+import org.opencv.core.Mat;
+
+import java.io.File;
+import java.io.IOException;
 
 
 public class MainActivity extends AppCompatActivity {
 
     private static String TAG = "MainActivity";
 
+    //Read storage permission request code
+    private static final int RC_READ_STORAGE = 5;
+
     static {
         System.loadLibrary("native-lib");
     }
 
+
+    private static final int REQUEST_CHOOSER = 1234;
+    int id_entered_button;
+    String path_ref_image = "";
 
     Dialog dialog;
     int simple_navigation_button;
@@ -38,14 +57,35 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.menu_layout);
         simple_navigation_button = findViewById(R.id.simple_navigation).getId();
 
+        //check for read storage permission
+        if (ContextCompat.checkSelfPermission(this, Manifest.permission.READ_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
+            //request permission
+            ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.READ_EXTERNAL_STORAGE}, RC_READ_STORAGE);
+        }
+
+        String[] permissionsStorage = {Manifest.permission.READ_EXTERNAL_STORAGE};
+        int requestExternalStorage = 1;
+        int permission = ActivityCompat.checkSelfPermission(this, Manifest.permission.READ_EXTERNAL_STORAGE);
+        if (permission != PackageManager.PERMISSION_GRANTED) {
+            ActivityCompat.requestPermissions(this, permissionsStorage, requestExternalStorage);
+        }
+
+
+        if (ActivityCompat.checkSelfPermission(this,
+                Manifest.permission.READ_EXTERNAL_STORAGE)
+                != PackageManager.PERMISSION_GRANTED) {
+            ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.READ_EXTERNAL_STORAGE}, 6);
+        }
+
 //  TODO debug memory mode
 //        if(BuildConfig.DEBUG)
 //            StrictMode.enableDefaults();
     }
 
+
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
-        getMenuInflater().inflate(R.menu.menu_main, menu);
+//        getMenuInflater().inflate(R.menu.menu_main, menu);
         return true;
     }
 
@@ -79,9 +119,13 @@ public class MainActivity extends AppCompatActivity {
 //        finish();
     }
 
-    private static final int REQUEST_CHOOSER = 1234;
-    int id_entered_button;
-    String path_ref_image = "";
+    public void startSimple(View view) {
+//        ActivityCompat.finishAffinity(this);
+        showFileDialog(view);
+        Intent intent = new Intent(this, GalleryMainActivity.class);
+        startActivity(intent);
+//        finish();
+    }
 
     public void showFileDialog(View view) {
         id_entered_button = view.getId();
@@ -119,6 +163,13 @@ public class MainActivity extends AppCompatActivity {
         String message = "";
         boolean isCorrect = true;
 
+//      foťák
+//      cxf - Principal Point Offset    - center_f
+//      fxf - Focal Length              - focal_f
+//      kamera
+//      cxc - Principal Point Offset    - center_c
+//      fxc - Focal Length              - focal_c
+
         tf[0] = (EditText) dialog.findViewById(R.id.tf_cxf);
         tf[1] = (EditText) dialog.findViewById(R.id.tf_cyf);
         tf[2] = (EditText) dialog.findViewById(R.id.tf_fxf);
@@ -128,7 +179,7 @@ public class MainActivity extends AppCompatActivity {
         tf[6] = (EditText) dialog.findViewById(R.id.tf_fxc);
         tf[7] = (EditText) dialog.findViewById(R.id.tf_fyc);
 
-        for(int i = 0; i < tf.length; i++){
+        for (int i = 0; i < tf.length; i++) {
             params[i] = tf[i].getText().toString();
             message += params[i] + ";";
             if (!params[i].trim().matches(regexStr)) {
@@ -139,13 +190,25 @@ public class MainActivity extends AppCompatActivity {
             }
         }
 
-        if(isCorrect){
+        if (isCorrect) {
 //            ActivityCompat.finishAffinity(this);
             dialog.dismiss();
             Intent intent = new Intent(this, SettingActivity.class);
             intent.putExtra(EXTRA_MESSAGE, message);
             startActivity(intent);
 //            finish();
+        }
+    }
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+        if (requestCode == RC_READ_STORAGE) {
+            if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                Toast.makeText(this, "Storage Permission granted", Toast.LENGTH_SHORT).show();
+            } else {
+                Toast.makeText(this, "Storage Permission denied", Toast.LENGTH_SHORT).show();
+            }
         }
     }
 

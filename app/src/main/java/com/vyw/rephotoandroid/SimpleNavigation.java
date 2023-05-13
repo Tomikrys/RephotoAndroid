@@ -377,6 +377,7 @@ public class SimpleNavigation extends AppCompatActivity implements Parcelable {
                         intent.putExtra("PATH_NEW_IMAGE", savedImage);
                         intent.putExtra("SOURCE", source);
                         intent.putExtra("DISPLAY_NAME", displayName);
+                        intent.putExtra("SMART", false);
 
 //                        intent.putExtra("SimpleNavigation", (Parcelable) thisCopy);
                         UploadPhotoActivityResultLauncher.launch(intent);

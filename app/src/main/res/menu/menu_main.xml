@@ -1,6 +1,7 @@
 <menu xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/main_menu"
     tools:context=".GalleryMainActivity">
 <!--    <item-->
 <!--        android:id="@+id/action_settings"-->
@@ -9,10 +10,23 @@
 <!--        android:title="@string/settings" />-->
 
     <item
+        android:id="@+id/toggleSmartNavigation"
+        android:onClick="toggleSmartNavigation"
+        android:checkable="true"
+        android:orderInCategory="100"
+        android:title="@string/toggleSmartNavigation" />
+    <item
         android:id="@+id/terms_and_conditions"
         android:onClick="openTermsAndConditions"
         android:orderInCategory="100"
-        android:title="@string/terms_and_conditions" />
+        android:title="@string/terms_and_conditions"
+        app:showAsAction="withText" />
+    <item
+        android:id="@+id/test"
+        android:onClick="test"
+        android:orderInCategory="100"
+        android:title="Test"
+        app:showAsAction="never" />
     <item
         android:id="@+id/exit"
         android:onClick="exitApplication"

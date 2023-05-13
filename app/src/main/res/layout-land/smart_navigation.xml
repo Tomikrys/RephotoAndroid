@@ -1,0 +1,217 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context="com.vyw.rephotoandroid.smartNavigation.SmartNavigation">
+
+    <FrameLayout
+        android:id="@+id/container"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+
+        <androidx.camera.view.PreviewView
+            android:id="@+id/previewView"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent">
+
+        </androidx.camera.view.PreviewView>
+    </FrameLayout>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+
+        <ImageView
+            android:id="@+id/refImage"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            app:srcCompat="@drawable/baseline_sync_black_24dp" />
+
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="horizontal">
+
+    </LinearLayout>
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+
+        <com.google.android.material.floatingactionbutton.FloatingActionButton
+            android:id="@+id/togle_canny"
+            android:layout_width="wrap_content"
+            android:layout_height="256dp"
+            android:layout_margin="16dp"
+            android:clickable="true"
+            android:focusable="true"
+            android:onClick="toggleEdges"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            app:srcCompat="@drawable/ic_baseline_filter_b_and_w_24" />
+
+        <com.google.android.material.floatingactionbutton.FloatingActionButton
+            android:id="@+id/take_rephoto"
+            android:layout_width="162dp"
+            android:layout_height="wrap_content"
+            android:layout_margin="16dp"
+            android:clickable="true"
+            android:focusable="true"
+            android:onClick="capturePhoto"
+            android:visibility="invisible"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            app:srcCompat="@drawable/ic_menu_camera" />
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+
+        <com.google.android.material.floatingactionbutton.FloatingActionButton
+            android:id="@+id/take_first_image"
+            android:layout_width="162dp"
+            android:layout_height="wrap_content"
+            android:layout_margin="16dp"
+            android:clickable="true"
+            android:focusable="true"
+            android:onClick="takeFirstPhoto"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            app:srcCompat="@drawable/navigation_first" />
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+
+        <com.google.android.material.floatingactionbutton.FloatingActionButton
+            android:id="@+id/take_second_image"
+            android:layout_width="162dp"
+            android:layout_height="wrap_content"
+            android:layout_margin="16dp"
+            android:clickable="true"
+            android:focusable="true"
+            android:onClick="takeSecondPhoto"
+            android:visibility="invisible"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            app:srcCompat="@drawable/camera_center" />
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="horizontal">
+
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="1" />
+
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="2">
+
+            <ImageView
+                android:id="@+id/navigation_arrow"
+                android:layout_width="50dp"
+                android:layout_height="50dp"
+                android:layout_margin="16dp"
+                android:background="#A9000000"
+                android:rotation="15"
+                android:rotationX="0"
+                android:visibility="invisible"
+                app:layout_constraintEnd_toStartOf="@+id/distance_xy"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent"
+                app:srcCompat="@drawable/baseline_arrow_back_black_24dp" />
+
+            <TextView
+                android:id="@+id/distance_xy"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:background="#A9000000"
+                android:text=""
+                app:layout_constraintEnd_toStartOf="@+id/distance_z"
+                app:layout_constraintStart_toEndOf="@+id/navigation_arrow"
+                app:layout_constraintTop_toTopOf="@+id/navigation_arrow" />
+
+            <TextView
+                android:id="@+id/distance_z"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:background="#A9000000"
+                android:text=""
+                app:layout_constraintEnd_toStartOf="@+id/z_arrow"
+                app:layout_constraintStart_toEndOf="@+id/distance_xy"
+                app:layout_constraintTop_toTopOf="@+id/navigation_arrow" />
+
+            <ImageView
+                android:id="@+id/z_arrow"
+                android:layout_width="50dp"
+                android:layout_height="50dp"
+                android:layout_margin="16dp"
+                android:background="#A9000000"
+                android:rotation="92"
+                android:rotationX="54"
+                android:visibility="invisible"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toEndOf="@+id/distance_z"
+                app:layout_constraintTop_toTopOf="parent"
+                app:srcCompat="@drawable/baseline_arrow_back_black_24dp" />
+
+        </androidx.constraintlayout.widget.ConstraintLayout>
+
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="1" />
+
+    </LinearLayout>
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+
+        <TextView
+            android:id="@+id/help"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_margin="16dp"
+            android:background="#A9000000"
+            android:textSize="16sp"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+
+    <!--    <LinearLayout-->
+    <!--        android:layout_width="match_parent"-->
+    <!--        android:layout_height="match_parent">-->
+
+    <!--        <TextView-->
+    <!--            android:id="@+id/orientation"-->
+    <!--            android:layout_width="match_parent"-->
+    <!--            android:layout_height="300dp"-->
+    <!--            android:layout_gravity="center"-->
+    <!--            android:gravity="center"-->
+    <!--            android:textColor="#9999ff"-->
+    <!--            android:textSize="100sp" />-->
+    <!--    </LinearLayout>-->
+
+</androidx.constraintlayout.widget.ConstraintLayout>
