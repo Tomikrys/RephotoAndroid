@@ -1,5 +1,7 @@
 package com.vyw.rephotoandroid.smartNavigation;
 
+import static java.lang.Math.abs;
+
 import android.Manifest;
 import android.app.Activity;
 import android.content.ContentValues;
@@ -59,6 +61,7 @@ import androidx.lifecycle.LifecycleOwner;
 import com.google.common.util.concurrent.ListenableFuture;
 import com.squareup.picasso.Picasso;
 import com.squareup.picasso.Target;
+import com.vyw.rephotoandroid.GalleryMainActivity;
 import com.vyw.rephotoandroid.GalleryScreenUtils;
 import com.vyw.rephotoandroid.ImageFunctions;
 import com.vyw.rephotoandroid.OpenCVNative;
@@ -160,6 +163,7 @@ public class SmartNavigation extends AppCompatActivity implements Parcelable {
         }
 
         previewView = findViewById(R.id.previewView);
+        ((TextView) findViewById(R.id.help)).setText("Take a picture from roughly 20° angle.");
         Intent intent = getIntent();
         path_ref_image = intent.getStringExtra("PATH_REF_IMAGE");
         image_id = intent.getStringExtra("IMAGE_ID");
@@ -169,6 +173,7 @@ public class SmartNavigation extends AppCompatActivity implements Parcelable {
                 @Override
                 public void onBitmapLoaded(Bitmap bitmap, Picasso.LoadedFrom from) {
                     bt_ref_frame = bitmap;
+                    initializeImage();
                 }
 
                 @Override
@@ -190,7 +195,11 @@ public class SmartNavigation extends AppCompatActivity implements Parcelable {
                 e.printStackTrace();
             }
             bt_ref_frame = ImageFunctions.rotateImage(bt_ref_frame, ImageFunctions.getOrientation(uri_ref_image, this));
+            initializeImage();
         }
+    }
+
+    private void initializeImage() {
         refImage = findViewById(R.id.refImage);
         refImage.setImageBitmap(bt_ref_frame);
 
@@ -241,7 +250,7 @@ public class SmartNavigation extends AppCompatActivity implements Parcelable {
                 new ImageAnalysis.Builder()
                         // enable the following line if RGBA output is needed.
                         .setOutputImageFormat(ImageAnalysis.OUTPUT_IMAGE_FORMAT_RGBA_8888)
-//                        .setTargetResolution(new Size(widthForAnalysis, heightForAnalysis))
+                        .setTargetResolution(new Size(widthForAnalysis, heightForAnalysis))
                         .setBackpressureStrategy(ImageAnalysis.STRATEGY_KEEP_ONLY_LATEST)
                         .build();
         imageAnalysis.setAnalyzer(ContextCompat.getMainExecutor(this), new ImageAnalysis.Analyzer() {
@@ -254,7 +263,11 @@ public class SmartNavigation extends AppCompatActivity implements Parcelable {
                     Bitmap bitmap = RGBA8888BitesToBitmap(bytes, imageProxy.getWidth(), imageProxy.getHeight(), rotationDegrees);
 
                     if (bitmap != null) {
-                        Bitmap scaledBitmap = ImageFunctions.cropAndScaleImage(bitmap, widthForAnalysis, heightForAnalysis);
+//                      crop to the preview size
+                        Bitmap previewSizeBitmap = ImageFunctions.cropToAspectRatio(bitmap, previewView.getWidth(), previewView.getHeight());
+//                      crop to the analysis size
+//                        Bitmap scaledBitmap = previewSizeBitmap;
+                        Bitmap scaledBitmap = ImageFunctions.cropAndScaleImage(previewSizeBitmap, widthForAnalysis, heightForAnalysis);
                         Log.i(TAG, "Run analysis");
                         get_dimensions(scaledBitmap);
                         process_navigation(scaledBitmap);
@@ -320,13 +333,31 @@ public class SmartNavigation extends AppCompatActivity implements Parcelable {
             angle -= 360; // ensure angle is in range [0, 359]
         }
         arrow.setRotation(Math.round(angle));
-        distance_xy.setText(String.format("%.2f", Math.sqrt(x * x + y * y)));
+        double xy = Math.sqrt(x * x + y * y);
+        distance_xy.setText(String.format("%.2f", xy));
         distance_z.setText(String.format("%.2f", z));
+
+        double threshold_perfect = 0.1;
+        double threshold_good = 0.2;
+
+        if (abs(xy) < threshold_perfect) {
+            distance_xy.setTextColor(Color.GREEN);
+        } else if (abs(xy) < threshold_good) {
+            distance_xy.setTextColor(Color.YELLOW);
+        } else {
+            distance_xy.setTextColor(Color.WHITE);
+        }
+        if (abs(z) < threshold_perfect) {
+            distance_z.setTextColor(Color.GREEN);
+        } else if (abs(z) < threshold_good) {
+            distance_z.setTextColor(Color.YELLOW);
+        } else {
+            distance_z.setTextColor(Color.WHITE);
+        }
 
         if (x == 0 && y == 0) {
             arrow.setVisibility(View.INVISIBLE);
         }
-
 
         View z_arrow = findViewById(R.id.z_arrow);
         z_arrow.setVisibility(View.VISIBLE);
@@ -337,52 +368,6 @@ public class SmartNavigation extends AppCompatActivity implements Parcelable {
         } else {
             z_arrow.setVisibility(View.INVISIBLE);
         }
-//        if (direction < 10) {
-//            switch (direction) {
-//                case -1:
-//                    arrow.setRotation(15);
-//                    break;
-//                case 0:
-//                    // optimal position
-//                    arrow.setVisibility(View.INVISIBLE);
-//                    break;
-//                case 1:
-//                    // up
-//                    arrow.setRotation(90);
-//                    break;
-//                case 2:
-//                    // down
-//                    arrow.setRotation(270);
-//                    break;
-//                case 3:
-//                    // right
-//                    arrow.setRotation(180);
-//                    break;
-//                case 4:
-//                    // left
-//                    arrow.setRotation(0);
-//                    break;
-//            }
-//        } else {
-//            switch (direction) {
-//                case 13:
-//                    // up right
-//                    arrow.setRotation(135);
-//                    break;
-//                case 14:
-//                    // up left
-//                    arrow.setRotation(45);
-//                    break;
-//                case 23:
-//                    // down right
-//                    arrow.setRotation(220);
-//                    break;
-//                case 24:
-//                    // down left
-//                    arrow.setRotation(315);
-//                    break;
-//            }
-//        }
     }
 
     public int getDirection(double x, double y) {
@@ -561,11 +546,9 @@ public class SmartNavigation extends AppCompatActivity implements Parcelable {
         Rational aspect_ratio;
         int orientation = this.getResources().getConfiguration().orientation;
         if (orientation == Configuration.ORIENTATION_LANDSCAPE) {
-            aspect_ratio = new Rational(GalleryScreenUtils.getScreenWidth(this), GalleryScreenUtils.getScreenHeight(this));
             imageCapture.setTargetRotation(this.getWindowManager().getDefaultDisplay().getRotation());
-        } else {
-            aspect_ratio = new Rational(GalleryScreenUtils.getScreenWidth(this), GalleryScreenUtils.getScreenHeight(this));
         }
+        aspect_ratio = new Rational(GalleryScreenUtils.getScreenWidth(this), GalleryScreenUtils.getScreenHeight(this));
         imageCapture.setCropAspectRatio(aspect_ratio);
         imageCapture.takePicture(outputFileOptions, executor, new ImageCapture.OnImageSavedCallback() {
             @Override
@@ -598,6 +581,7 @@ public class SmartNavigation extends AppCompatActivity implements Parcelable {
         try {
             bt_image = ImageFunctions.getBitmapFromUri(uri_new_image, this);
             bt_image = ImageFunctions.rotateImage(bt_image, ImageFunctions.getOrientation(uri_new_image, this));
+            bt_image = ImageFunctions.cropToAspectRatio(bt_image, widthForAnalysis, heightForAnalysis);
             bt_image = ImageFunctions.scaleImage(bt_image, max_width_for_analysis, max_height_for_analysis);
         } catch (IOException e) {
             e.printStackTrace();
@@ -621,8 +605,10 @@ public class SmartNavigation extends AppCompatActivity implements Parcelable {
             bt_first_image = ImageFunctions.deepCopyBitmap(bt_image);
             findViewById(R.id.take_first_image).setVisibility(View.INVISIBLE);
             findViewById(R.id.take_second_image).setVisibility(View.VISIBLE);
+            ((TextView) findViewById(R.id.help)).setText("Take you best guess.");
         } else {
             bt_second_image = ImageFunctions.deepCopyBitmap(bt_image);
+            ((TextView) findViewById(R.id.help)).setText(null);
 
             Mat mat_first_image = new Mat();
             Mat mat_second_image = new Mat();
@@ -671,7 +657,6 @@ public class SmartNavigation extends AppCompatActivity implements Parcelable {
 
                 long mat_ref_address = mat_ref_image.getNativeObjAddr();
                 intent.putExtra("ref_image", ref_image_file.getAbsolutePath());
-//                startActivity(intent);
                 UploadPhotoActivityResultLauncher.launch(intent);
             } else {
                 OpenCVNative.navigation_init();
@@ -701,11 +686,9 @@ public class SmartNavigation extends AppCompatActivity implements Parcelable {
         Rational aspect_ratio;
         int orientation = this.getResources().getConfiguration().orientation;
         if (orientation == Configuration.ORIENTATION_LANDSCAPE) {
-            aspect_ratio = new Rational(GalleryScreenUtils.getScreenWidth(this), GalleryScreenUtils.getScreenHeight(this));
             imageCapture.setTargetRotation(this.getWindowManager().getDefaultDisplay().getRotation());
-        } else {
-            aspect_ratio = new Rational(GalleryScreenUtils.getScreenWidth(this), GalleryScreenUtils.getScreenHeight(this));
         }
+        aspect_ratio = new Rational(GalleryScreenUtils.getScreenWidth(this), GalleryScreenUtils.getScreenHeight(this));
         imageCapture.setCropAspectRatio(aspect_ratio);
         imageCapture.takePicture(outputFileOptions, executor, new ImageCapture.OnImageSavedCallback() {
             @Override
@@ -723,6 +706,8 @@ public class SmartNavigation extends AppCompatActivity implements Parcelable {
                         intent.putExtra("SOURCE", source);
                         intent.putExtra("DISPLAY_NAME", displayName);
                         intent.putExtra("SMART", true);
+                        intent.putExtra("SCREEN_WIDTH", previewView.getWidth());
+                        intent.putExtra("SCREEN_HEIGHT", previewView.getHeight());
 
 //                        intent.putExtra("SimpleNavigation", (Parcelable) thisCopy);
                         UploadPhotoActivityResultLauncher.launch(intent);
@@ -761,8 +746,6 @@ public class SmartNavigation extends AppCompatActivity implements Parcelable {
                         }
                     }
                 }
-
-
             });
 
 
@@ -860,4 +843,13 @@ public class SmartNavigation extends AppCompatActivity implements Parcelable {
 
         return rotatedBitmap;
     }
+
+
+//    @Override
+//    public void onBackPressed() {
+//        Intent intent = new Intent(this, GalleryMainActivity.class);
+//        intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+//        startActivity(intent);
+//        finish();
+//    }
 }

@@ -88,11 +88,11 @@ const std::string ERROR_OPEN_CAMERA = "Could not open the camera device";
 bool useExtrinsicGuess = false;
 int iterationsCount = 10000;
 float reprojectionError = 3.0;
-double confidence = 0.999;
+double confidence = 0.95;
 int pnp_method = cv::SOLVEPNP_EPNP;
 
 // Kalman Filter parameters
-int minInliersKalman = 10;
+int minInliersKalman = 6;
 int nStates = 18;
 int nMeasurements = 6;
 int nInputs = 0;
@@ -100,8 +100,6 @@ double dt = 0.125;
 
 
 std::vector<cv::Mat> current_frames;
-int start;
-int end;
 
 std::thread robust_thread;
 cv::Mat robust_last_current_frame;
@@ -184,5 +182,9 @@ void fillMeasurements(cv::Mat &measurements, const cv::Mat &translation_measured
 inline pthread_t fast_robust_matcher_t, robust_matcher_t;
 
 cv::Mat loadImage(const std::string path_to_file);
+
+std::vector<cv::Point3f> list_points3d_current_frame;
+std::vector<cv::Point2f> list_points2d_current_frame;
+cv::Mat warpImageWithProjectionMatrix(cv::Mat image3, cv::Mat projection);
 
 #endif

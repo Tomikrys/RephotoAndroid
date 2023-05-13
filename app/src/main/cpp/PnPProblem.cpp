@@ -125,42 +125,6 @@ void PnPProblem::estimatePoseRANSAC(const std::vector<cv::Point3f> &list_3d_poin
     std::string csv_3D = generate_csv_from_Point3fa(list_3d_points);
     std::string csv_2D = generate_csv_from_Point2fa(list_2d_points);
 
-//    cv::Mat mat_3d_points = vectorToMat(list_3d_points);
-//    cv::Mat labels;
-//    cv::Mat centers;
-//    int numClusters = 3;
-//
-//    kmeans(mat_3d_points, numClusters, labels,
-//           cv::TermCriteria(cv::TermCriteria::EPS + cv::TermCriteria::COUNT, 10, 1.0),
-//           3, cv::KMEANS_PP_CENTERS, centers);
-//
-//    std::vector<cv::Point3f> representative3DPoints;
-//    std::vector<cv::Point2f> representative2DPoints;
-//    for (int i = 0; i < numClusters; i++) {
-//        // Find all points in the current cluster
-//        std::vector<cv::Point3f> clusterPoints;
-//        for (int j = 0; j < mat_3d_points.rows; j++) {
-//            if (labels.at<int>(j) == i) {
-//                clusterPoints.push_back(mat_3d_points.at<cv::Point3f>(j));
-//            }
-//        }
-//
-//        // Choose a random point from the cluster
-//        int randomIndex = rand() % clusterPoints.size();
-//
-//        // Find index of 3d point in original array
-//        int index_of_coresponding_2d_point = findIndex(list_3d_points, clusterPoints[randomIndex]);
-//
-//        // Push borh 3D point and corresponding 2d point
-//        if (index_of_coresponding_2d_point >= 0) {
-//            representative3DPoints.push_back(clusterPoints[randomIndex]);
-//            representative2DPoints.push_back(list_2d_points[index_of_coresponding_2d_point]);
-//        }
-//    }
-//
-//    std::string representative_3d_csv = generate_csv_from_Point3fa(representative3DPoints);
-//    std::string representative_2d_csv = generate_csv_from_Point2fa(representative2DPoints);
-
     try {
         if (cv::solvePnPRansac(list_3d_points, list_2d_points, _camera_matrix,
                                dist_coeffs, rvec, tvec, use_extrinsic_guess, iterations_count,

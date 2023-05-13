@@ -51,8 +51,8 @@
             android:clickable="true"
             android:focusable="true"
             android:onClick="toggleEdges"
-            app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
             app:srcCompat="@drawable/ic_baseline_filter_b_and_w_24" />
 
         <com.google.android.material.floatingactionbutton.FloatingActionButton
@@ -66,7 +66,7 @@
             android:visibility="invisible"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
             app:srcCompat="@drawable/ic_menu_camera" />
 
     </androidx.constraintlayout.widget.ConstraintLayout>
@@ -85,7 +85,7 @@
             android:onClick="takeFirstPhoto"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
             app:srcCompat="@drawable/navigation_first" />
 
     </androidx.constraintlayout.widget.ConstraintLayout>
@@ -105,64 +105,82 @@
             android:visibility="invisible"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
             app:srcCompat="@drawable/camera_center" />
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 
-    <androidx.constraintlayout.widget.ConstraintLayout
+    <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="match_parent">
+        android:layout_height="match_parent"
+        android:orientation="horizontal">
 
-        <ImageView
-            android:id="@+id/navigation_arrow"
-            android:layout_width="50dp"
-            android:layout_height="50dp"
-            android:layout_margin="16dp"
-            android:background="#A9000000"
-            android:rotation="15"
-            android:rotationX="0"
-            android:visibility="invisible"
-            app:layout_constraintEnd_toStartOf="@+id/distance_xy"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent"
-            app:srcCompat="@drawable/baseline_arrow_back_black_24dp" />
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="1" />
 
-        <TextView
-            android:id="@+id/distance_xy"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:background="#A9000000"
-            app:layout_constraintEnd_toStartOf="@+id/distance_z"
-            app:layout_constraintStart_toEndOf="@+id/navigation_arrow"
-            app:layout_constraintTop_toTopOf="@+id/navigation_arrow"
-            android:text="" />
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="2">
 
-        <TextView
-            android:id="@+id/distance_z"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:background="#A9000000"
-            app:layout_constraintEnd_toStartOf="@+id/z_arrow"
-            app:layout_constraintStart_toEndOf="@+id/distance_xy"
-            app:layout_constraintTop_toTopOf="@+id/navigation_arrow"
-            android:text="" />
+            <ImageView
+                android:id="@+id/navigation_arrow"
+                android:layout_width="50dp"
+                android:layout_height="50dp"
+                android:layout_margin="16dp"
+                android:background="#A9000000"
+                android:rotation="15"
+                android:rotationX="0"
+                android:visibility="invisible"
+                app:layout_constraintEnd_toStartOf="@+id/distance_xy"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent"
+                app:srcCompat="@drawable/baseline_arrow_back_black_24dp" />
 
-        <ImageView
-            android:id="@+id/z_arrow"
-            android:layout_width="50dp"
-            android:layout_height="50dp"
-            android:layout_margin="16dp"
-            android:background="#A9000000"
-            android:rotation="92"
-            android:rotationX="54"
-            android:visibility="invisible"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toEndOf="@+id/distance_z"
-            app:layout_constraintTop_toTopOf="parent"
-            app:srcCompat="@drawable/baseline_arrow_back_black_24dp" />
+            <TextView
+                android:id="@+id/distance_xy"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:background="#A9000000"
+                android:text=""
+                app:layout_constraintEnd_toStartOf="@+id/distance_z"
+                app:layout_constraintStart_toEndOf="@+id/navigation_arrow"
+                app:layout_constraintTop_toTopOf="@+id/navigation_arrow" />
 
-    </androidx.constraintlayout.widget.ConstraintLayout>
+            <TextView
+                android:id="@+id/distance_z"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:background="#A9000000"
+                android:text=""
+                app:layout_constraintEnd_toStartOf="@+id/z_arrow"
+                app:layout_constraintStart_toEndOf="@+id/distance_xy"
+                app:layout_constraintTop_toTopOf="@+id/navigation_arrow" />
+
+            <ImageView
+                android:id="@+id/z_arrow"
+                android:layout_width="50dp"
+                android:layout_height="50dp"
+                android:layout_margin="16dp"
+                android:background="#A9000000"
+                android:rotation="92"
+                android:rotationX="54"
+                android:visibility="invisible"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toEndOf="@+id/distance_z"
+                app:layout_constraintTop_toTopOf="parent"
+                app:srcCompat="@drawable/baseline_arrow_back_black_24dp" />
+
+        </androidx.constraintlayout.widget.ConstraintLayout>
+
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="1" />
+
+    </LinearLayout>
 
     <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="match_parent"

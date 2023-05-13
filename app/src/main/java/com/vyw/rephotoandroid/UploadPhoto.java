@@ -79,6 +79,9 @@ public class UploadPhoto extends AppCompatActivity {
     Uri uri_new_image_cropped = null;
     Bitmap bt_ref_frame = null;
     Bitmap bt_new_frame = null;
+    Bitmap bt_new_frame_orig = null;
+    Bitmap bt_new_frame_for_warping = null;
+    boolean isImageWarped = false;
     private static String TAG = "UploadPhoto";
     private float origX = 0;
     private float origY = 0;
@@ -91,6 +94,9 @@ public class UploadPhoto extends AppCompatActivity {
     private String displayName = "";
     private String image_id;
     private boolean isFromSmartNavigation;
+
+    private Integer screenWidth;
+    private Integer screenHeight;
 //    private SimpleNavigation simpleNavigationIntent = null;
 
 
@@ -128,6 +134,8 @@ public class UploadPhoto extends AppCompatActivity {
         source = intent.getStringExtra("SOURCE");
         displayName = intent.getStringExtra("DISPLAY_NAME");
         isFromSmartNavigation = intent.getBooleanExtra("SMART", false);
+        screenWidth = intent.getIntExtra("SCREEN_WIDTH", -1);
+        screenHeight = intent.getIntExtra("SCREEN_HEIGHT", -1);
 
         if (source.equals("ONLINE")) {
             ((FloatingActionButton) findViewById(R.id.retake)).setVisibility(View.VISIBLE);
@@ -205,9 +213,32 @@ public class UploadPhoto extends AppCompatActivity {
         }
 
         bt_new_frame = ImageFunctions.rotateImage(bt_new_frame, ImageFunctions.getOrientation(uri_new_image, this));
+        bt_new_frame_for_warping = bt_new_frame.copy(Bitmap.Config.ARGB_8888, true);
+
+        if (screenWidth != -1 && screenHeight != -1) {
+            bt_new_frame = ImageFunctions.cropToAspectRatio(bt_new_frame, screenWidth, screenHeight);
+        }
+        bt_new_frame = ImageFunctions.cropToAspectRatio(bt_new_frame, bt_ref_frame.getWidth(), bt_ref_frame.getHeight());
+        bt_new_frame_orig = bt_new_frame.copy(Bitmap.Config.ARGB_8888, true);
+        newImage = findViewById(R.id.newImage);
+        newImage.setImageBitmap(bt_new_frame);
+
         if (isFromSmartNavigation) {
+            ((FloatingActionButton) findViewById(R.id.warp_perspective)).setVisibility(View.VISIBLE);
+        } else {
+            ((FloatingActionButton) findViewById(R.id.warp_perspective)).setVisibility(View.GONE);
+        }
+    }
+
+    public void warpPerspective(View view) {
+        if (isImageWarped) {
+            bt_new_frame = bt_new_frame_orig;
+            ((FloatingActionButton) findViewById(R.id.warp_perspective)).setImageDrawable(
+                    getResources().getDrawable(R.drawable.ic_baseline_auto_fix_high_24, null)
+            );
+        } else {
             Mat mat_new_frame = new Mat();
-            Utils.bitmapToMat(bt_new_frame, mat_new_frame);
+            Utils.bitmapToMat(bt_new_frame_for_warping, mat_new_frame);
             Mat mat_ref_frame = new Mat();
             Utils.bitmapToMat(bt_ref_frame, mat_ref_frame);
             long new_frame_wrap_persp_addr = OpenCVNative.warpPerspectiveOfRephoto(
@@ -222,12 +253,13 @@ public class UploadPhoto extends AppCompatActivity {
             Log.d(TAG, "done");
 
             bt_new_frame = rephotoWrappedPerspective;
+            ((FloatingActionButton) findViewById(R.id.warp_perspective)).setImageDrawable(
+                    getResources().getDrawable(R.drawable.ic_baseline_auto_fix_off_24, null)
+            );
         }
-
-//        bt_new_frame = ImageFunctions.cropToAspectRatio(bt_new_frame, bt_ref_frame.getWidth(), bt_ref_frame.getHeight());
-
         newImage = findViewById(R.id.newImage);
         newImage.setImageBitmap(bt_new_frame);
+        isImageWarped = !isImageWarped;
     }
 
     @NonNull

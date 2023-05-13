@@ -156,14 +156,48 @@
             app:layout_constraintStart_toStartOf="parent"
             app:srcCompat="@android:drawable/ic_media_next" />
 
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/relativeLayout2"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_margin="16dp"
+        tools:layout_editor_absoluteX="16dp"
+        tools:layout_editor_absoluteY="16dp">
+
         <TextView
-            android:id="@+id/textView"
-            android:layout_width="39dp"
+            android:id="@+id/help"
+            android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:text="TextView"
+            android:layout_marginStart="16dp"
+            android:layout_marginEnd="16dp"
+            android:background="#A9000000"
+            android:text="Find and target the point in the center of upper image in the lower image."
+            android:textSize="16sp"
+            app:layout_constraintEnd_toStartOf="@+id/finish_points"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent" />
+
+        <com.google.android.material.floatingactionbutton.FloatingActionButton
+            android:id="@+id/finish_points"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:clickable="true"
+            android:contentDescription="@string/app_name"
+            android:focusable="true"
+            android:onClick="finishRegister"
+            app:srcCompat="@drawable/ic_baseline_done_all_24"
+            tools:layout_editor_absoluteX="328dp"
+            app:layout_constraintStart_toEndOf="@+id/help"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toTopOf="parent"/>
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 

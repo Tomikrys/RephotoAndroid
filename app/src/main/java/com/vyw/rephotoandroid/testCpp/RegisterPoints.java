@@ -528,9 +528,18 @@ public class RegisterPoints extends AppCompatActivity {
         intent.putExtra("NAVIGATION_CAN_START", true);
         setResult(RESULT_OK, intent);
 
-//        ActivityCompat.finishAffinity(this);
-//        Intent play = new Intent(this, CameraPreview.class);
-//        startActivity(play);
+        finish();
+    }
+
+    public void finishRegister(View item) {
+//        OPENCVNATIVECALL
+        selected_points_coordinates += "ALES %%%%%%%%%%%%%%%%%%%%%%%%\n";
+
+        OpenCVNative.navigation_init();
+        Intent intent = new Intent();
+        intent.putExtra("NAVIGATION_CAN_START", true);
+        setResult(RESULT_OK, intent);
+
         finish();
     }
 
