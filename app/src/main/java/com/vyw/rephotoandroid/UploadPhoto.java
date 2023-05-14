@@ -76,7 +76,6 @@ public class UploadPhoto extends AppCompatActivity {
     private ImageView cameraPreview = null;
     String path_ref_image = "";
     String path_new_image = "";
-    Uri uri_new_image_cropped = null;
     Bitmap bt_ref_frame = null;
     Bitmap bt_new_frame = null;
     Bitmap bt_new_frame_orig = null;
@@ -196,11 +195,6 @@ public class UploadPhoto extends AppCompatActivity {
             e.printStackTrace();
         }
 
-        try {
-            uri_new_image_cropped = saveBitmap(this, bt_new_frame, displayName + "_crop");
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
 
         if (!isOCVSetUp) { // if OCV hasn't been setup yet, init it
             if (!OpenCVLoader.initDebug()) {
@@ -330,7 +324,14 @@ public class UploadPhoto extends AppCompatActivity {
         Toast.makeText(getApplicationContext(),
                 "Begin Upload", Toast.LENGTH_LONG).show();
 //        Uri file_uri = Uri.parse(path_new_image_cropped);
-        String absolute_path = getPath(uri_new_image_cropped);
+
+        String absolute_path = null;
+        try {
+            absolute_path = getPath(saveBitmap(this, bt_new_frame, displayName));
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
         File file = new File(absolute_path);
 
         RequestBody requestFile = RequestBody.create(MediaType.parse("image/*"), file);
@@ -514,6 +515,12 @@ public class UploadPhoto extends AppCompatActivity {
     }
 
     public void SavePhoto(View view) {
+        try {
+            saveBitmap(this, bt_new_frame, displayName);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
         Intent intent = new Intent();
         intent.putExtra("CLOSE", true);
         setResult(Activity.RESULT_OK, intent);

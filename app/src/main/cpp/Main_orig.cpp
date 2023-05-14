@@ -276,50 +276,57 @@ int triangulation(jlong bt_first_frame, jlong bt_second_frame, jlong bt_ref_fram
     std::string csv2D_second = generate_csv_from_Point2f(detection_points_second_image);
 
 //  testif we can use SIFT to determine projection matrix from reference photo
-    std::vector<cv::DMatch> good_matches;
-    std::vector<cv::KeyPoint> key_points_current_frame;
-    robustMatcher.robustMatch(ref_image, good_matches, key_points_current_frame);
+//  TODO this should be true in production!!!!
+    bool try_to_find_historic_position_now = true;
+    if (try_to_find_historic_position_now) {
 
-    cv::Mat m_ref = ref_image.clone();
-    std::vector<cv::Point3f> list_points3d_model_match;
-    std::vector<cv::Point2f> list_points2d_scene_match;
-    for (unsigned int i = 0;
-         i < good_matches.size();
-         ++i) { // todo list_3D_points je menší než dává good_matchees
+        std::vector<cv::DMatch> good_matches;
+        std::vector<cv::KeyPoint> key_points_current_frame;
+        robustMatcher.robustMatch(ref_image, good_matches, key_points_current_frame);
 
-        // trainIdx patří k key_points_first_image proto převod pomocí tabulky vytvořené při triangulaci
-        int index_in_3D_points = -1;
-        auto it = find(key_points_first_image_convert_table_to_3d_points.begin(),
-                       key_points_first_image_convert_table_to_3d_points.end(),
-                       good_matches[i].queryIdx);
-        if (it != key_points_first_image_convert_table_to_3d_points.end()) { // If element was found
-            // calculating the index_in_3D_points of good_matches[i].trainIdx
-            index_in_3D_points = it - key_points_first_image_convert_table_to_3d_points.begin();
-        } else {
-            continue; // If the element is not present in the vector
+        cv::Mat m_ref = ref_image.clone();
+        std::vector<cv::Point3f> list_points3d_model_match;
+        std::vector<cv::Point2f> list_points2d_scene_match;
+        for (unsigned int i = 0;
+             i < good_matches.size();
+             ++i) { // todo list_3D_points je menší než dává good_matchees
+
+            // trainIdx patří k key_points_first_image proto převod pomocí tabulky vytvořené při triangulaci
+            int index_in_3D_points = -1;
+            auto it = find(key_points_first_image_convert_table_to_3d_points.begin(),
+                           key_points_first_image_convert_table_to_3d_points.end(),
+                           good_matches[i].queryIdx);
+            if (it !=
+                key_points_first_image_convert_table_to_3d_points.end()) { // If element was found
+                // calculating the index_in_3D_points of good_matches[i].trainIdx
+                index_in_3D_points = it - key_points_first_image_convert_table_to_3d_points.begin();
+            } else {
+                continue; // If the element is not present in the vector
+            }
+
+            cv::Point3f point3d_model = list_3D_points_after_triangulation[index_in_3D_points];
+            cv::Point2f point2d_scene = key_points_current_frame[good_matches[i].trainIdx].pt;
+            list_points3d_model_match.push_back(point3d_model);
+            list_points2d_scene_match.push_back(point2d_scene);
+            drawPoint(m_ref, point2d_scene.x, point2d_scene.y);
         }
+        saveMatToJpeg(m_ref, "reference_points", true);
+        bool good_measurement = false;
+        std::string csv2D_history = generate_csv_from_Point2f(list_points2d_scene_match);
 
-        cv::Point3f point3d_model = list_3D_points_after_triangulation[index_in_3D_points];
-        cv::Point2f point2d_scene = key_points_current_frame[good_matches[i].trainIdx].pt;
-        list_points3d_model_match.push_back(point3d_model);
-        list_points2d_scene_match.push_back(point2d_scene);
-        drawPoint(m_ref, point2d_scene.x, point2d_scene.y);
-    }
-    saveMatToJpeg(m_ref, "reference_points", true);
-    bool good_measurement = false;
-    std::string csv2D_history = generate_csv_from_Point2f(list_points2d_scene_match);
-
-    if (good_matches.size() > 0) {
-        pnp_registration.estimatePoseRANSAC(list_points3d_model_match, list_points2d_scene_match,
-                                            pnp_method,
-                                            useExtrinsicGuess, iterationsCount,
-                                            reprojectionError, confidence);
-        int inliers_size = pnp_registration.getInliersPoints().size();
+        if (good_matches.size() > 0) {
+            pnp_registration.estimatePoseRANSAC(list_points3d_model_match,
+                                                list_points2d_scene_match,
+                                                pnp_method,
+                                                useExtrinsicGuess, iterationsCount,
+                                                reprojectionError, confidence);
+            int inliers_size = pnp_registration.getInliersPoints().size();
 //        TODO rovnou to poslat tam, a+t se to ned2l8 znova ten v7sledek estimate pose.
-        if (inliers_size > minInliersKalman) {
-            registration.setList2DPoints(list_points2d_scene_match);
-            registration.setList3DPoints(list_points3d_model_match);
-            return 1;
+            if (inliers_size > minInliersKalman) {
+                registration.setList2DPoints(list_points2d_scene_match);
+                registration.setList3DPoints(list_points3d_model_match);
+                return 1;
+            }
         }
     }
 
@@ -1266,7 +1273,8 @@ Java_com_vyw_rephotoandroid_OpenCVNative_warpPerspectiveOfRephoto(JNIEnv *env, j
         // pouziti bodu z registrace
 
         cv::Mat warped_img_mat = mat_rephoto.clone();
-        warped_img_mat = warpImageWithProjectionMatrix(mat_rephoto, pnp_registration.getProjectionMatrix());
+        warped_img_mat = warpImageWithProjectionMatrix(mat_rephoto,
+                                                       pnp_registration.getProjectionMatrix());
         saveMatToJpeg(warped_img_mat, "test", true);
         cv::cvtColor(warped_img_mat, warped_img_mat, cv::COLOR_BGRA2RGBA);
         cv::Mat *mat = new cv::Mat(warped_img_mat);

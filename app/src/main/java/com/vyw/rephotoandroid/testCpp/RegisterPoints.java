@@ -58,9 +58,12 @@ public class RegisterPoints extends AppCompatActivity {
     private float firstImageLastTouchY;
     private float firstImageLastTranslationX;
     private float firstImageLastTranslationY;
-    private TextView textView;
     float firstImageScaleFactor = 1.0f;
     float refImageScaleFactor = 1.0f;
+    float defautlScaleFactor = 4.0f;
+
+    float first_image_pos_x;
+    float first_image_pos_y;
 
     @SuppressLint("ClickableViewAccessibility")
     @Override
@@ -103,7 +106,7 @@ public class RegisterPoints extends AppCompatActivity {
         refImageView.getViewTreeObserver().addOnGlobalLayoutListener(new ViewTreeObserver.OnGlobalLayoutListener() {
             @Override
             public void onGlobalLayout() {
-                centerPixelOnImageView(refImageView, pos_x, pos_y, 3.0f);
+                centerPixelOnImageView(refImageView, pos_x, pos_y, defautlScaleFactor);
                 refImageView.getViewTreeObserver().removeOnGlobalLayoutListener(this);
             }
         });
@@ -115,11 +118,13 @@ public class RegisterPoints extends AppCompatActivity {
         firstImageView.getViewTreeObserver().addOnGlobalLayoutListener(new ViewTreeObserver.OnGlobalLayoutListener() {
             @Override
             public void onGlobalLayout() {
-                centerPixelOnImageView(firstImageView, pos_x, pos_y, 3.0f);
+                centerPixelOnImageView(firstImageView, pos_x, pos_y, defautlScaleFactor);
                 firstImageView.getViewTreeObserver().removeOnGlobalLayoutListener(this);
             }
         });
         draw_point(pos_x, pos_y, bt_first_frame, Color.RED);
+        first_image_pos_x = pos_x;
+        first_image_pos_y = pos_y;
 
 
 //        magnifierImageView = (ImageView) findViewById(R.id.magnifier_image);
@@ -127,9 +132,6 @@ public class RegisterPoints extends AppCompatActivity {
 //        magnifierImageView.setImageBitmap(bt_first_frame);
 //        magnifierImageView.setScaleX(5.0f);
 //        magnifierImageView.setScaleY(5.0f);
-
-        textView = (TextView) findViewById(R.id.textView);
-
 
         refImageScaleGestureDetector = new ScaleGestureDetector(this, new ScaleGestureDetector.SimpleOnScaleGestureListener() {
             @Override
@@ -333,7 +335,11 @@ public class RegisterPoints extends AppCompatActivity {
         float centerBitmapX = bitmapWidth - (((refImageView.getTranslationX() / scaleImageView) - cornerX) / widthRatio);
         float centerBitmapY = bitmapHeight - (((refImageView.getTranslationY() / scaleImageView) - cornerY) / heightRatio);
 
-        draw_point(centerBitmapX, centerBitmapY, bitmap, Color.MAGENTA);
+        draw_point(centerBitmapX, centerBitmapY, bitmap, Color.GREEN);
+
+        Bitmap first_bitmap = ((BitmapDrawable) firstImageView.getDrawable()).getBitmap();
+        draw_point(first_image_pos_x, first_image_pos_y, first_bitmap, Color.GREEN);
+
         register_point(centerBitmapX, centerBitmapY);
     }
 
@@ -347,6 +353,8 @@ public class RegisterPoints extends AppCompatActivity {
 
         Bitmap first_image_bitmap = ((BitmapDrawable) firstImageView.getDrawable()).getBitmap();
         draw_point(points[0], points[1], first_image_bitmap, Color.RED);
+        first_image_pos_x = points[0];
+        first_image_pos_y = points[1];
         focusOnCross(points[0], points[1]);
 //        float[] touched_point = new float[]{event.getX(), event.getY()};
 //
@@ -365,8 +373,8 @@ public class RegisterPoints extends AppCompatActivity {
     }
 
     public void focusOnCross(float x, float y) {
-        centerPixelOnImageView(refImageView, x, y, 4.0f);
-        centerPixelOnImageView(firstImageView, x, y, 4.0f);
+        centerPixelOnImageView(refImageView, x, y, defautlScaleFactor);
+        centerPixelOnImageView(firstImageView, x, y, defautlScaleFactor);
     }
 
     public void centerPixelOnImageView(ImageView imageView, float x, float y, float scale) {
@@ -555,6 +563,8 @@ public class RegisterPoints extends AppCompatActivity {
 
         Bitmap first_image_bitmap = ((BitmapDrawable) firstImageView.getDrawable()).getBitmap();
         draw_point(points[0], points[1], first_image_bitmap, Color.RED);
+        first_image_pos_x = points[0];
+        first_image_pos_y = points[1];
         focusOnCross(points[0], points[1]);
     }
 
@@ -567,6 +577,8 @@ public class RegisterPoints extends AppCompatActivity {
 
         Bitmap first_image_bitmap = ((BitmapDrawable) firstImageView.getDrawable()).getBitmap();
         draw_point(points[0], points[1], first_image_bitmap, Color.RED);
+        first_image_pos_x = points[0];
+        first_image_pos_y = points[1];
         focusOnCross(points[0], points[1]);
     }
 

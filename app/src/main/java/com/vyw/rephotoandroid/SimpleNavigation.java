@@ -55,6 +55,7 @@ import org.opencv.android.BaseLoaderCallback;
 import org.opencv.android.LoaderCallbackInterface;
 import org.opencv.android.OpenCVLoader;
 
+import java.io.File;
 import java.io.IOException;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Executor;
@@ -338,20 +339,28 @@ public class SimpleNavigation extends AppCompatActivity implements Parcelable {
         isEdges = !isEdges;
     }
 
+    public File create_file(String filename) {
+        File imageFile = null;
+        try {
+            String imageFileName = filename + ".jpg";
+            File storageDir = getFilesDir();  // Gets the internal storage directory
+            imageFile = new File(storageDir, imageFileName);
+            imageFile.createNewFile();
+        } catch (IOException ex) {
+            Log.e(TAG, ex.getMessage());
+        }
+
+        return imageFile;
+    }
+
     public void capturePhoto(View view) {
         Log.d(TAG, "capture");
 
-        String displayName = "Rephoto_" + System.currentTimeMillis();
+        File imageFile = create_file("rephoto");
+        assert imageFile != null;
+        ImageCapture.OutputFileOptions outputFileOptions =
+                new ImageCapture.OutputFileOptions.Builder(imageFile).build();
 
-        ContentValues contentValues = new ContentValues();
-        contentValues.put(MediaStore.MediaColumns.DISPLAY_NAME, displayName);
-        contentValues.put(MediaStore.MediaColumns.MIME_TYPE, "image/jpeg");
-
-        ImageCapture.OutputFileOptions outputFileOptions = new ImageCapture.OutputFileOptions.Builder(
-                getContentResolver(),
-                MediaStore.Images.Media.EXTERNAL_CONTENT_URI,
-                contentValues
-        ).build();
         SimpleNavigation thisCopy = this;
         Rational aspect_ratio;
         int orientation = this.getResources().getConfiguration().orientation;
@@ -376,6 +385,7 @@ public class SimpleNavigation extends AppCompatActivity implements Parcelable {
                         intent.putExtra("IMAGE_ID", image_id);
                         intent.putExtra("PATH_NEW_IMAGE", savedImage);
                         intent.putExtra("SOURCE", source);
+                        String displayName = "Rephoto_" + System.currentTimeMillis();
                         intent.putExtra("DISPLAY_NAME", displayName);
                         intent.putExtra("SMART", false);
 

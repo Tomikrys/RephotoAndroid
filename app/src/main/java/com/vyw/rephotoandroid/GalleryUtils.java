@@ -4,7 +4,9 @@ package com.vyw.rephotoandroid;
 import android.content.Context;
 import android.database.Cursor;
 import android.location.Location;
+
 import java.lang.Float;
+
 import android.os.Environment;
 import android.provider.MediaStore;
 import android.util.Log;
@@ -65,20 +67,20 @@ public class GalleryUtils {
         ApiInterface apiInterface = RetrofitClient.getRetrofitInstance().create(ApiInterface.class);
         Call<ListPlace> call = apiInterface.getPlaces();
 
-        try
-        {
+        try {
             Response<ListPlace> response = call.execute();
             ListPlace listPlace = response.body();
             if (listPlace != null) {
-                    List<Place> places = listPlace.getPlaces();
-                    if (places != null) {
-                        ArrayList<GalleryItem> results = new ArrayList<GalleryItem>(places.size());
-                        for (int i = 0; i < places.size(); i++) {
-                            Place place = places.get(i);
-                            Log.d(TAG, "onResponse: [" + i + "] name : " + place.getName());
-                            Location placeLocation = new Location("providername");
-                            placeLocation.setLatitude(Double.parseDouble(place.getLatitude()));
-                            placeLocation.setLongitude(Double.parseDouble(place.getLongitude()));
+                List<Place> places = listPlace.getPlaces();
+                if (places != null) {
+                    ArrayList<GalleryItem> results = new ArrayList<GalleryItem>(places.size());
+                    for (int i = 0; i < places.size(); i++) {
+                        Place place = places.get(i);
+                        Log.d(TAG, "onResponse: [" + i + "] name : " + place.getName());
+                        Location placeLocation = new Location("providername");
+                        placeLocation.setLatitude(Double.parseDouble(place.getLatitude()));
+                        placeLocation.setLongitude(Double.parseDouble(place.getLongitude()));
+                        try {
                             GalleryItem galleryItem = new GalleryItem(
                                     place.getPhotos().get(0).getPhotoUri(),
                                     place.getName(),
@@ -97,11 +99,14 @@ public class GalleryUtils {
                                 galleryItem.addPlacePhoto(photoItem);
                             }
                             results.add(galleryItem);
+                        } catch (Exception e) {
+                            Log.e(TAG, e.getMessage());
                         }
-                        if (location != null) {
-                            ((List) results).sort(new Comparator<GalleryItem>() {
-                                @Override
-                                public int compare(GalleryItem o1, GalleryItem o2) {
+                    }
+                    if (location != null) {
+                        ((List) results).sort(new Comparator<GalleryItem>() {
+                            @Override
+                            public int compare(GalleryItem o1, GalleryItem o2) {
 //                                    Location location1 = new Location("providername");
 //                                    location1.setLatitude(Double.parseDouble(o1.place.getLatitude()));
 //                                    location1.setLongitude(Double.parseDouble(o1.place.getLongitude()));
@@ -111,18 +116,16 @@ public class GalleryUtils {
 //                                    Float dist1 = location1.distanceTo(location);
 //                                    Float dist2 = location2.distanceTo(location);
 //                                    return dist1.compareTo(dist2);
-                                    return o1.distance.compareTo(o2.distance);
-                                }
-                            });
-                        }
-                        return results;
-                    } else {
-                        Log.e(TAG, "onResponse: empty places");
+                                return o1.distance.compareTo(o2.distance);
+                            }
+                        });
                     }
+                    return results;
+                } else {
+                    Log.e(TAG, "onResponse: empty places");
+                }
             }
-        }
-        catch (Exception e)
-        {
+        } catch (Exception e) {
             Log.e(TAG, e.getMessage());
         }
         return null;

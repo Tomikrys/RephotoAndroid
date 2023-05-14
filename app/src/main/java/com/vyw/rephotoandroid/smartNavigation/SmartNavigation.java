@@ -82,7 +82,10 @@ import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.nio.IntBuffer;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.List;
+import java.util.Locale;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
@@ -484,17 +487,11 @@ public class SmartNavigation extends AppCompatActivity implements Parcelable {
     public void takeFirstPhoto(View view) {
         Log.d(TAG, "first photo capture");
 
-        String displayName = "Rephoto_" + System.currentTimeMillis();
+        File imageFile = create_file("first_view");
+        assert imageFile != null;
+        ImageCapture.OutputFileOptions outputFileOptions =
+                new ImageCapture.OutputFileOptions.Builder(imageFile).build();
 
-        ContentValues contentValues = new ContentValues();
-        contentValues.put(MediaStore.MediaColumns.DISPLAY_NAME, displayName);
-        contentValues.put(MediaStore.MediaColumns.MIME_TYPE, "image/jpeg");
-
-        ImageCapture.OutputFileOptions outputFileOptions = new ImageCapture.OutputFileOptions.Builder(
-                getContentResolver(),
-                MediaStore.Images.Media.EXTERNAL_CONTENT_URI,
-                contentValues
-        ).build();
         SmartNavigation thisCopy = this;
         Rational aspect_ratio;
         int orientation = this.getResources().getConfiguration().orientation;
@@ -531,17 +528,11 @@ public class SmartNavigation extends AppCompatActivity implements Parcelable {
     public void takeSecondPhoto(View view) {
         Log.d(TAG, "second photo capture");
 
-        String displayName = "Rephoto_" + System.currentTimeMillis();
+        File imageFile = create_file("second_view");
+        assert imageFile != null;
+        ImageCapture.OutputFileOptions outputFileOptions =
+                new ImageCapture.OutputFileOptions.Builder(imageFile).build();
 
-        ContentValues contentValues = new ContentValues();
-        contentValues.put(MediaStore.MediaColumns.DISPLAY_NAME, displayName);
-        contentValues.put(MediaStore.MediaColumns.MIME_TYPE, "image/jpeg");
-
-        ImageCapture.OutputFileOptions outputFileOptions = new ImageCapture.OutputFileOptions.Builder(
-                getContentResolver(),
-                MediaStore.Images.Media.EXTERNAL_CONTENT_URI,
-                contentValues
-        ).build();
         SmartNavigation thisCopy = this;
         Rational aspect_ratio;
         int orientation = this.getResources().getConfiguration().orientation;
@@ -668,20 +659,27 @@ public class SmartNavigation extends AppCompatActivity implements Parcelable {
         }
     }
 
+    public File create_file(String filename) {
+        File imageFile = null;
+        try {
+            String imageFileName = filename + ".jpg";
+            File storageDir = getFilesDir();  // Gets the internal storage directory
+            imageFile = new File(storageDir, imageFileName);
+            imageFile.createNewFile();
+        } catch (IOException ex) {
+            Log.e(TAG, ex.getMessage());
+        }
+
+        return imageFile;
+    }
+
     public void capturePhoto(View view) {
         Log.d(TAG, "capture");
 
-        String displayName = "Rephoto_" + System.currentTimeMillis();
-
-        ContentValues contentValues = new ContentValues();
-        contentValues.put(MediaStore.MediaColumns.DISPLAY_NAME, displayName);
-        contentValues.put(MediaStore.MediaColumns.MIME_TYPE, "image/jpeg");
-
-        ImageCapture.OutputFileOptions outputFileOptions = new ImageCapture.OutputFileOptions.Builder(
-                getContentResolver(),
-                MediaStore.Images.Media.EXTERNAL_CONTENT_URI,
-                contentValues
-        ).build();
+        File imageFile = create_file("rephoto");
+        assert imageFile != null;
+        ImageCapture.OutputFileOptions outputFileOptions =
+                new ImageCapture.OutputFileOptions.Builder(imageFile).build();
         SmartNavigation thisCopy = this;
         Rational aspect_ratio;
         int orientation = this.getResources().getConfiguration().orientation;
@@ -689,7 +687,7 @@ public class SmartNavigation extends AppCompatActivity implements Parcelable {
             imageCapture.setTargetRotation(this.getWindowManager().getDefaultDisplay().getRotation());
         }
         aspect_ratio = new Rational(GalleryScreenUtils.getScreenWidth(this), GalleryScreenUtils.getScreenHeight(this));
-        imageCapture.setCropAspectRatio(aspect_ratio);
+//        imageCapture.setCropAspectRatio(aspect_ratio);
         imageCapture.takePicture(outputFileOptions, executor, new ImageCapture.OnImageSavedCallback() {
             @Override
             public void onImageSaved(@NonNull ImageCapture.OutputFileResults outputFileResults) {
@@ -704,6 +702,7 @@ public class SmartNavigation extends AppCompatActivity implements Parcelable {
                         intent.putExtra("IMAGE_ID", image_id);
                         intent.putExtra("PATH_NEW_IMAGE", savedImage);
                         intent.putExtra("SOURCE", source);
+                        String displayName = "Rephoto_" + System.currentTimeMillis();
                         intent.putExtra("DISPLAY_NAME", displayName);
                         intent.putExtra("SMART", true);
                         intent.putExtra("SCREEN_WIDTH", previewView.getWidth());
