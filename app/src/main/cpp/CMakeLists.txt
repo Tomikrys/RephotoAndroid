@@ -22,9 +22,8 @@ add_library( # Sets the name of the library.
         SHARED
 
         # Provides a relative path to your source file(s).
-        OpenCVNative.cpp
-#        Main.cpp
-        Main_orig.cpp
+        Main.cpp
+#        Main_orig.cpp
         ModelRegistration.cpp
         MSAC.cpp
         RobustMatcher.cpp
