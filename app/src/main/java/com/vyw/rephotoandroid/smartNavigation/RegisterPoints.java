@@ -1,4 +1,4 @@
-package com.vyw.rephotoandroid.testCpp;
+package com.vyw.rephotoandroid.smartNavigation;
 
 import android.annotation.SuppressLint;
 import android.content.Intent;

@@ -20,8 +20,8 @@
         android:supportsRtl="true"
         android:theme="@style/AppTheme"
         android:usesCleartextTraffic="true"
-        android:versionCode="7"
-        android:versionName="beta004">
+        android:versionCode="8"
+        android:versionName="release1">
         <!--        <activity-->
         <!--            android:name=".GalleryMainActivity"-->
         <!--            android:exported="true">-->
@@ -44,7 +44,7 @@
         <activity android:name=".UploadPhoto" />
         <activity android:name=".PreferenceActivity" />
         <activity android:name=".TermsAndConditions" />
-        <activity android:name=".testCpp.RegisterPoints" />
+        <activity android:name=".smartNavigation.RegisterPoints" />
     </application>
 
 </manifest>

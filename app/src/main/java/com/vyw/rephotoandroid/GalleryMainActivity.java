@@ -607,7 +607,4 @@ public class GalleryMainActivity extends AppCompatActivity implements GalleryAda
         editor.apply();
         item.setChecked(!currentValue);
     }
-
-    public void test(MenuItem item) {
-    }
 }

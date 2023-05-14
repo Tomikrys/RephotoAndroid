@@ -8,8 +8,8 @@ android {
         applicationId "com.vyw.rephotoandroid"
         minSdkVersion 24
         targetSdkVersion 33
-        versionCode 7
-        versionName "beta004"
+        versionCode 8
+        versionName "release1"
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
         externalNativeBuild {
             cmake {
