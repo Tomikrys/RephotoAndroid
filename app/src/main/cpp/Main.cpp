@@ -1028,6 +1028,32 @@ Java_com_vyw_rephotoandroid_OpenCVNative_warpPerspectiveOfRephoto(JNIEnv *env, j
     std::vector<cv::Point2f> points_ref_image;
     std::vector<cv::Point2f> points_rephoto;
 
+    int h1 = mat_ref_image.rows;
+    int w1 = mat_ref_image.cols;
+    int h2 = mat_rephoto.rows;
+    int w2 = mat_rephoto.cols;
+
+    double aspect_ratio = (double) w1 / (double) h1;
+
+    // Compute the width and height for the first image after resizing
+    int new_width, new_height;
+    if (w2 >= h2 * aspect_ratio) {
+        new_height = h2;
+        new_width = new_height * aspect_ratio;
+    } else {
+        new_width = w2;
+        new_height = new_width / aspect_ratio;
+    }
+
+    cv::Size dsize(new_width,
+                   new_height);
+
+    cv::Mat dst_mat_rephoto = mat_rephoto.clone();
+    cv::Rect ROI(0, (h2 - new_height) / 2, w2, new_height);
+    dst_mat_rephoto = dst_mat_rephoto(ROI);
+//    cv::resize(dst_mat_rephoto, dst_mat_rephoto, dsize, 0, 0, cv::INTER_LINEAR);
+//    saveMatToJpeg(dst_mat_rephoto, "dst_mat_rephoto", true);
+
 //    TODO UNCOMENT RIGHT NOW
     if (matches.size() > minInliersKalman) {
 //    if (false) {
@@ -1053,21 +1079,11 @@ Java_com_vyw_rephotoandroid_OpenCVNative_warpPerspectiveOfRephoto(JNIEnv *env, j
         cv::Mat homographyMatrix = cv::findHomography(points_rephoto, points_ref_image, cv::RANSAC,
                                                       1.0);
 
-        int h1 = mat_ref_image.rows;
-        int w1 = mat_ref_image.cols;
-        int h2 = mat_rephoto.rows;
-        int w2 = mat_rephoto.cols;
-        double test = homographyMatrix.at<double>(0, 0);
-        double test2 = homographyMatrix.at<double>(1, 1);
-        if (h1 < h2 and w1 < w2) {
-            homographyMatrix.at<double>(0, 0) *= static_cast<double>(w2) / w1;
-            homographyMatrix.at<double>(1, 1) *= static_cast<double>(h2) / h1;
-        }
-        double test3 = homographyMatrix.at<double>(0, 0);
-        double test4 = homographyMatrix.at<double>(1, 1);
 
-        cv::Mat dst_mat_rephoto = mat_rephoto.clone();
+
         cv::warpPerspective(mat_rephoto, dst_mat_rephoto, homographyMatrix, mat_ref_image.size());
+//        saveMatToJpeg(mat_rephoto, "mat_rephoto", true);
+//        saveMatToJpeg(dst_mat_rephoto, "dst_mat_rephoto", true);
 
         cv::Mat *mat = new cv::Mat(dst_mat_rephoto);
         return (jlong) mat;

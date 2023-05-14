@@ -86,6 +86,7 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.List;
 import java.util.Locale;
+import java.util.Objects;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
@@ -94,7 +95,7 @@ import java.util.concurrent.Executors;
 // https://medium.com/swlh/introduction-to-androids-camerax-with-java-ca384c522c5
 
 public class SmartNavigation extends AppCompatActivity implements Parcelable {
-    private Executor executor = Executors.newSingleThreadExecutor();
+    private final Executor executor = Executors.newSingleThreadExecutor();
     private static final String[] CAMERA_PERMISSION = new String[]{Manifest.permission.CAMERA};
     private static final int CAMERA_REQUEST_CODE = 10;
     private boolean isOCVSetUp = false;
@@ -103,12 +104,9 @@ public class SmartNavigation extends AppCompatActivity implements Parcelable {
     private static Bitmap refImageBitmap;
     private static Bitmap refImageBitmapCopy;
     private ListenableFuture<ProcessCameraProvider> cameraProviderFuture;
-    private ImageView cameraPreview = null;
-    private RenderScript rs;
-    private ScriptIntrinsicYuvToRGB yuvToRgbIntrinsic;
     private String path_ref_image = "";
     private Bitmap bt_ref_frame = null;
-    private static String TAG = "SimpleNavigation";
+    private static final String TAG = "SimpleNavigation";
     private float origX = 0;
     private float origY = 0;
     Bitmap refImageForAnalysis;
@@ -121,26 +119,21 @@ public class SmartNavigation extends AppCompatActivity implements Parcelable {
     private String source = "";
     private String image_id;
 
-    private int max_width_for_analysis = 1280;
-    private int max_height_for_analysis = 960;
+    private final int max_width_for_analysis = 1280;
+    private final int max_height_for_analysis = 960;
 
     private int widthForAnalysis = 1280;
     private int heightForAnalysis = 960;
 
     private Boolean navigation_started = false;
 
-    private BaseLoaderCallback mOpenCVCallBack = new BaseLoaderCallback(this) {
+    private final BaseLoaderCallback mOpenCVCallBack = new BaseLoaderCallback(this) {
         @Override
         public void onManagerConnected(int status) {
-            switch (status) {
-                case LoaderCallbackInterface.SUCCESS: {
-                    Log.i(TAG, "OpenCV loaded successfully");
-                }
-                break;
-                default: {
-                    super.onManagerConnected(status);
-                }
-                break;
+            if (status == LoaderCallbackInterface.SUCCESS) {
+                Log.i(TAG, "OpenCV loaded successfully");
+            } else {
+                super.onManagerConnected(status);
             }
         }
     };
@@ -232,8 +225,8 @@ public class SmartNavigation extends AppCompatActivity implements Parcelable {
         }, ContextCompat.getMainExecutor(this));
 
 
-        rs = RenderScript.create(this);
-        yuvToRgbIntrinsic = ScriptIntrinsicYuvToRGB.create(rs, Element.U8_4(rs));
+        RenderScript rs = RenderScript.create(this);
+        ScriptIntrinsicYuvToRGB yuvToRgbIntrinsic = ScriptIntrinsicYuvToRGB.create(rs, Element.U8_4(rs));
     }
 
     private void bindPreviewAndAnalysis(@NonNull ProcessCameraProvider cameraProvider) {
@@ -498,7 +491,7 @@ public class SmartNavigation extends AppCompatActivity implements Parcelable {
                     public void run() {
                         Toast.makeText(getApplicationContext(),
                                 "Image Saved successfully", Toast.LENGTH_LONG).show();
-                        String savedImage = outputFileResults.getSavedUri().toString();
+                        String savedImage = Objects.requireNonNull(outputFileResults.getSavedUri()).toString();
 
                         thisCopy.loadImageFoTriangulation(savedImage, true);
                     }
@@ -611,6 +604,7 @@ public class SmartNavigation extends AppCompatActivity implements Parcelable {
                 }
                 bt_second_image.compress(Bitmap.CompressFormat.PNG, 100, first_image_outputStream);
                 try {
+                    assert first_image_outputStream != null;
                     first_image_outputStream.close();
                 } catch (IOException e) {
                     e.printStackTrace();
@@ -627,6 +621,7 @@ public class SmartNavigation extends AppCompatActivity implements Parcelable {
                 }
                 refImageForAnalysis.compress(Bitmap.CompressFormat.PNG, 100, ref_image_outputStream);
                 try {
+                    assert ref_image_outputStream != null;
                     ref_image_outputStream.close();
                 } catch (IOException e) {
                     e.printStackTrace();
@@ -666,13 +661,14 @@ public class SmartNavigation extends AppCompatActivity implements Parcelable {
         ImageCapture.OutputFileOptions outputFileOptions =
                 new ImageCapture.OutputFileOptions.Builder(imageFile).build();
         SmartNavigation thisCopy = this;
-        Rational aspect_ratio;
+
         int orientation = this.getResources().getConfiguration().orientation;
         if (orientation == Configuration.ORIENTATION_LANDSCAPE) {
             imageCapture.setTargetRotation(this.getWindowManager().getDefaultDisplay().getRotation());
         }
-        aspect_ratio = new Rational(GalleryScreenUtils.getScreenWidth(this), GalleryScreenUtils.getScreenHeight(this));
-//        imageCapture.setCropAspectRatio(aspect_ratio);
+
+        Rational aspect_ratio = new Rational(3, 4);
+        imageCapture.setCropAspectRatio(aspect_ratio);
 
         imageCapture.takePicture(outputFileOptions, executor, new ImageCapture.OnImageSavedCallback() {
             @Override
@@ -682,7 +678,7 @@ public class SmartNavigation extends AppCompatActivity implements Parcelable {
                     public void run() {
                         Toast.makeText(getApplicationContext(),
                                 "Image Saved successfully", Toast.LENGTH_LONG).show();
-                        String savedImage = outputFileResults.getSavedUri().toString();
+                        String savedImage = Objects.requireNonNull(outputFileResults.getSavedUri()).toString();
                         Intent intent = new Intent(thisCopy, UploadPhoto.class);
                         intent.putExtra("PATH_REF_IMAGE", path_ref_image);
                         intent.putExtra("IMAGE_ID", image_id);
@@ -807,8 +803,7 @@ public class SmartNavigation extends AppCompatActivity implements Parcelable {
 
         Matrix matrix = new Matrix();
         matrix.postRotate(rotationDegrees);
-        Bitmap rotatedBitmap = Bitmap.createBitmap(bitmap, 0, 0, bitmap.getWidth(), bitmap.getHeight(), matrix, true);
 
-        return rotatedBitmap;
+        return Bitmap.createBitmap(bitmap, 0, 0, bitmap.getWidth(), bitmap.getHeight(), matrix, true);
     }
 }

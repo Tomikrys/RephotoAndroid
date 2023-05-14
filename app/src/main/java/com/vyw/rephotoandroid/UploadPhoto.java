@@ -73,7 +73,6 @@ public class UploadPhoto extends AppCompatActivity {
     private ImageView newImage;
     private static Bitmap refImageBitmap;
     private static Bitmap refImageBitmapCopy;
-    private ImageView cameraPreview = null;
     String path_ref_image = "";
     String path_new_image = "";
     Bitmap bt_ref_frame = null;
@@ -81,7 +80,7 @@ public class UploadPhoto extends AppCompatActivity {
     Bitmap bt_new_frame_orig = null;
     Bitmap bt_new_frame_for_warping = null;
     boolean isImageWarped = false;
-    private static String TAG = "UploadPhoto";
+    private static final String TAG = "UploadPhoto";
     private float origX = 0;
     private float origY = 0;
 
@@ -89,28 +88,19 @@ public class UploadPhoto extends AppCompatActivity {
     private float origAlpha = 0;
     private float newCrop = 0.5F;
     private float origCrop = 0;
-    private String source = "";
     private String displayName = "";
     private String image_id;
-    private boolean isFromSmartNavigation;
 
-    private Integer screenWidth;
-    private Integer screenHeight;
-//    private SimpleNavigation simpleNavigationIntent = null;
+    //    private SimpleNavigation simpleNavigationIntent = null;
 
 
-    private BaseLoaderCallback mOpenCVCallBack = new BaseLoaderCallback(this) {
+    private final BaseLoaderCallback mOpenCVCallBack = new BaseLoaderCallback(this) {
         @Override
         public void onManagerConnected(int status) {
-            switch (status) {
-                case LoaderCallbackInterface.SUCCESS: {
-                    Log.i(TAG, "OpenCV loaded successfully");
-                }
-                break;
-                default: {
-                    super.onManagerConnected(status);
-                }
-                break;
+            if (status == LoaderCallbackInterface.SUCCESS) {
+                Log.i(TAG, "OpenCV loaded successfully");
+            } else {
+                super.onManagerConnected(status);
             }
         }
     };
@@ -130,11 +120,11 @@ public class UploadPhoto extends AppCompatActivity {
         path_ref_image = intent.getStringExtra("PATH_REF_IMAGE");
         path_new_image = intent.getStringExtra("PATH_NEW_IMAGE");
         image_id = intent.getStringExtra("IMAGE_ID");
-        source = intent.getStringExtra("SOURCE");
+        String source = intent.getStringExtra("SOURCE");
         displayName = intent.getStringExtra("DISPLAY_NAME");
-        isFromSmartNavigation = intent.getBooleanExtra("SMART", false);
-        screenWidth = intent.getIntExtra("SCREEN_WIDTH", -1);
-        screenHeight = intent.getIntExtra("SCREEN_HEIGHT", -1);
+        boolean isFromSmartNavigation = intent.getBooleanExtra("SMART", false);
+        int screenWidth = intent.getIntExtra("SCREEN_WIDTH", -1);
+        int screenHeight = intent.getIntExtra("SCREEN_HEIGHT", -1);
 
         if (source.equals("ONLINE")) {
             ((FloatingActionButton) findViewById(R.id.retake)).setVisibility(View.VISIBLE);
