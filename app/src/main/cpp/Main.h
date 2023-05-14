@@ -16,8 +16,6 @@
 #include <opencv2/video/tracking.hpp>
 #include <iomanip>
 #include "opencv2/features2d.hpp"
-//todo add
-//#include "opencv2/xfeatures2d.hpp"
 
 #include "PnPProblem.h"
 #include "CameraCalibrator.h"
@@ -46,9 +44,7 @@
 int getDirectory(double x, double y);
 void print_matrix(const char *label, cv::Mat mat);
 
-bool end_registration = false;
 int const number_registration = 15;
-int index_of_registration = 0;
 
 // Color
 cv::Scalar red(0, 0, 255);
@@ -56,7 +52,6 @@ cv::Scalar green(0, 255, 0);
 cv::Scalar blue(255, 0, 0);
 
 ModelRegistration registration;
-CameraCalibrator cameraCalibrator;
 RobustMatcher robustMatcher;
 PnPProblem pnp_registration;
 PnPProblem pnp_detection;
@@ -76,12 +71,6 @@ int numKeyPoints = 1000;
 int mode = MODE_NIETO;
 int numVps = 3;
 bool verbose = false;
-
-
-// ERROR message
-const std::string ERROR_READ_IMAGE = "Could not open or find the image";
-//const std::string ERROR_WRITE_IMAGE = "Could not open the camera device";
-const std::string ERROR_OPEN_CAMERA = "Could not open the camera device";
 
 
 // RANSAC parameters
@@ -106,7 +95,6 @@ cv::Mat robust_last_current_frame;
 int last_robust_id;
 
 std::vector<cv::Point3f> list_3D_points_after_triangulation;
-std::vector<cv::Point2f> list_2D_points_after_triangulation;
 std::vector<cv::Point2f> detection_points_first_image, detection_points_second_image;
 std::vector<int> key_points_first_image_convert_table_to_3d_points;
 cv::Mat first_image;
@@ -116,7 +104,6 @@ std::vector<int> index_points;
 
 struct robust_matcher_struct {
     cv::Mat current_frame;
-    std::vector<cv::Point3f> list_3D_points;
     cv::Mat measurements;
     int direction;
     int count_frames;
@@ -131,8 +118,6 @@ void fill_robust_matcher_arg_struct(cv::Mat current_frame_vis, int count_frames)
 struct fast_robust_matcher_struct {
     cv::Mat last_current_frame;
     cv::Mat current_frame;
-    std::vector<cv::Point3f> list_3D_points_from_robust;
-    std::vector<cv::Point2f> list_2D_points_from_robust;
     int direction;
     int count_frames;
     int robust_id;
@@ -156,8 +141,6 @@ void *robust_matcher(void *arg);
 
 void *fast_robust_matcher(void *arg);
 
-static void onMouseModelRegistration(int event, int x, int y, int, void *);
-
 std::vector<cv::Mat> processImage(MSAC &msac, int numVps, cv::Mat &imgGRAY, cv::Mat &outputImg);
 
 bool getRobustEstimation(cv::Mat current_frame_vis, std::vector<cv::Point3f> list_3D_points,
@@ -179,7 +162,7 @@ void updateKalmanFilter(cv::KalmanFilter &KF, cv::Mat &measurements, cv::Mat &tr
 void fillMeasurements(cv::Mat &measurements, const cv::Mat &translation_measured,
                       const cv::Mat &rotation_measured);
 
-pthread_t fast_robust_matcher_t, robust_matcher_t;
+pthread_t robust_matcher_t;
 
 cv::Mat loadImage(const std::string path_to_file);
 

@@ -38,13 +38,6 @@ public class RegisterPoints extends AppCompatActivity {
     ImageView firstImageView;
     LinearLayout wrapperRefImage;
     LinearLayout wrapperFirstImage;
-//    ImageView magnifierImageView;
-
-    Bitmap bt_first_frame;
-    Bitmap bt_ref_frame;
-
-    Mat first_frame;
-    Mat ref_frame;
 
     String selected_points_coordinates = "";
 
@@ -68,28 +61,12 @@ public class RegisterPoints extends AppCompatActivity {
     @SuppressLint("ClickableViewAccessibility")
     @Override
     protected void onCreate(Bundle savedInstanceState) {
-
         super.onCreate(savedInstanceState);
         setContentView(R.layout.select_points);
-
-//        long firstFrameAddress = getIntent().getLongExtra("first_image", 0);
-//        long refFrameAddress = getIntent().getLongExtra("ref_image", 0);
 
         float[] points = OpenCVNative.registration_init();
         float pos_x = points[0];
         float pos_y = points[1];
-
-//        first_frame = new Mat(firstFrameAddress);
-//        ref_frame = new Mat(refFrameAddress);
-//
-//        Bitmap.Config con_first_frame = Bitmap.Config.ARGB_4444;
-//        Bitmap.Config con_ref_frame = Bitmap.Config.ARGB_4444;
-//
-//        bt_first_frame = Bitmap.createBitmap(first_frame.width(), first_frame.height(), con_first_frame);
-//        Utils.matToBitmap(first_frame, bt_first_frame);
-//
-//        bt_ref_frame = Bitmap.createBitmap(ref_frame.width(), ref_frame.height(), con_ref_frame);
-//        Utils.matToBitmap(ref_frame, bt_ref_frame);
 
         final BitmapFactory.Options options = new BitmapFactory.Options();
         options.inMutable = true;
@@ -125,13 +102,6 @@ public class RegisterPoints extends AppCompatActivity {
         draw_point(pos_x, pos_y, bt_first_frame, Color.RED);
         first_image_pos_x = pos_x;
         first_image_pos_y = pos_y;
-
-
-//        magnifierImageView = (ImageView) findViewById(R.id.magnifier_image);
-//        magnifierImageView.setVisibility(View.INVISIBLE);
-//        magnifierImageView.setImageBitmap(bt_first_frame);
-//        magnifierImageView.setScaleX(5.0f);
-//        magnifierImageView.setScaleY(5.0f);
 
         refImageScaleGestureDetector = new ScaleGestureDetector(this, new ScaleGestureDetector.SimpleOnScaleGestureListener() {
             @Override
@@ -181,27 +151,8 @@ public class RegisterPoints extends AppCompatActivity {
                         firstImageView.setTranslationX(translationX);
                         firstImageView.setTranslationY(translationY);
                         Log.d(TAG, "event: " + event.getX() + " " + event.getY());
-//                        Log.d(TAG, "refImageLastTouch: " + firstImageLastTouchX + " " + firstImageLastTouchY);
-//                        Log.d(TAG, "delta: " + deltaX + " " + deltaY);
-//                        Log.d(TAG, "refImageLastTranslation: " + firstImageLastTranslationX + " " + firstImageLastTranslationY);
-//                        Log.d(TAG, "translation: " + translationX + " " + translationY);
                         return true;
 
-//                    case MotionEvent.ACTION_UP:
-//                        // Get the x and y coordinates of the touch event
-//                        float x = event.getX();
-//                        float y = event.getY();
-//
-//                        // Get the bitmap that is displayed in the ImageView
-//                        Bitmap bitmap = ((BitmapDrawable) firstImageView.getDrawable()).getBitmap();
-//
-//                        // Calculate the corresponding pixel coordinates
-//                        int pixelX = (int) (x * bitmap.getWidth() / firstImageView.getWidth());
-//                        int pixelY = (int) (y * bitmap.getHeight() / firstImageView.getHeight());
-//
-//                        // Do something with the pixel coordinates (e.g. display them in a TextView)
-//                        textView.setText("Pixel coordinates: (" + pixelX + ", " + pixelY + ")");
-//                        break;
                 }
                 return true;
             }
@@ -221,8 +172,6 @@ public class RegisterPoints extends AppCompatActivity {
                         refImageLastTouchY = event.getRawY();
                         refImageLastTranslationX = refImageView.getTranslationX();
                         refImageLastTranslationY = refImageView.getTranslationY();
-//                        magnifierImageView.setVisibility(View.VISIBLE);
-//                        firstImageView.setVisibility(View.INVISIBLE);
                         break;
 
                     case MotionEvent.ACTION_MOVE:
@@ -232,83 +181,11 @@ public class RegisterPoints extends AppCompatActivity {
                         float translationY = refImageLastTranslationY + deltaY;
                         refImageView.setTranslationX(translationX);
                         refImageView.setTranslationY(translationY);
-//                        Log.d(TAG, "event: " + event.getX() + " " + event.getY());
-//                        Log.d(TAG, "rawEvent: " + event.getRawX() + " " + event.getRawY());
-//                        Log.d(TAG, "refImageLastTouch: " + refImageLastTouchX + " " + refImageLastTouchY);
-//                        Log.d(TAG, "delta: " + deltaX + " " + deltaY);
-//                        Log.d(TAG, "refImageLastTranslation: " + refImageLastTranslationX + " " + refImageLastTranslationY);
-//                        Log.d(TAG, "translation: " + translationX + " " + translationY);
-                        break;
-                    case MotionEvent.ACTION_UP:
-//                        magnifierImageView.setVisibility(View.INVISIBLE);
-//                        firstImageView.setVisibility(View.VISIBLE);
                         break;
                 }
                 return true;
             }
-
-            ;
         });
-
-
-//        refImageView.setOnTouchListener(new View.OnTouchListener() {
-//            @Override
-//            public boolean onTouch(View v, MotionEvent event) {
-//                refImageScaleGestureDetector.onTouchEvent(event);
-//                if (refImageScaleGestureDetector.isInProgress()) {
-//                    // Scaling is happening, prevent any other positioning
-//                    return true;
-//                }
-//                switch (event.getAction()) {
-//                    case MotionEvent.ACTION_DOWN:
-//                        refImageLastTouchX = event.getX();
-//                        refImageLastTouchY = event.getY();
-//                        refImageLastTranslationX = refImageView.getTranslationX();
-//                        refImageLastTranslationY = refImageView.getTranslationY();
-//                        magnifierImageView.setVisibility(View.VISIBLE);
-//                        firstImageView.setVisibility(View.INVISIBLE);
-//                        break;
-//
-//                    case MotionEvent.ACTION_MOVE:
-//                        float deltaX = event.getX() - refImageLastTouchX;
-//                        float deltaY = event.getY() - refImageLastTouchY;
-//                        refImageView.setTranslationX(refImageLastTranslationX + deltaX);
-//                        refImageView.setTranslationY(refImageLastTranslationY + deltaY);
-//                        break;
-//                    case MotionEvent.ACTION_UP:
-//                        magnifierImageView.setVisibility(View.INVISIBLE);
-//                        firstImageView.setVisibility(View.VISIBLE);
-//                        break;
-//                }
-//                if (event.getAction() == MotionEvent.ACTION_DOWN) {
-//                    double imageViewHeight = refImageView.getHeight();
-//                    double imageViewWidth = refImageView.getWidth();
-//                    double imageRealHeight = bt_ref_frame.getHeight();
-//                    double imageRealWidth = bt_ref_frame.getWidth();
-//                    double imageDisplayedHeight;
-//                    double imageDisplayedWidth;
-////                      https://stackoverflow.com/questions/12463155/get-the-displayed-size-of-an-image-inside-an-imageview
-//                    if (imageViewHeight * imageRealWidth <= imageViewWidth * imageRealHeight) {
-//                        imageDisplayedWidth = imageRealWidth * imageViewHeight / imageRealHeight;
-//                        imageDisplayedHeight = imageViewHeight;
-//                    } else {
-//                        imageDisplayedHeight = imageRealHeight * imageViewWidth / imageRealWidth;
-//                        imageDisplayedWidth = imageViewWidth;
-//                    }
-//
-//                    double x = event.getX();
-//                    double y = event.getY();
-//                    double realX = ((x - ((imageViewWidth - imageDisplayedWidth) / 2)) / imageDisplayedWidth) * imageRealWidth;
-//                    double realY = ((y - ((imageViewHeight - imageDisplayedHeight) / 2)) / imageDisplayedHeight) * imageRealHeight;
-//
-//                    centerPixelOnImageView(magnifierImageView,
-//                            (int) Math.round(realX),
-//                            (int) Math.round(realY));
-
-//                }
-//                return true;
-//            }
-//        });
     }
 
 
@@ -347,29 +224,14 @@ public class RegisterPoints extends AppCompatActivity {
         //                        OPENCVNATIVECALL
         selected_points_coordinates += "OpenCVNative.registration_register_point(" + x + ", " + y + ");\n";
         float[] points = OpenCVNative.registration_register_point(x, y);
-//                        float[] points = {event.getX(), event.getY()}; // smazat
         Log.d(TAG, "Draw point to : " + String.valueOf(points[0]) + " x " + String.valueOf(points[1]));
-//                    Utils.matToBitmap(first_frame, bt_first_frame);
+
 
         Bitmap first_image_bitmap = ((BitmapDrawable) firstImageView.getDrawable()).getBitmap();
         draw_point(points[0], points[1], first_image_bitmap, Color.RED);
         first_image_pos_x = points[0];
         first_image_pos_y = points[1];
         focusOnCross(points[0], points[1]);
-//        float[] touched_point = new float[]{event.getX(), event.getY()};
-//
-//        Matrix inverse = new Matrix();
-//        refImageView.getImageMatrix().invert(inverse);
-//        inverse.mapPoints(touched_point);
-//
-//                        /*float density = getResources().getDisplayMetrics().density;
-//                        point[0] /= density;
-//                        point[1] /= density;*/
-//
-//        draw_point(touched_point[0], touched_point[1], bt_ref_frame, Color.BLUE);
-//
-//        Log.d(TAG, "Touch point to : " + touched_point[0] + " x " + touched_point[1]);
-//        refImageView.setImageBitmap(bt_ref_frame);
     }
 
     public void focusOnCross(float x, float y) {
@@ -489,20 +351,6 @@ public class RegisterPoints extends AppCompatActivity {
                 pos_x + fw,
                 pos_y - cross_size + sw,
                 paint_fill);
-
-
-//        Paint black_paint = new Paint();
-//        paint_fill.setColor(Color.BLACK);
-//        paint_fill.setStrokeWidth(1);
-//        paint_fill.setStyle(Paint.Style.FILL);
-//
-//        cross_size += 20;
-//        center_space = 0;
-
-//        canvas.drawLine(pos_x - cross_size, pos_y, pos_x - center_space, pos_y, black_paint);
-//        canvas.drawLine(pos_x + center_space, pos_y, pos_x + cross_size, pos_y, black_paint);
-//        canvas.drawLine(pos_x, pos_y - cross_size, pos_x, pos_y - center_space, black_paint);
-//        canvas.drawLine(pos_x, pos_y + center_space, pos_x, pos_y + cross_size, black_paint);
     }
 
 
@@ -515,16 +363,6 @@ public class RegisterPoints extends AppCompatActivity {
     public boolean onCreateOptionsMenu(Menu menu) {
         getMenuInflater().inflate(R.menu.change_view, menu);
         return true;
-    }
-
-    public void changeView(MenuItem item) {
-//        if (!isRefImage) {
-//            refImageView.setImageBitmap(bt_ref_frame);
-//            isRefImage = true;
-//        } else {
-//            firstImageView.setImageBitmap(bt_first_frame);
-//            isRefImage = false;
-//        }
     }
 
     public void finishRegister(MenuItem item) {
@@ -558,7 +396,6 @@ public class RegisterPoints extends AppCompatActivity {
     public void nextPoint(MenuItem item) {
 //    OPENCVNATIVECALL
         float[] points = OpenCVNative.registration_next_point();
-//        float[] points = {50, 50}; // smazat
         Log.d(TAG, "Draw point to : " + String.valueOf(points[0]) + " x " + String.valueOf(points[1]));
 
         Bitmap first_image_bitmap = ((BitmapDrawable) firstImageView.getDrawable()).getBitmap();
@@ -572,7 +409,6 @@ public class RegisterPoints extends AppCompatActivity {
 //    OPENCVNATIVECALL
         selected_points_coordinates += "OpenCVNative.registration_next_point();\n";
         float[] points = OpenCVNative.registration_next_point();
-//        float[] points = {50, 50}; // smazat
         Log.d(TAG, "Draw point to : " + String.valueOf(points[0]) + " x " + String.valueOf(points[1]));
 
         Bitmap first_image_bitmap = ((BitmapDrawable) firstImageView.getDrawable()).getBitmap();

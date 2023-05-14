@@ -67,10 +67,7 @@ public class GalleryStripAdapter extends RecyclerView.Adapter {
             .centerCrop()
             .resize(thumbSize, thumbSize)//Resize image to width half of screen and height 1/3 of screen height
             .into(galleryStripItemHolder.imageViewThumbnail);
-//        Bitmap ThumbImage = ThumbnailUtils.extractThumbnail(BitmapFactory.decodeFile(mCurrentItem.imageUri),
-//                thumbSize, thumbSize);
-//        //set thumbnail
-//        galleryStripItemHolder.imageViewThumbnail.setImageBitmap(ThumbImage);
+
         //set current selected
         if (mCurrentItem.isSelected) {
             galleryStripItemHolder.imageViewThumbnail.setBackgroundColor(ContextCompat.getColor(context, android.R.color.white));

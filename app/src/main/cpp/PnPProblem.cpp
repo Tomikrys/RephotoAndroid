@@ -122,8 +122,8 @@ void PnPProblem::estimatePoseRANSAC(const std::vector<cv::Point3f> &list_3d_poin
     cv::Mat dist_coeffs = cv::Mat::zeros(4, 1, CV_64FC1);
     cv::Mat inliers_points;
 //    https://chart-studio.plotly.com/create
-    std::string csv_3D = generate_csv_from_Point3fa(list_3d_points);
-    std::string csv_2D = generate_csv_from_Point2fa(list_2d_points);
+//    std::string csv_3D = generate_csv_from_Point3fa(list_3d_points);
+//    std::string csv_2D = generate_csv_from_Point2fa(list_2d_points);
 
     try {
         if (cv::solvePnPRansac(list_3d_points, list_2d_points, _camera_matrix,
@@ -135,7 +135,7 @@ void PnPProblem::estimatePoseRANSAC(const std::vector<cv::Point3f> &list_3d_poin
             _translation_matrix = tvec;
 
             cv::projectPoints(list_3d_points, rvec, tvec, _camera_matrix, dist_coeffs, list_2d_points);
-            std::string csv_3D_projected_to_2D = generate_csv_from_Point2fa(list_2d_points);
+//            std::string csv_3D_projected_to_2D = generate_csv_from_Point2fa(list_2d_points);
 
             // TODO protect from data race
             if (!inliers_points.empty()) {

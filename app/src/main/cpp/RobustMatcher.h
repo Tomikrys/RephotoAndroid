@@ -68,8 +68,6 @@ public:
     cv::Mat ransacTest(const std::vector<cv::DMatch> &matches, const std::vector<cv::KeyPoint> &keypoints1,
                        const std::vector<cv::KeyPoint> &keypoints2,
                        std::vector<cv::DMatch> &outMatches, cv::Mat cameraMatrix);
-
-
 };
 
 #endif

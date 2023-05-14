@@ -75,14 +75,12 @@ public class GalleryMainActivity extends AppCompatActivity implements GalleryAda
     public List<GalleryItem> galleryItems;
     //Read storage permission request code
     private static final int RC_READ_STORAGE = 5;
-    private static final int RC_ACCESS_COARSE_LOCATION = 6;
     private static final int RC_ACCESS_FINE_LOCATION = 7;
     GalleryAdapter mGalleryAdapter;
     private GalleryItem selectedPicture = null;
     public DrawerLayout drawerLayout;
     public ActionBarDrawerToggle actionBarDrawerToggle;
     private static final int REQUEST_CHOOSER = 1234;
-    private int id_entered_button;
     private String path_ref_image = "";
     private ImageView loading_image_view = null;
     private Button choose_photo_button = null;
@@ -336,7 +334,6 @@ public class GalleryMainActivity extends AppCompatActivity implements GalleryAda
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
         if (data != null && data.getBooleanExtra("REFRESH", false)) {
-            int position = parseInt(data.getStringExtra("IMAGE_ID"));
             loadImagesFromAPIAsynchronously(location);
             onItemSelected(last_position);
         } else if (resultCode == RESULT_OK) {
@@ -356,7 +353,6 @@ public class GalleryMainActivity extends AppCompatActivity implements GalleryAda
             intent.putExtra("SOURCE", "LOCAL");
             startActivity(intent);
             Log.d(TAG, path);
-            Log.d(TAG, String.valueOf(id_entered_button));
         }
     }
 
@@ -367,46 +363,6 @@ public class GalleryMainActivity extends AppCompatActivity implements GalleryAda
 
         startActivityForResult(intent, REQUEST_CHOOSER);
     }
-
-//    public void UploadPhoto(View view) {
-//        Toast.makeText(getApplicationContext(),
-//                "Begin Upload", Toast.LENGTH_LONG).show();
-////        File path = Environment.getExternalStoragePublicDirectory(
-////                Environment.DIRECTORY_PICTURES);
-////        File file = new File(path, "DemoPicture.jpg");
-//        String path_new_image = "content://media/external/images/media/67";
-//        Uri file_uri = Uri.parse(path_new_image);
-//        String absolute_path = getPath(file_uri);
-//        File file = new File(absolute_path);
-//        RequestBody requestFile = RequestBody.create(MediaType.parse("image/*"), file);
-//        MultipartBody.Part multipartBodyPart = MultipartBody.Part.createFormData("file", file.getName(), requestFile);
-//
-//        ApiInterface apiInterface = RetrofitClient.getRetrofitInstance().create(ApiInterface.class);
-//        Call<Status> call = apiInterface.addPhoto(Configuration.getAccessToken(this), 6, multipartBodyPart);
-//
-//        AppCompatActivity copyThis = this;
-//        call.enqueue(new Callback<Status>() {
-//            @Override
-//            public void onResponse(Call<Status> call, Response<Status> response) {
-////                LoginResponse status = response.body().getLoginResponse();
-//                if (response.code() == 200) {
-//                    Toast.makeText(
-//                            copyThis,
-//                            "Uploaded",
-//                            Toast.LENGTH_SHORT
-//                    ).show();
-//                } else {
-//                    Log.e(TAG, "onResponse: " + response.code());
-//                }
-//            }
-//
-//            @Override
-//            public void onFailure(Call<Status> call, Throwable t) {
-//                Log.e(TAG, "onFailure: " + call.toString());
-//                Log.e(TAG, "onFailure: " + t.getMessage());
-//            }
-//        });
-//    }
 
     public void setVariablesNotLogged(AppCompatActivity view) {
         SharedPreferences sharedPref = view.getPreferences(Context.MODE_PRIVATE);
@@ -466,18 +422,9 @@ public class GalleryMainActivity extends AppCompatActivity implements GalleryAda
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
-// TODO removed
-//        MaterialMenuInflater
-//                .with(this) // Provide the activity context
-//                // Set the fall-back color for all the icons. Colors set inside the XML will always have higher priority
-//                .setDefaultColor(Color.RED)
-//                // Inflate the menu
-//                .inflate(R.menu.menu_main, menu);
-
         MenuInflater inflater = getMenuInflater();
         inflater.inflate(R.menu.menu_main, menu);
         boolean toggleSmartNavigationCurrentValue = Configuration.getSmartNavigationEnabled(this);
-//        MenuItem toggleSmartNavigationMenuItem = findViewById(R.id.toggleSmartNavigation);
         MenuItem toggleSmartNavigationMenuItem = menu.findItem(R.id.toggleSmartNavigation);
         toggleSmartNavigationMenuItem.setChecked(toggleSmartNavigationCurrentValue);
         return true;
@@ -526,8 +473,6 @@ public class GalleryMainActivity extends AppCompatActivity implements GalleryAda
         GalleryMainActivity thisCopy = this;
         new Thread(() -> {
             // Run async
-//                TODO local
-//                galleryItems = GalleryUtils.getLocalImages(thisCopy);
             galleryItems = GalleryUtils.getImagesFromAPI(location);
 
             runOnUiThread(() -> {
@@ -596,7 +541,6 @@ public class GalleryMainActivity extends AppCompatActivity implements GalleryAda
         intent.putExtra("IMAGE_ID", String.valueOf(id));
         intent.putExtra("SOURCE", "ONLINE");
         SimpleNavigationActivityResultLauncher.launch(intent);
-//        startActivity(intent);
     }
 
     //    TODO změnit na smart navigaci
@@ -641,8 +585,6 @@ public class GalleryMainActivity extends AppCompatActivity implements GalleryAda
 
     public void setSelectedPicture(GalleryItem picture, int index) {
         selectedPicture = picture;
-//        last_position = index;
-//        onItemSelected(index); // cyclic
     }
 
     @Override

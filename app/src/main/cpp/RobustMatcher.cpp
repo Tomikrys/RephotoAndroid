@@ -6,15 +6,11 @@
 
 #include <opencv2/opencv.hpp>
 #include "RobustMatcher.h"
-//#include <opencv2/xfeatures2d.hpp>
 #include <opencv2/calib3d/calib3d_c.h>
 
 RobustMatcher::RobustMatcher() {
-    // TODO to tady bylo, vrátil jsem na originál
     detector = cv::ORB::create();
     extractor = cv::ORB::create();
-//    detector = cv::xfeatures2d::SURF::create();
-//    extractor = cv::xfeatures2d::SURF::create();
 
     matcher = cv::makePtr<cv::BFMatcher>((int) cv::NORM_HAMMING, false);
 }

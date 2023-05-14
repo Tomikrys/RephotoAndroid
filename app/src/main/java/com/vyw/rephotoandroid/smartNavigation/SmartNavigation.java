@@ -269,10 +269,8 @@ public class SmartNavigation extends AppCompatActivity implements Parcelable {
 //                      crop to the preview size
                         Bitmap previewSizeBitmap = ImageFunctions.cropToAspectRatio(bitmap, previewView.getWidth(), previewView.getHeight());
 //                      crop to the analysis size
-//                        Bitmap scaledBitmap = previewSizeBitmap;
                         Bitmap scaledBitmap = ImageFunctions.cropAndScaleImage(previewSizeBitmap, widthForAnalysis, heightForAnalysis);
                         Log.i(TAG, "Run analysis");
-                        get_dimensions(scaledBitmap);
                         process_navigation(scaledBitmap);
                     } else {
                         Log.d(TAG, "imageBitmap is null, cannot run analysis");
@@ -288,16 +286,6 @@ public class SmartNavigation extends AppCompatActivity implements Parcelable {
     public int countFrames = 1;
 
     public void process_navigation(Bitmap bitmap) {
-//      add countFrames to bitmap
-//        Canvas canvas = new Canvas(bitmap);
-//        canvas.drawBitmap(bitmap, 100, 200, null);
-//        Paint paint = new Paint();
-//        paint.setColor(Color.RED);
-//        paint.setTextSize(70);
-
-        // draw the text on the canvas
-//        canvas.drawText(String.valueOf(countFrames), 10, 10, paint);
-
         Log.d(TAG, "count frames: " + countFrames);
         Mat mat_current_frame = new Mat();
         Utils.bitmapToMat(bitmap, mat_current_frame);
@@ -608,7 +596,7 @@ public class SmartNavigation extends AppCompatActivity implements Parcelable {
             Utils.bitmapToMat(bt_second_image, mat_second_image);
             Utils.bitmapToMat(refImageForAnalysis, mat_ref_image);
 
-            int automatic_registration = OpenCVNative.triangulation(mat_second_image.getNativeObjAddr(), mat_first_image.getNativeObjAddr(), mat_ref_image.getNativeObjAddr());
+            int automatic_registration = OpenCVNative.triangulation(mat_first_image.getNativeObjAddr(), mat_second_image.getNativeObjAddr(), mat_ref_image.getNativeObjAddr());
 //            TODO REISTRATION DEVELOPMENT UNCOMMENT IMIDIETLY OMG!!!!
             if (automatic_registration != 1) {
 //            if (true) {
@@ -621,16 +609,14 @@ public class SmartNavigation extends AppCompatActivity implements Parcelable {
                 } catch (FileNotFoundException e) {
                     e.printStackTrace();
                 }
-                bt_first_image.compress(Bitmap.CompressFormat.PNG, 100, first_image_outputStream);
+                bt_second_image.compress(Bitmap.CompressFormat.PNG, 100, first_image_outputStream);
                 try {
                     first_image_outputStream.close();
                 } catch (IOException e) {
                     e.printStackTrace();
                 }
 
-                long mat_first_address = mat_first_image.getNativeObjAddr();
                 intent.putExtra("first_image", first_image_file.getAbsolutePath());
-
 
                 File ref_image_file = new File(this.getFilesDir(), "ref_image.jpg");
                 FileOutputStream ref_image_outputStream = null;
@@ -646,7 +632,6 @@ public class SmartNavigation extends AppCompatActivity implements Parcelable {
                     e.printStackTrace();
                 }
 
-                long mat_ref_address = mat_ref_image.getNativeObjAddr();
                 intent.putExtra("ref_image", ref_image_file.getAbsolutePath());
                 UploadPhotoActivityResultLauncher.launch(intent);
             } else {
@@ -688,6 +673,7 @@ public class SmartNavigation extends AppCompatActivity implements Parcelable {
         }
         aspect_ratio = new Rational(GalleryScreenUtils.getScreenWidth(this), GalleryScreenUtils.getScreenHeight(this));
 //        imageCapture.setCropAspectRatio(aspect_ratio);
+
         imageCapture.takePicture(outputFileOptions, executor, new ImageCapture.OnImageSavedCallback() {
             @Override
             public void onImageSaved(@NonNull ImageCapture.OutputFileResults outputFileResults) {
@@ -708,7 +694,6 @@ public class SmartNavigation extends AppCompatActivity implements Parcelable {
                         intent.putExtra("SCREEN_WIDTH", previewView.getWidth());
                         intent.putExtra("SCREEN_HEIGHT", previewView.getHeight());
 
-//                        intent.putExtra("SimpleNavigation", (Parcelable) thisCopy);
                         UploadPhotoActivityResultLauncher.launch(intent);
                     }
                 });
@@ -796,22 +781,6 @@ public class SmartNavigation extends AppCompatActivity implements Parcelable {
         dest.writeByte((byte) (isEdges ? 1 : 0));
     }
 
-
-    public void get_dimensions(Bitmap bitmap) {
-        try {
-            ProcessCameraProvider cameraProvider = cameraProviderFuture.get();
-            Integer width = bitmap.getWidth();
-            Integer height = bitmap.getHeight();
-            Float focal_length = getFocalLengths(cameraProvider)[0];
-// F(mm) = F(pixels) * SensorWidth(mm) / ImageWidth (pixel)
-// https://answers.opencv.org/question/17076/conversion-focal-distance-from-mm-to-pixels/
-            Integer focal_f_x = Math.round(width * focal_length);
-            Integer focal_f_y = Math.round(width * focal_length);
-        } catch (ExecutionException | InterruptedException e) {
-            e.printStackTrace();
-        }
-    }
-
     @androidx.annotation.OptIn(markerClass = ExperimentalCamera2Interop.class)
     float[] getFocalLengths(ProcessCameraProvider cameraProvider) {
         List<CameraInfo> filteredCameraInfos = CameraSelector.DEFAULT_BACK_CAMERA
@@ -842,13 +811,4 @@ public class SmartNavigation extends AppCompatActivity implements Parcelable {
 
         return rotatedBitmap;
     }
-
-
-//    @Override
-//    public void onBackPressed() {
-//        Intent intent = new Intent(this, GalleryMainActivity.class);
-//        intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-//        startActivity(intent);
-//        finish();
-//    }
 }

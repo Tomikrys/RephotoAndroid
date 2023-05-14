@@ -107,15 +107,6 @@ public class GalleryUtils {
                         ((List) results).sort(new Comparator<GalleryItem>() {
                             @Override
                             public int compare(GalleryItem o1, GalleryItem o2) {
-//                                    Location location1 = new Location("providername");
-//                                    location1.setLatitude(Double.parseDouble(o1.place.getLatitude()));
-//                                    location1.setLongitude(Double.parseDouble(o1.place.getLongitude()));
-//                                    Location location2 = new Location("providername");
-//                                    location2.setLatitude(Double.parseDouble(o2.place.getLatitude()));
-//                                    location2.setLongitude(Double.parseDouble(o2.place.getLongitude()));
-//                                    Float dist1 = location1.distanceTo(location);
-//                                    Float dist2 = location2.distanceTo(location);
-//                                    return dist1.compareTo(dist2);
                                 return o1.distance.compareTo(o2.distance);
                             }
                         });

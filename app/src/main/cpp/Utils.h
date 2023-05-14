@@ -21,7 +21,4 @@ cv::Mat rot2euler(const cv::Mat & rotationMatrix);
 
 cv::Mat euler2rot(const cv::Mat & euler);
 
-
-
-
 #endif

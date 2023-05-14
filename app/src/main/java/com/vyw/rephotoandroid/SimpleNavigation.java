@@ -236,24 +236,12 @@ public class SimpleNavigation extends AppCompatActivity implements Parcelable {
 
         ImageCapture.Builder builder = new ImageCapture.Builder();
 
-        //Vendor-Extensions (The CameraX extensions dependency in build.gradle)
-//        HdrImageCaptureExtender hdrImageCaptureExtender = HdrImageCaptureExtender.create(builder);
-//
-//        // Query if extension is available (optional).
-//        if (hdrImageCaptureExtender.isExtensionAvailable(cameraSelector)) {
-//            // Enable the extension if available.
-//            hdrImageCaptureExtender.enableExtension(cameraSelector);
-//        }
-
         imageCapture = builder
                 .setTargetRotation(this.getWindowManager().getDefaultDisplay().getRotation())
                 .build();
-//        preview.setSurfaceProvider(mPreviewView.createSurfaceProvider());
         cameraProvider.bindToLifecycle((LifecycleOwner) this, cameraSelector,
                 imageAnalysis, preview, imageCapture);
     }
-
-//z
 
     @Override
     public boolean onTouchEvent(MotionEvent motionEvent) {

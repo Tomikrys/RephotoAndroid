@@ -50,8 +50,6 @@ public class GallerySlideShowPagerAdapter extends PagerAdapter {
         ImageView imageView = (ImageView) itemView.findViewById(R.id.imageViewThumbnail);
         //load current image in viewpager
 
-//                TODO local
-//        Picasso.get().load(new File(galleryItems.get(position).imageUri)).fit().centerInside().into(imageView);
         Picasso.get().load(galleryItems.get(position).imageUri).fit().centerInside().into(imageView);
         container.addView(itemView);
         return itemView;
